@@ -134,11 +134,11 @@ clean-deployments: ## Clean the deployments for a given network which matches at
 
 explorer.verify.sonic_testnet:
 	@echo "Verifying contracts on sonic testnet..."
-	@yarn hardhat --network sonic_testnet etherscan-verify --api-key 4EJCRRD3JKIE6TKF6ME7AKVYWFEJI79A26 --api-url https://api-testnet.sonicscan.org
+	@yarn hardhat --network sonic_testnet etherscan-verify --api-key <api-key-here> --api-url https://api-testnet.sonicscan.org
 
 explorer.verify.sonic_mainnet:
 	@echo "Verifying contracts on sonic mainnet..."
-	@yarn hardhat --network sonic_mainnet etherscan-verify --api-key 4EJCRRD3JKIE6TKF6ME7AKVYWFEJI79A26 --api-url https://api.sonicscan.org
+	@yarn hardhat --network sonic_mainnet etherscan-verify --api-key <api-key-here> --api-url https://api.sonicscan.org
 
 ##############
 ## Building ##
