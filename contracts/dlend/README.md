@@ -1,4 +1,4 @@
-# dTrinity Lend core smart contracts
+# Colt Lend core smart contracts
 
 This project is a fork of the AAVE v3.
 

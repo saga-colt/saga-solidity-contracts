@@ -4,7 +4,6 @@ import { ethers, BigNumberish } from "ethers";
 import {
   DStableFixtureConfig,
   DUSD_CONFIG,
-  DS_CONFIG,
 } from "../dstable/fixtures";
 import {
   getTokenContractForSymbol,
@@ -17,11 +16,7 @@ import {
   SDUSD_DSTAKE_TOKEN_ID,
   SDUSD_COLLATERAL_VAULT_ID,
   SDUSD_ROUTER_ID,
-  SDS_DSTAKE_TOKEN_ID,
-  SDS_COLLATERAL_VAULT_ID,
-  SDS_ROUTER_ID,
   DUSD_A_TOKEN_WRAPPER_ID,
-  DS_A_TOKEN_WRAPPER_ID,
   INCENTIVES_PROXY_ID,
   PULL_REWARDS_TRANSFER_STRATEGY_ID,
   POOL_ADDRESSES_PROVIDER_ID,
@@ -29,7 +24,7 @@ import {
 } from "../../typescript/deploy-ids";
 
 export interface DStakeFixtureConfig {
-  dStableSymbol: "dUSD" | "dS";
+  dStableSymbol: "D" | "dS";
   DStakeTokenSymbol: string;
   DStakeTokenContractId: string;
   collateralVaultContractId: string;
@@ -41,44 +36,27 @@ export interface DStakeFixtureConfig {
 }
 
 export const SDUSD_CONFIG: DStakeFixtureConfig = {
-  dStableSymbol: "dUSD",
-  DStakeTokenSymbol: "sdUSD",
+  dStableSymbol: "D",
+  DStakeTokenSymbol: "sD",
   DStakeTokenContractId: SDUSD_DSTAKE_TOKEN_ID,
   collateralVaultContractId: SDUSD_COLLATERAL_VAULT_ID,
   routerContractId: SDUSD_ROUTER_ID,
-  defaultVaultAssetSymbol: "wddUSD",
+  defaultVaultAssetSymbol: "wdD",
   underlyingDStableConfig: DUSD_CONFIG,
   deploymentTags: [
     "local-setup", // mock tokens and oracles
     "oracle", // mock oracle setup uses this tag
     "dusd", // underlying dStable token tag
-    "dUSD-aTokenWrapper", // static aToken wrapper for dUSD
+    "D-aTokenWrapper", // static aToken wrapper for D
     "dlend", // dLend core and periphery
     "dStake", // dStake core, adapters, and configuration
     "ds", // Required by the Redstone plain feed setup
   ],
 };
 
-export const SDS_CONFIG: DStakeFixtureConfig = {
-  dStableSymbol: "dS",
-  DStakeTokenSymbol: "sdS",
-  DStakeTokenContractId: SDS_DSTAKE_TOKEN_ID,
-  collateralVaultContractId: SDS_COLLATERAL_VAULT_ID,
-  routerContractId: SDS_ROUTER_ID,
-  defaultVaultAssetSymbol: "wdS",
-  underlyingDStableConfig: DS_CONFIG,
-  deploymentTags: [
-    "local-setup",
-    "oracle",
-    "ds",
-    "dS-aTokenWrapper",
-    "dlend",
-    "dStake",
-  ],
-};
 
 // Array of all DStake configurations
-export const DSTAKE_CONFIGS: DStakeFixtureConfig[] = [SDUSD_CONFIG, SDS_CONFIG];
+export const DSTAKE_CONFIGS: DStakeFixtureConfig[] = [SDUSD_CONFIG];
 
 // Core logic for fetching dStake components *after* deployments are done
 async function fetchDStakeComponents(
@@ -114,9 +92,7 @@ async function fetchDStakeComponents(
 
   const wrappedATokenAddress = (
     await deployments.get(
-      config.dStableSymbol === "dUSD"
-        ? DUSD_A_TOKEN_WRAPPER_ID
-        : DS_A_TOKEN_WRAPPER_ID
+      DUSD_A_TOKEN_WRAPPER_ID
     )
   ).address;
   const wrappedAToken = await ethers.getContractAt(
@@ -335,9 +311,3 @@ export const SDUSDRewardsFixture = setupDLendRewardsFixture(
   ethers.parseUnits("1", 6) // emission per second (1 token/sec in 6-decimals)
 );
 
-// Pre-bound SDS rewards fixture for table-driven tests
-export const SDSRewardsFixture = setupDLendRewardsFixture(
-  SDS_CONFIG,
-  "stS",
-  ethers.parseUnits("100", 18)
-);

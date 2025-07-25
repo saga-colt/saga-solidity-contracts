@@ -12,7 +12,7 @@ import {IRewardsController} from "contracts/dlend/periphery/rewards/interfaces/I
  * @notice Factory contract that keeps track of all deployed static aToken wrappers for a specified pool.
  * This registry also acts as a factory, allowing to deploy new static aTokens on demand.
  * There can only be one static aToken per underlying on the registry at a time.
- * @author BGD labs (modified by dTrinity)
+ * @author BGD labs (modified by Colt)
  */
 contract StaticATokenFactory is IStaticATokenFactory {
     IPool public immutable POOL;

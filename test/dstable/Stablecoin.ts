@@ -33,8 +33,8 @@ describe("ERC20StablecoinUpgradeable", () => {
       const name = await stablecoinContract.name();
       const symbol = await stablecoinContract.symbol();
 
-      assert.equal(name, "dTRINITY USD");
-      assert.equal(symbol, "dUSD");
+      assert.equal(name, "Saga Dollar");
+      assert.equal(symbol, "D");
     });
 
     it("should have 18 decimals", async function () {
