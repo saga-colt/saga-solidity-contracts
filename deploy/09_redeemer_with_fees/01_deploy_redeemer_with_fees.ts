@@ -4,13 +4,9 @@ import { DeployFunction } from "hardhat-deploy/types";
 
 import { getConfig } from "../../config/config";
 import {
-  DS_COLLATERAL_VAULT_CONTRACT_ID,
-  DS_REDEEMER_WITH_FEES_CONTRACT_ID,
-  DS_TOKEN_ID,
   DUSD_COLLATERAL_VAULT_CONTRACT_ID,
   DUSD_REDEEMER_WITH_FEES_CONTRACT_ID,
   DUSD_TOKEN_ID,
-  S_ORACLE_AGGREGATOR_ID,
   USD_ORACLE_AGGREGATOR_ID,
 } from "../../typescript/deploy-ids";
 
@@ -21,7 +17,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Check all required configuration values at the top
   const dUSDConfig = config.dStables.dUSD;
-  const dSConfig = config.dStables.dS;
 
   const missingConfigs: string[] = [];
 
@@ -37,17 +32,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     missingConfigs.push("dStables.dUSD.initialRedemptionFeeBps");
   }
 
-  // Check dS configuration
-  if (
-    !dSConfig?.initialFeeReceiver ||
-    !isAddress(dSConfig.initialFeeReceiver)
-  ) {
-    missingConfigs.push("dStables.dS.initialFeeReceiver");
-  }
-
-  if (dSConfig?.initialRedemptionFeeBps === undefined) {
-    missingConfigs.push("dStables.dS.initialRedemptionFeeBps");
-  }
 
   // If any required config values are missing, skip deployment
   if (missingConfigs.length > 0) {
@@ -103,47 +87,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     console.log("Role granted for dUSD RedeemerWithFees.");
   }
 
-  // Deploy RedeemerWithFees for dS
-  const dSToken = await get(DS_TOKEN_ID);
-  const dSCollateralVaultDeployment = await get(
-    DS_COLLATERAL_VAULT_CONTRACT_ID,
-  );
-  const sOracleAggregator = await get(S_ORACLE_AGGREGATOR_ID);
-
-  const dSRedeemerWithFeesDeployment = await deploy(
-    DS_REDEEMER_WITH_FEES_CONTRACT_ID,
-    {
-      from: deployer,
-      contract: "RedeemerWithFees",
-      args: [
-        dSCollateralVaultDeployment.address,
-        dSToken.address,
-        sOracleAggregator.address,
-        dSConfig.initialFeeReceiver,
-        dSConfig.initialRedemptionFeeBps,
-      ],
-    },
-  );
-
-  const dSCollateralVaultContract = await hre.ethers.getContractAt(
-    "CollateralVault",
-    dSCollateralVaultDeployment.address,
-    await hre.ethers.getSigner(deployer),
-  );
-  const dSWithdrawerRole =
-    await dSCollateralVaultContract.COLLATERAL_WITHDRAWER_ROLE();
-  const dSHasRole = await dSCollateralVaultContract.hasRole(
-    dSWithdrawerRole,
-    dSRedeemerWithFeesDeployment.address,
-  );
-
-  if (!dSHasRole) {
-    await dSCollateralVaultContract.grantRole(
-      dSWithdrawerRole,
-      dSRedeemerWithFeesDeployment.address,
-    );
-    console.log("Role granted for dS RedeemerWithFees.");
-  }
 
   console.log(`☯️  ${__filename.split("/").slice(-2).join("/")}: ✅`);
 
@@ -156,9 +99,6 @@ func.dependencies = [
   DUSD_TOKEN_ID,
   DUSD_COLLATERAL_VAULT_CONTRACT_ID,
   USD_ORACLE_AGGREGATOR_ID,
-  DS_TOKEN_ID,
-  DS_COLLATERAL_VAULT_CONTRACT_ID,
-  S_ORACLE_AGGREGATOR_ID,
 ];
 
 export default func;

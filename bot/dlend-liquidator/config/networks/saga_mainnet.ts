@@ -2,16 +2,16 @@ import { ONE_PERCENT_BPS } from "../constants";
 import { Config } from "../types";
 
 /**
- * Get the config for the Sonic mainnet network
+ * Get the config for the Saga mainnet network
  *
- * @returns The config for the Sonic mainnet network
+ * @returns The config for the Saga mainnet network
  */
 export async function getConfig(): Promise<Config> {
-  // Replace these with actual contract addresses from Sonic mainnet
+  // Replace these with actual contract addresses from Saga mainnet
   const dUSDAddress = "0x53a6aBb52B2F968fA80dF6A894e4f1b1020DA975"; // Replace with actual dUSD address
   const dSAddress = "0x614914B028A7D1fD4Fab1E5a53a3E2dF000bcB0e"; // Replace with actual dS address
-  const odosRouterAddress = "0xaC041Df48dF9791B0654f1Dbbf2CC8450C5f2e9D"; // Odos router on Sonic
-  const pyFactoryAddress = "0x0582D93FD9c9d42f26bE5D86a5f75291F92102C2"; // Pendle Yield factory on Sonic
+  const odosRouterAddress = "0xaC041Df48dF9791B0654f1Dbbf2CC8450C5f2e9D"; // Odos router on Saga
+  const pyFactoryAddress = "0x0582D93FD9c9d42f26bE5D86a5f75291F92102C2"; // Pendle Yield factory on Saga
 
   return {
     parentDeploymentAddresses: {
@@ -33,7 +33,7 @@ export async function getConfig(): Promise<Config> {
       profitableThresholdInUSD: 0.001,
       liquidatingBatchSize: 200,
       graphConfig: {
-        url: "https://graph-node-sonic.dtrinity.org/subgraphs/name/dtrinity-aave-sonic",
+        url: "PLACEHOLDER_SAGA_SUBGRAPH_URL_UNIQUE_006",
         batchSize: 1000,
       },
       isUnstakeTokens: {

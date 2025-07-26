@@ -2,7 +2,7 @@ import { ZeroAddress } from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 
-import { isMainnet, isSonicTestnet } from "../typescript/hardhat/deploy";
+import { isMainnet, isSagaTestnet } from "../typescript/hardhat/deploy";
 import { getTokenContractForSymbol } from "../typescript/token/utils";
 
 // Define the oracle feed structure

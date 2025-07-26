@@ -20,10 +20,11 @@ Use these tags when doing replacements:
   - Network names: `sonic_testnet` → `saga_testnet`
   - Network names: `sonic_mainnet` → `saga_mainnet`
   - RPC URLs: 
-    - Testnet: `https://rpc.blaze.soniclabs.com` → `[SAGA_TESTNET_RPC]`
-    - Mainnet: `https://rpc.soniclabs.com` → `[SAGA_MAINNET_RPC]`
-  - Documentation URL: `https://docs.soniclabs.com/sonic/build-on-sonic/getting-started` → `[SAGA_DOCS_URL]`
+    - Testnet: `https://rpc.blaze.soniclabs.com` → `https://sagaevm.jsonrpc.sagarpc.io/`
+    - Mainnet: `https://rpc.soniclabs.com` → `https://sagaevm.jsonrpc.sagarpc.io/`
+  - Documentation URL: `https://docs.soniclabs.com/sonic/build-on-sonic/getting-started` → **REMOVE** (delete documentation references)
   - Environment variables: `sonic_testnet`, `sonic_mainnet` → `saga_testnet`, `saga_mainnet`
+  - **NOTE:** Both testnet and mainnet use same RPC as Saga has no testnet - staging deployed to mainnet with isolation
 
 **Bot Configuration:**
 - **File:** `bot/dlend-liquidator/hardhat.config.ts:25-34`
@@ -34,15 +35,15 @@ Use these tags when doing replacements:
 
 **Etherscan Configuration:**
 - **File:** `hardhat.config.ts:202-210`
-  - API key: `4EJCRRD3JKIE6TKF6ME7AKVYWFEJI79A26` → `[SAGA_API_KEY]`
-  - Chain ID: `146` → `[SAGA_CHAIN_ID]`
-  - API URL: `https://api.sonicscan.org/api` → `[SAGA_EXPLORER_API]`
-  - Browser URL: `https://sonicscan.org` → `[SAGA_EXPLORER_URL]`
+  - API key: `4EJCRRD3JKIE6TKF6ME7AKVYWFEJI79A26` → `PLACEHOLDER_SAGA_API_KEY_UNIQUE_001` (remove and leave placeholder)
+  - Chain ID: `146` → `5464`
+  - API URL: `https://api.sonicscan.org/api` → `PLACEHOLDER_SAGA_EXPLORER_API_UNIQUE_002`
+  - Browser URL: `https://sonicscan.org` → `PLACEHOLDER_SAGA_EXPLORER_URL_UNIQUE_003`
 
 **Makefile Explorer URLs:**
 - **File:** `Makefile:135-141`
-  - Testnet API: `https://api-testnet.sonicscan.org` → `[SAGA_TESTNET_EXPLORER_API]`
-  - Mainnet API: `https://api.sonicscan.org` → `[SAGA_MAINNET_EXPLORER_API]`
+  - Testnet API: `https://api-testnet.sonicscan.org` → `PLACEHOLDER_SAGA_TESTNET_EXPLORER_API_UNIQUE_004`
+  - Mainnet API: `https://api.sonicscan.org` → `PLACEHOLDER_SAGA_MAINNET_EXPLORER_API_UNIQUE_005`
 
 ### Network-Specific Configuration Files `#SONIC_NETWORK_CONFIG`
 
@@ -55,8 +56,8 @@ Use these tags when doing replacements:
 - Token addresses (all Sonic-specific addresses)
 - Oracle feed addresses  
 - Governance multisig addresses
-- Subgraph URL: `https://graph-node-sonic.dtrinity.org/subgraphs/name/dtrinity-aave-sonic` → `[SAGA_SUBGRAPH_URL]`
-- Special token name: `"Wrapped Staked Sonic USD"` → `"Wrapped Staked Saga USD"`
+- Subgraph URL: `https://graph-node-sonic.dtrinity.org/subgraphs/name/dtrinity-aave-sonic` → `PLACEHOLDER_SAGA_SUBGRAPH_URL_UNIQUE_006`
+- Special token name: `"Wrapped Staked Sonic USD"` → `"Wrapped Staked Saga Dollar"`
 
 ### Code References `#SONIC_NETWORK_CONFIG`
 
@@ -115,29 +116,29 @@ Use these tags when doing replacements:
 
 **Token Display Names:**
 - **File:** `deploy/02_dusd_ecosystem/01_dusd_token.ts:17`
-  - `"dTRINITY USD"` → `"[NEW_USD_TOKEN_NAME]"`
+  - `"dTRINITY USD"` → `"Saga Dollar"`
 
 **Staking Token Names:**
 - **Files:** Multiple config files (sonic_mainnet.ts:391, sonic_testnet.ts:429, localhost.ts:475)
-  - `"Staked dUSD"` → `"Staked [NEW_USD_TOKEN_NAME]"`
+  - `"Staked dUSD"` → `"Staked Saga Dollar"`
 
 **Vault Names:**
 - **Files:** Multiple config files
-  - `"Leveraged sFRAX-dUSD Vault"` → `"Leveraged sFRAX-[NEW_USD_SYMBOL] Vault"`
-  - `"FRAX-dUSD-3x"` → `"FRAX-[NEW_USD_SYMBOL]-3x"`
+  - `"Leveraged sFRAX-dUSD Vault"` → `"Leveraged sFRAX-D Vault"`
+  - `"FRAX-dUSD-3x"` → `"FRAX-D-3x"`
 
 **Boost/Vesting Names:**
 - **Files:** Multiple config files (sonic_mainnet.ts:427, localhost.ts:549, sonic_testnet.ts:467)
-  - `"dBOOST sdUSD Season 1"` → `"[NEW_BOOST_NAME] s[NEW_USD_SYMBOL] Season 1"`
-  - `"sdUSD-S1"` → `"s[NEW_USD_SYMBOL]-S1"`
+  - `"dBOOST sdUSD Season 1"` → **REMOVE** (dBOOST system will be deleted entirely)
+  - `"sdUSD-S1"` → **REMOVE** (vesting system will be deleted entirely)
 
 **Documentation:**
 - **File:** `contracts/dlend/README.md:1`
-  - `"# dTrinity Lend core smart contracts"` → `"# [NEW_PROJECT_NAME] Lend core smart contracts"`
+  - `"# dTrinity Lend core smart contracts"` → `"# Colt Lend core smart contracts"`
 
 **Test Assertions:**
 - **File:** `test/dstable/Stablecoin.ts:36`
-  - `assert.equal(name, "dTRINITY USD");` → `assert.equal(name, "[NEW_USD_TOKEN_NAME]");`
+  - `assert.equal(name, "dTRINITY USD");` → `assert.equal(name, "Saga Dollar");`
 
 ### 🟡 REPLACE - Token Symbols `#DTRINITY_SYMBOL_REPLACEMENTS`
 
@@ -145,15 +146,15 @@ Use these tags when doing replacements:
 
 **Primary Token Symbols:**
 - **File:** `deploy/02_dusd_ecosystem/01_dusd_token.ts:17`
-  - `"dUSD"` → `"[NEW_USD_SYMBOL]"`
+  - `"dUSD"` → `"D"`
 
 **Staking Token Symbols:**
 - **Files:** Multiple config files (sonic_mainnet.ts:391, sonic_testnet.ts:429, localhost.ts:475)
-  - `"sdUSD"` → `"s[NEW_USD_SYMBOL]"`
+  - `"sdUSD"` → `"sD"`
 
 **Vesting Token Symbols:**
 - **Files:** Multiple config files (sonic_mainnet.ts:427, localhost.ts:549, sonic_testnet.ts:467)
-  - `"sdUSD-S1"` → `"s[NEW_USD_SYMBOL]-S1"`
+  - `"sdUSD-S1"` → **REMOVE** (entire vesting system will be deleted)
 
 **Static AToken Wrapper Symbols:**
 - **File:** `deploy/07_dlend_static_wrappers/02_dstable_atoken_wrappers.ts:91-92`
@@ -161,11 +162,11 @@ Use these tags when doing replacements:
 
 **TypeScript Constants:**
 - **File:** `typescript/token/utils.ts:9`
-  - `DSTABLE_SYMBOLS = ["dUSD", "dS"]` → `DSTABLE_SYMBOLS = ["[NEW_USD_SYMBOL]"]` (also removing dS)
+  - `DSTABLE_SYMBOLS = ["dUSD", "dS"]` → `DSTABLE_SYMBOLS = ["D"]` (also removing dS)
 
 **Test Fixture Symbols:**
 - **Files:** `test/dstable/fixtures.ts:20,89`, `test/dstake/fixture.ts:32,45,64`
-  - Various `"dUSD"`, `"sdUSD"` → `"[NEW_USD_SYMBOL]"`, `"s[NEW_USD_SYMBOL]"`
+  - Various `"dUSD"`, `"sdUSD"` → `"D"`, `"sD"`
 
 ### 🔴 KEEP - Internal/Compatibility `#DTRINITY_KEEP_INTERNAL`
 
@@ -255,7 +256,92 @@ Use these tags when doing replacements:
 
 ---
 
-## 4. REPLACEMENT CHECKLIST
+## 4. dLOOP, dPOOL, dBOOST REMOVAL `#VAULT_SYSTEMS_REMOVAL`
+
+### 🗑️ dLOOP (Leveraged Vault System) - REMOVE ENTIRELY
+
+**Complete Directories to Delete:**
+- **Directory:** `contracts/vaults/dloop/` (26 Solidity contracts)
+  - **Action:** Delete entire directory
+  - **Reason:** Core contracts, periphery contracts, Odos integration, design docs
+
+- **Directory:** `deploy/12_dloop/` (6 deployment scripts)
+  - **Action:** Delete entire directory  
+  - **Reason:** Complete dLoop deployment infrastructure
+
+- **Directory:** `test/dloop/` (25+ test files)
+  - **Action:** Delete entire directory
+  - **Reason:** Comprehensive test coverage for all dLoop functionality
+
+- **Directory:** `scripts/dloop/` (5 shell scripts + README)
+  - **Action:** Delete entire directory
+  - **Reason:** Deployment automation scripts
+
+**Configuration References to Remove:**
+- **File:** `typescript/deploy-ids.ts:94-105`
+  - **Remove:** All dLoop deployment ID constants (DLOOP_CORE_DLEND_ID, DLOOP_PERIPHERY_*, etc.)
+
+- **File:** `config/types.ts:20-35`
+  - **Remove:** Entire dLoop configuration interface
+
+- **Files:** Network configs (sonic_mainnet.ts:169-210, sonic_testnet.ts:192-233, localhost.ts:427-470)
+  - **Remove:** All dLoop configuration blocks including "3x_sFRAX_dUSD" vault configs
+
+### 🗑️ dPOOL (Pool Vault System) - REMOVE ENTIRELY
+
+**Complete Directories to Delete:**
+- **Directory:** `contracts/vaults/dpool/` (4 contracts + docs)
+  - **Action:** Delete entire directory
+  - **Reason:** Core contracts, periphery, Curve integration
+
+- **Directory:** `deploy/11_dpool/` (3 deployment scripts)
+  - **Action:** Delete entire directory
+  - **Reason:** Complete dPool deployment infrastructure
+
+- **Directory:** `test/dpool/` (4 test files)
+  - **Action:** Delete entire directory
+  - **Reason:** Curve integration tests, event testing
+
+**Individual Files to Delete:**
+- **File:** `contracts/testing/DPoolVaultLPMock.sol`
+  - **Action:** Delete file
+  - **Reason:** dPool-specific mock contract
+
+**Configuration References to Remove:**
+- **File:** `config/types.ts:40-42,254-265`
+  - **Remove:** dPool interface properties and DPoolInstanceConfig interface
+
+- **Files:** Network configs (localhost.ts:556-578)
+  - **Remove:** "dPOOL USDC/USDS" and "dPOOL frxUSD/USDC" vault configurations
+
+### 🗑️ dBOOST (Vesting/Boost System) - REMOVE ENTIRELY
+
+**Complete Directories to Delete:**
+- **Directory:** `contracts/vaults/vesting/` (2 files)
+  - **Action:** Delete entire directory
+  - **Reason:** ERC20VestingNFT.sol contract and design documentation
+
+- **Directory:** `deploy/10_vesting_dstake/` (1 deployment script)
+  - **Action:** Delete entire directory
+  - **Reason:** Vesting NFT deployment infrastructure
+
+- **Directory:** `test/vesting/` (2 test files)
+  - **Action:** Delete entire directory
+  - **Reason:** Vesting NFT tests and metadata tests
+
+**Configuration References to Remove:**
+- **File:** `typescript/deploy-ids.ts:139-142`
+  - **Remove:** ERC20_VESTING_NFT_ID and DSTAKE_NFT_VESTING_DEPLOYMENT_TAG constants
+
+- **File:** `config/types.ts:39,242-250`
+  - **Remove:** vesting interface property and VestingConfig interface
+
+- **Files:** Network configs (sonic_mainnet.ts:425-433, sonic_testnet.ts:465-473, localhost.ts:546-555)
+  - **Remove:** All "dBOOST sdUSD Season 1" and "sdUSD-S1" configurations
+
+---
+
+## 5. REPLACEMENT CHECKLIST
 
 ### Phase 1: Network Infrastructure
 - [ ] Update hardhat.config.ts network configurations
@@ -292,7 +378,23 @@ Use these tags when doing replacements:
 - [ ] Remove dS test fixtures and test cases
 - [ ] Update TokenAddresses interface to remove dS property
 
-### Phase 5: Infrastructure & Deployment
+### Phase 5: Vault Systems Removal (dLOOP, dPOOL, dBOOST)
+- [ ] Delete contracts/vaults/dloop/ directory entirely (26 contracts)
+- [ ] Delete deploy/12_dloop/ directory entirely (6 scripts)
+- [ ] Delete test/dloop/ directory entirely (25+ test files)
+- [ ] Delete scripts/dloop/ directory entirely (5 shell scripts)
+- [ ] Delete contracts/vaults/dpool/ directory entirely (4 contracts)
+- [ ] Delete deploy/11_dpool/ directory entirely (3 scripts)
+- [ ] Delete test/dpool/ directory entirely (4 test files)
+- [ ] Delete contracts/vaults/vesting/ directory entirely (2 files)
+- [ ] Delete deploy/10_vesting_dstake/ directory entirely (1 script)
+- [ ] Delete test/vesting/ directory entirely (2 test files)
+- [ ] Delete contracts/testing/DPoolVaultLPMock.sol file
+- [ ] Remove dLoop/dPool/dBOOST deployment ID constants from typescript/deploy-ids.ts
+- [ ] Remove dLoop/dPool/vesting interfaces from config/types.ts
+- [ ] Clean dLoop/dPool/dBOOST references from network configuration files
+
+### Phase 6: Infrastructure & Deployment
 - [ ] Rename deployment artifact directories
 - [ ] Update Docker image names
 - [ ] Replace Slack integration environment variables
@@ -301,30 +403,39 @@ Use these tags when doing replacements:
 
 ---
 
-## 5. REFERENCE MAPPING TABLE
+## 6. REFERENCE MAPPING TABLE
 
 | Category | Current Value | Replacement Needed |
 |----------|---------------|-------------------|
 | **Network Names** | sonic_testnet, sonic_mainnet | saga_testnet, saga_mainnet |
-| **Chain ID** | 146 | [SAGA_CHAIN_ID] |
-| **RPC URLs** | https://rpc.soniclabs.com | [SAGA_RPC_URL] |
-| **Explorer** | https://sonicscan.org | [SAGA_EXPLORER_URL] |
-| **API URLs** | https://api.sonicscan.org | [SAGA_API_URL] |
-| **USD Token Name** | "dTRINITY USD" | "[NEW_USD_TOKEN_NAME]" |
-| **USD Token Symbol** | "dUSD" | "[NEW_USD_SYMBOL]" |
-| **Staked USD Symbol** | "sdUSD" | "s[NEW_USD_SYMBOL]" |
-| **Boost Name** | "dBOOST" | "[NEW_BOOST_NAME]" |
-| **Project Name** | "dTrinity" | "[NEW_PROJECT_NAME]" |
-| **Subgraph URL** | graph-node-sonic.dtrinity.org | [SAGA_SUBGRAPH_URL] |
+| **Chain ID** | 146 | 5464 |
+| **RPC URLs** | https://rpc.soniclabs.com | https://sagaevm.jsonrpc.sagarpc.io/ |
+| **Explorer API** | https://api.sonicscan.org | PLACEHOLDER_SAGA_EXPLORER_API_UNIQUE_002 |
+| **Explorer URL** | https://sonicscan.org | PLACEHOLDER_SAGA_EXPLORER_URL_UNIQUE_003 |
+| **USD Token Name** | "dTRINITY USD" | "Saga Dollar" |
+| **USD Token Symbol** | "dUSD" | "D" |
+| **Staked USD Symbol** | "sdUSD" | "sD" |
+| **Boost Name** | "dBOOST" | **REMOVE ENTIRELY** |
+| **Project Name** | "dTrinity" | "Colt" |
+| **Subgraph URL** | graph-node-sonic.dtrinity.org | PLACEHOLDER_SAGA_SUBGRAPH_URL_UNIQUE_006 |
 
 ---
 
 **⚠️ IMPORTANT NOTES:**
-1. **Token symbols WILL be changed** (updated from original plan)
-2. **dS stablecoin will be completely removed** while preserving dSTABLE infrastructure
-3. **dSTABLE infrastructure confirmed reusable** for future stablecoins (dEUR, dJPY, etc.)
-4. Internal attribution comments should be kept for proper credit
-5. Test localhost network behavior to ensure nothing breaks between changes
-6. No references to dPOOL and dLOOP were found (as expected)
+1. **Token symbols WILL be changed:** dUSD → D, sdUSD → sD
+2. **Complete removal of:** dS stablecoin, dLOOP vaults, dPOOL vaults, dBOOST vesting
+3. **Same RPC for both networks:** Saga has no testnet - staging uses mainnet with isolation
+4. **dSTABLE infrastructure preserved** for future stablecoins (dEUR, dJPY, etc.)
+5. **Unique placeholders created** for unknown values (easily searchable for later replacement)
+6. Internal attribution comments should be kept for proper credit
+7. Test localhost network behavior to ensure nothing breaks between changes
 
-**📋 Ready for your input on the replacement values marked with [BRACKETS]**
+**📋 UNIQUE PLACEHOLDERS FOR UNKNOWN VALUES:**
+- `PLACEHOLDER_SAGA_API_KEY_UNIQUE_001` - Explorer API key
+- `PLACEHOLDER_SAGA_EXPLORER_API_UNIQUE_002` - Explorer API URL
+- `PLACEHOLDER_SAGA_EXPLORER_URL_UNIQUE_003` - Explorer browser URL
+- `PLACEHOLDER_SAGA_TESTNET_EXPLORER_API_UNIQUE_004` - Testnet explorer API  
+- `PLACEHOLDER_SAGA_MAINNET_EXPLORER_API_UNIQUE_005` - Mainnet explorer API
+- `PLACEHOLDER_SAGA_SUBGRAPH_URL_UNIQUE_006` - Subgraph URL
+
+**🚀 Ready to execute replacements with provided values!**

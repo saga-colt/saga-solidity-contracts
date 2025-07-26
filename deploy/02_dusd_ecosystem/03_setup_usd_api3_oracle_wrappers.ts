@@ -3,7 +3,6 @@ import { DeployFunction } from "hardhat-deploy/types";
 
 import { getConfig } from "../../config/config";
 import {
-  DS_TOKEN_ID,
   USD_API3_COMPOSITE_WRAPPER_WITH_THRESHOLDING_ID,
   USD_API3_ORACLE_WRAPPER_ID,
   USD_API3_WRAPPER_WITH_THRESHOLDING_ID,
@@ -213,7 +212,7 @@ func.tags = [
   "oracle-wrapper",
   "usd-api3-oracle-wrapper",
 ];
-func.dependencies = [DS_TOKEN_ID];
+func.dependencies = [];
 func.id = "setup-usd-api3-oracle-wrappers";
 
 export default func;

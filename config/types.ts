@@ -17,28 +17,8 @@ export interface Config {
     readonly router: string;
   };
   readonly pendle?: PendleConfig;
-  readonly dLoop: {
-    readonly dUSDAddress: string;
-    readonly coreVaults: { [vaultName: string]: DLoopCoreConfig };
-    readonly depositors: {
-      odos: DLoopDepositorOdosConfig;
-    };
-    readonly redeemers: {
-      odos: DLoopRedeemerOdosConfig;
-    };
-    readonly decreaseLeverage?: {
-      odos: DLoopDecreaseLeverageOdosConfig;
-    };
-    readonly increaseLeverage?: {
-      odos: DLoopIncreaseLeverageOdosConfig;
-    };
-  };
   readonly dStake?: {
     [key: string]: DStakeInstanceConfig; // e.g., sdUSD, sdS
-  };
-  readonly vesting?: VestingConfig;
-  readonly dPool?: {
-    [key: string]: DPoolInstanceConfig; // e.g., dUSD-USDC_Curve
   };
 }
 
@@ -71,39 +51,10 @@ export interface DStableConfig {
   };
 }
 
-export interface DLoopCoreConfig {
-  readonly venue: "dlend";
-  readonly name: string;
-  readonly symbol: string;
-  readonly underlyingAsset: string;
-  readonly dStable: string;
-  readonly targetLeverageBps: number;
-  readonly lowerBoundTargetLeverageBps: number;
-  readonly upperBoundTargetLeverageBps: number;
-  readonly maxSubsidyBps: number;
-  readonly extraParams: { [key: string]: any }; // Add more params here
-}
-
-export interface DLoopDepositorOdosConfig {
-  readonly router: string;
-}
-
-export interface DLoopRedeemerOdosConfig {
-  readonly router: string;
-}
-
-export interface DLoopDecreaseLeverageOdosConfig {
-  readonly router: string;
-}
-
-export interface DLoopIncreaseLeverageOdosConfig {
-  readonly router: string;
-}
 
 export interface TokenAddresses {
   readonly wS: string;
   readonly dUSD: string;
-  readonly dS: string;
   readonly [key: string]: string; // dLEND assets must be defined as well
 }
 
@@ -239,30 +190,6 @@ export interface DStakeInstanceConfig {
   readonly dLendRewardManager?: DLendRewardManagerConfig; // Added for dLend rewards
 }
 
-export interface VestingConfig {
-  readonly name: string; // Name of the NFT collection
-  readonly symbol: string; // Symbol of the NFT collection
-  readonly dstakeToken: Address; // Address of the dSTAKE token to vest
-  readonly vestingPeriod: number; // Vesting period in seconds (e.g., 6 months)
-  readonly maxTotalSupply: string; // Maximum total dSTAKE that can be deposited (as string for big numbers)
-  readonly initialOwner: Address; // Initial owner of the vesting contract
-  readonly minDepositThreshold: string; // Minimum total dSTAKE that must be deposited per deposit
-}
-
-// --- dPool Types ---
-
-export interface DPoolInstanceConfig {
-  readonly baseAsset: string; // Reference to token in config (e.g., "USDC", "dUSD")
-  readonly name: string; // Name for the vault (e.g., "dPOOL USDC/USDS")
-  readonly symbol: string; // Symbol for the vault (e.g., "dpUSDC_USDS")
-  readonly initialAdmin: Address;
-  readonly initialSlippageBps?: number; // Initial max slippage setting in BPS for periphery
-  readonly pool: string; // Pool deployment name (localhost) or pool address (testnet/mainnet)
-  // Examples by environment:
-  // - localhost: "USDC_USDS_CurvePool" (deployment name)
-  // - testnet: "0x742d35Cc6634C0532925a3b8D404fEdF6Caf9cd5" (actual pool address)
-  // - mainnet: "0xA5407eAE9Ba41422680e2e00537571bcC53efBfD" (actual pool address)
-}
 
 // --- Pendle PT Token Types ---
 

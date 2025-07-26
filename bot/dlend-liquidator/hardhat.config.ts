@@ -22,16 +22,16 @@ const config: HardhatUserConfig = {
     hardhat: {
       allowUnlimitedContractSize: true,
     },
-    sonic_testnet: {
-      url: `https://rpc.blaze.soniclabs.com`,
-      accounts: process.env.SONIC_TESTNET_PRIVATE_KEY
-        ? [process.env.SONIC_TESTNET_PRIVATE_KEY]
+    saga_testnet: {
+      url: `https://sagaevm.jsonrpc.sagarpc.io/`,
+      accounts: process.env.SAGA_TESTNET_PRIVATE_KEY
+        ? [process.env.SAGA_TESTNET_PRIVATE_KEY]
         : [],
     },
-    sonic_mainnet: {
-      url: `https://rpc.soniclabs.com`,
-      accounts: process.env.SONIC_MAINNET_PRIVATE_KEY
-        ? [process.env.SONIC_MAINNET_PRIVATE_KEY]
+    saga_mainnet: {
+      url: `https://sagaevm.jsonrpc.sagarpc.io/`,
+      accounts: process.env.SAGA_MAINNET_PRIVATE_KEY
+        ? [process.env.SAGA_MAINNET_PRIVATE_KEY]
         : [],
     },
   },

@@ -43,81 +43,6 @@ const config: HardhatUserConfig = {
       },
     ],
     overrides: {
-      // Core complex contract causing stack too deep errors
-      "contracts/vaults/dloop/core/venue/dlend/DLoopCoreDLend.sol": {
-        version: "0.8.20",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-          viaIR: true,
-        },
-      },
-      // Base contract with stack too deep errors
-      "contracts/vaults/dloop/periphery/DLoopDepositorBase.sol": {
-        version: "0.8.20",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-          viaIR: true,
-        },
-      },
-      // Contracts that import DLoopDepositorBase
-      "contracts/vaults/dloop/periphery/venue/odos/DLoopDepositorOdos.sol": {
-        version: "0.8.20",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-          viaIR: true,
-        },
-      },
-      "contracts/vaults/dloop/periphery/venue/mock/DLoopDepositorMock.sol": {
-        version: "0.8.20",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-          viaIR: true,
-        },
-      },
-      // Base redeemer contract with stack too deep errors
-      "contracts/vaults/dloop/periphery/DLoopRedeemerBase.sol": {
-        version: "0.8.20",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-          viaIR: true,
-        },
-      },
-      // Contracts that import DLoopRedeemerBase
-      "contracts/vaults/dloop/periphery/venue/odos/DLoopRedeemerOdos.sol": {
-        version: "0.8.20",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-          viaIR: true,
-        },
-      },
-      "contracts/vaults/dloop/periphery/venue/mock/DLoopRedeemerMock.sol": {
-        version: "0.8.20",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-          viaIR: true,
-        },
-      },
       // DStake router with stack too deep errors
       "contracts/vaults/dstake/DStakeRouterDLend.sol": {
         version: "0.8.20",
@@ -140,17 +65,6 @@ const config: HardhatUserConfig = {
           viaIR: true,
         },
       },
-      // Vesting NFT with stack too deep errors
-      "contracts/vaults/vesting/ERC20VestingNFT.sol": {
-        version: "0.8.20",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-          viaIR: true,
-        },
-      },
     },
   },
   networks: {
@@ -163,18 +77,18 @@ const config: HardhatUserConfig = {
       deploy: ["deploy-mocks", "deploy"],
       saveDeployments: true,
     },
-    sonic_testnet: {
+    saga_testnet: {
       // https://docs.soniclabs.com/sonic/build-on-sonic/getting-started
-      url: `https://rpc.blaze.soniclabs.com`,
+      url: `https://sagaevm.jsonrpc.sagarpc.io/`,
       deploy: ["deploy-mocks", "deploy"],
       saveDeployments: true,
-      accounts: getEnvPrivateKeys("sonic_testnet"),
+      accounts: getEnvPrivateKeys("saga_testnet"),
     },
-    sonic_mainnet: {
-      url: `https://rpc.soniclabs.com`,
+    saga_mainnet: {
+      url: `https://sagaevm.jsonrpc.sagarpc.io/`,
       deploy: ["deploy"], // NOTE: DO NOT DEPLOY mocks
       saveDeployments: true,
-      accounts: getEnvPrivateKeys("sonic_mainnet"),
+      accounts: getEnvPrivateKeys("saga_mainnet"),
     },
   },
   namedAccounts: {
@@ -199,15 +113,15 @@ const config: HardhatUserConfig = {
   etherscan: {
     // Used for verifying single contracts when hardhat-deploy auto verify doesn't work
     apiKey: {
-      sonic_mainnet: "4EJCRRD3JKIE6TKF6ME7AKVYWFEJI79A26",
+      saga_mainnet: "PLACEHOLDER_SAGA_API_KEY_UNIQUE_001",
     },
     customChains: [
       {
-        network: "sonic_mainnet",
-        chainId: 146,
+        network: "saga_mainnet",
+        chainId: 5464,
         urls: {
-          apiURL: "https://api.sonicscan.org/api",
-          browserURL: "https://sonicscan.org",
+          apiURL: "PLACEHOLDER_SAGA_EXPLORER_API_UNIQUE_002",
+          browserURL: "PLACEHOLDER_SAGA_EXPLORER_URL_UNIQUE_003",
         },
       },
     ],

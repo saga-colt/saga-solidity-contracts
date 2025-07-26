@@ -31,10 +31,6 @@ export const strategyDUSD: IReserveParams = {
   supplyCap: "2500000", // Specific to dUSD
 };
 
-export const strategyDS: IReserveParams = {
-  ...baseDStableConfig,
-  supplyCap: "5000000", // Specific to dS
-};
 
 export const strategyWETH: IReserveParams = {
   strategy: rateStrategyHighLiquidityVolatile,

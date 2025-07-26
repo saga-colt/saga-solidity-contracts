@@ -87,7 +87,7 @@ make mythril
 make mythril.focused contract=contracts/common/BasisPointConstants.sol
 
 # Deep analysis of a complex contract
-make mythril.deep contract=contracts/vaults/dloop/core/DLoopCore.sol
+make mythril.deep contract=contracts/vaults/dstake/DStakeToken.sol
 
 # Fast parallel analysis
 make mythril.fast

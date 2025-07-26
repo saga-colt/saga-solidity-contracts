@@ -9,13 +9,13 @@ export function isLocalNetwork(network: string): boolean {
 }
 
 /**
- * Check if the network is sonic_testnet
+ * Check if the network is saga_testnet
  *
  * @param network - The network name
- * @returns True if the network is sonic_testnet, false otherwise
+ * @returns True if the network is saga_testnet, false otherwise
  */
-export function isSonicTestnet(network: string): boolean {
-  return network === "sonic_testnet";
+export function isSagaTestnet(network: string): boolean {
+  return network === "saga_testnet";
 }
 
 /**
@@ -25,5 +25,5 @@ export function isSonicTestnet(network: string): boolean {
  * @returns True if the network is mainnet, false otherwise
  */
 export function isMainnet(network: string): boolean {
-  return network === "sonic_mainnet";
+  return network === "saga_mainnet";
 }

@@ -8,24 +8,14 @@ import {
 import { IDStableConversionAdapter } from "../../typechain-types";
 import { IERC20 } from "../../typechain-types";
 import { deployments } from "hardhat";
-import { DUSD_TOKEN_ID, DS_TOKEN_ID } from "../../typescript/deploy-ids";
+import { DUSD_TOKEN_ID } from "../../typescript/deploy-ids";
 
 DSTAKE_CONFIGS.forEach((config: DStakeFixtureConfig) => {
   describe(`DStakeRewardManagerDLend for ${config.DStakeTokenSymbol}`, function () {
     // Create rewards fixture once per suite for snapshot caching
     const rewardsFixture = setupDLendRewardsFixture(
       config,
-      (() => {
-        if (config.dStableSymbol === "dUSD") {
-          return "sfrxUSD";
-        } else if (config.dStableSymbol === "dS") {
-          return "stS";
-        } else {
-          throw new Error(
-            `Unsupported dStableSymbol for rewards fixture: ${config.dStableSymbol}`
-          );
-        }
-      })(),
+      "sfrxUSD",
       ethers.parseUnits("1000000", 18), // Reduced from 100M to 1M
       ethers.parseUnits("1", 6), // Reduced from 100 to 1 per second
       365 * 24 * 3600
@@ -56,10 +46,8 @@ DSTAKE_CONFIGS.forEach((config: DStakeFixtureConfig) => {
     let vaultAssetAddress: string;
 
     // Determine reward token symbol and dStable token ID based on config
-    const rewardTokenSymbol =
-      config.dStableSymbol === "dUSD" ? "sfrxUSD" : "stS";
-    const dStableTokenId =
-      config.dStableSymbol === "dUSD" ? DUSD_TOKEN_ID : DS_TOKEN_ID;
+    const rewardTokenSymbol = "sfrxUSD";
+    const dStableTokenId = DUSD_TOKEN_ID;
     const rewardAmount = ethers.parseUnits("100", 18);
     const emissionPerSecond = ethers.parseUnits("1", 6);
 

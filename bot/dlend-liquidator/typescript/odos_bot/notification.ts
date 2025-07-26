@@ -20,12 +20,12 @@ export async function getSlackClient(): Promise<{
     return slackInfo;
   }
 
-  const slackBotToken = process.env.SONIC_MAINNET_SLACK_BOT_TOKEN;
-  const slackChannelId = process.env.SONIC_MAINNET_SLACK_CHANNEL_ID;
+  const slackBotToken = process.env.SAGA_MAINNET_SLACK_BOT_TOKEN;
+  const slackChannelId = process.env.SAGA_MAINNET_SLACK_CHANNEL_ID;
 
   if (!slackBotToken || !slackChannelId) {
     throw new Error(
-      "SONIC_MAINNET_SLACK_BOT_TOKEN and SONIC_MAINNET_SLACK_CHANNEL_ID must be set in environment variables",
+      "SAGA_MAINNET_SLACK_BOT_TOKEN and SAGA_MAINNET_SLACK_CHANNEL_ID must be set in environment variables",
     );
   }
 

@@ -1,5 +1,5 @@
-// PT tokens from sonic_mainnet.ts config
-export const SONIC_MAINNET_PT_TOKENS = {
+// PT tokens from saga_mainnet.ts config
+export const SAGA_MAINNET_PT_TOKENS = {
     PTaUSDC: {
         name: "PT-aUSDC-14AUG2025",
         address: "0x930441Aa7Ab17654dF5663781CA0C02CC17e6643",
@@ -20,4 +20,4 @@ export const SONIC_MAINNET_PT_TOKENS = {
     }
 };
 
-export const SONIC_PY_FACTORY = "0x0582D93FD9c9d42f26bE5D86a5f75291F92102C2";
+export const SAGA_PY_FACTORY = "0x0582D93FD9c9d42f26bE5D86a5f75291F92102C2";

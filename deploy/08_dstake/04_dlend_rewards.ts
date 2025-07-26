@@ -9,8 +9,6 @@ import {
 } from "../../config/types";
 import { DStakeRewardManagerDLend } from "../../typechain-types";
 import {
-  DS_A_TOKEN_WRAPPER_ID,
-  DS_TOKEN_ID,
   DUSD_A_TOKEN_WRAPPER_ID,
   DUSD_TOKEN_ID,
   EMISSION_MANAGER_ID,
