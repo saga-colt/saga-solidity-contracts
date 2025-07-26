@@ -19,7 +19,6 @@ import {
 import {
   createDStableFixture,
   DUSD_CONFIG,
-  DS_CONFIG,
   DStableFixtureConfig,
 } from "./fixtures";
 import {
@@ -64,7 +63,7 @@ async function calculateExpectedCollateralAmount(
 }
 
 // Run tests for each dStable configuration
-const dstableConfigs: DStableFixtureConfig[] = [DUSD_CONFIG, DS_CONFIG];
+const dstableConfigs: DStableFixtureConfig[] = [DUSD_CONFIG];
 
 dstableConfigs.forEach((config) => {
   describe(`Redeemer for ${config.symbol}`, () => {

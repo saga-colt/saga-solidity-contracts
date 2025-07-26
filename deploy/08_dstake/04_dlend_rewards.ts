@@ -331,11 +331,9 @@ func.dependencies = [
   "dLendCore",
   "dlend-market",
   DUSD_A_TOKEN_WRAPPER_ID,
-  DS_A_TOKEN_WRAPPER_ID,
   INCENTIVES_PROXY_ID,
   POOL_DATA_PROVIDER_ID,
   DUSD_TOKEN_ID,
-  DS_TOKEN_ID,
   EMISSION_MANAGER_ID,
 ];
 func.runAtTheEnd = true;

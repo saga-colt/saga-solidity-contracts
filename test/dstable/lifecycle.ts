@@ -20,14 +20,13 @@ import {
 import {
   createDStableAmoFixture,
   DUSD_CONFIG,
-  DS_CONFIG,
   DStableFixtureConfig,
 } from "./fixtures";
 import { getConfig } from "../../config/config";
 import { ORACLE_AGGREGATOR_PRICE_DECIMALS } from "../../typescript/oracle_aggregator/constants";
 
 // Run tests for each dStable configuration
-const dstableConfigs: DStableFixtureConfig[] = [DUSD_CONFIG, DS_CONFIG];
+const dstableConfigs: DStableFixtureConfig[] = [DUSD_CONFIG];
 
 dstableConfigs.forEach((config) => {
   describe(`${config.symbol} Ecosystem Lifecycle`, () => {

@@ -19,13 +19,12 @@ import {
 import {
   createDStableAmoFixture,
   DUSD_CONFIG,
-  DS_CONFIG,
   DStableFixtureConfig,
 } from "./fixtures";
 import { getConfig } from "../../config/config";
 
 // Run tests for each dStable configuration
-const dstableConfigs: DStableFixtureConfig[] = [DUSD_CONFIG, DS_CONFIG];
+const dstableConfigs: DStableFixtureConfig[] = [DUSD_CONFIG];
 
 describe("AmoManager", () => {
   let deployer: Address;

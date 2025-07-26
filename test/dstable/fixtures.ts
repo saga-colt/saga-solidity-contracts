@@ -12,7 +12,7 @@ import {
 import { getTokenContractForSymbol } from "../../typescript/token/utils";
 
 export interface DStableFixtureConfig {
-  symbol: "D" | "dS";
+  symbol: "D";
   issuerContractId: string;
   redeemerContractId: string;
   collateralVaultContractId: string;
