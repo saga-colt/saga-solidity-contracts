@@ -10,13 +10,13 @@ export function getEnvPrivateKeys(network: string): string[] {
   let pks: string[] = [];
 
   switch (network) {
-    case "sonic_testnet":
+    case "saga_testnet":
       pks = [
         getPrivateKeyFromMnemonic(`testnet_deployer`),
         getPrivateKeyFromEnv(`testnet_deployer`),
       ];
       break;
-    case "sonic_mainnet":
+    case "saga_mainnet":
       pks = [
         getPrivateKeyFromMnemonic(`mainnet_deployer`),
         getPrivateKeyFromEnv(`mainnet_deployer`),
@@ -30,7 +30,7 @@ export function getEnvPrivateKeys(network: string): string[] {
   pks = pks.filter(
     (pk) =>
       pk !==
-      "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "0x0000000000000000000000000000000000000000000000000000000000000000"
   );
 
   if (pks.length === 0) {
