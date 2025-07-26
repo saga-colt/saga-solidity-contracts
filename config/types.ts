@@ -51,10 +51,7 @@ export interface DStableConfig {
   };
 }
 
-
 export interface TokenAddresses {
-  readonly wS: string;
-  readonly dUSD: string;
   readonly [key: string]: string; // dLEND assets must be defined as well
 }
 
@@ -189,7 +186,6 @@ export interface DStakeInstanceConfig {
   readonly collateralVault?: Address; // The DStakeCollateralVault for this instance (needed for adapter deployment)
   readonly dLendRewardManager?: DLendRewardManagerConfig; // Added for dLend rewards
 }
-
 
 // --- Pendle PT Token Types ---
 
