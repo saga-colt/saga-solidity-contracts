@@ -39,13 +39,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     DUSD_HARD_PEG_ORACLE_WRAPPER_ID,
   );
 
-  // Set the HardPegOracleWrapper as the oracle for dUSD
+  // Set the HardPegOracleWrapper as the oracle for D
   console.log(
-    `Setting HardPegOracleWrapper for dUSD (${config.tokenAddresses.dUSD}) to`,
+    `Setting HardPegOracleWrapper for D (${config.tokenAddresses.D}) to`,
     hardPegOracleWrapperAddress,
   );
   await oracleAggregatorContract.setOracle(
-    config.tokenAddresses.dUSD,
+    config.tokenAddresses.D,
     hardPegOracleWrapperAddress,
   );
 

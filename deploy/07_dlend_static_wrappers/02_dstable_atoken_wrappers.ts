@@ -54,7 +54,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   try {
     const dUSDReserveData = await poolContract.getReserveData(
-      tokenAddresses.dUSD,
+      tokenAddresses.D,
     );
     dUSDAToken = dUSDReserveData.aTokenAddress;
   } catch (error: any) {

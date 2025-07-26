@@ -29,7 +29,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     from: deployer,
     args: [
       collateralVaultAddress,
-      tokenAddresses.dUSD,
+      tokenAddresses.D,
       oracleAggregatorAddress,
       amoManagerAddress,
     ],
@@ -46,7 +46,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Grant MINTER_ROLE to the Issuer contract so it can mint dUSD
   const dusdContract = await hre.ethers.getContractAt(
     "ERC20StablecoinUpgradeable",
-    tokenAddresses.dUSD,
+    tokenAddresses.D,
   );
 
   const MINTER_ROLE = await dusdContract.MINTER_ROLE();

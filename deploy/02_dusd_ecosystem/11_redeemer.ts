@@ -31,7 +31,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     from: deployer,
     args: [
       collateralVaultAddress,
-      tokenAddresses.dUSD,
+      tokenAddresses.D,
       oracleAggregatorAddress,
     ],
     contract: "Redeemer",

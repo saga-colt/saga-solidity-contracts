@@ -23,7 +23,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await hre.deployments.deploy(DUSD_AMO_MANAGER_ID, {
     from: deployer,
-    args: [tokenAddresses.dUSD, collateralVaultAddress, oracleAddress],
+    args: [tokenAddresses.D, collateralVaultAddress, oracleAddress],
     contract: "AmoManager",
     autoMine: true,
     log: false,
