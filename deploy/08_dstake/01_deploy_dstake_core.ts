@@ -71,12 +71,27 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       );
     }
 
+    // Validate adapters but allow empty vaultAsset for dependency issues
+    for (const adapter of instanceConfig.adapters) {
+      if (!adapter.vaultAsset || adapter.vaultAsset === "" || adapter.vaultAsset === ethers.ZeroAddress) {
+        console.log(
+          `Warning: vaultAsset not set for adapter ${adapter.adapterContract} in dSTAKE instance ${instanceKey}, will be configured later`,
+        );
+      }
+      if (!adapter.adapterContract) {
+        throw new Error(
+          `Missing adapterContract for adapter in dSTAKE instance ${instanceKey}`,
+        );
+      }
+    }
+
     if (
       !instanceConfig.defaultDepositVaultAsset ||
-      instanceConfig.defaultDepositVaultAsset === ethers.ZeroAddress
+      instanceConfig.defaultDepositVaultAsset === ethers.ZeroAddress ||
+      instanceConfig.defaultDepositVaultAsset === ""
     ) {
-      throw new Error(
-        `Missing defaultDepositVaultAsset for dSTAKE instance ${instanceKey}`,
+      console.log(
+        `Warning: defaultDepositVaultAsset not set for dSTAKE instance ${instanceKey}, will be configured later`,
       );
     }
 

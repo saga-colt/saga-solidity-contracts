@@ -34,8 +34,8 @@ describe("StaticATokenLM – Signature malleability guard", () => {
     depositor = await ethers.getSigner(named.user1);
     relayer = await ethers.getSigner(named.user2);
 
-    // Pick dS dStable as underlying to wrap
-    const underlying = fixture.dStables.dS;
+    // Pick D dStable as underlying to wrap
+    const underlying = fixture.dStables.D;
     const pool = fixture.contracts.pool;
 
     // Deploy wrapper through factory

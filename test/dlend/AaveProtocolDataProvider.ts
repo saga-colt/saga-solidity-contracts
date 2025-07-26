@@ -24,7 +24,7 @@ describe("dLEND AaveProtocolDataProvider", () => {
     dataProvider = fixture.contracts.dataProvider;
 
     // Identify dStable and collateral assets from fixture
-    dStableAsset = fixture.dStables.dUSD; // Using dUSD for testing
+    dStableAsset = fixture.dStables.D; // Using D for testing
 
     // Find a non-dStable collateral asset
     collateralAsset = Object.keys(fixture.assets).find(

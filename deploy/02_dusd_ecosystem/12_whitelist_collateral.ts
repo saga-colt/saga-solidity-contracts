@@ -33,7 +33,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   // Get collateral addresses from config
-  const collateralAddresses = config.dStables.dUSD.collaterals;
+  const collateralAddresses = config.dStables.D.collaterals;
 
   // Array of tokens to whitelist with defined addresses
   interface TokenInfo {

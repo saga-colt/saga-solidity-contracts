@@ -16,20 +16,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const config = await getConfig(hre);
 
   // Check all required configuration values at the top
-  const dUSDConfig = config.dStables.dUSD;
+  const dUSDConfig = config.dStables.D;
 
   const missingConfigs: string[] = [];
 
-  // Check dUSD configuration
+  // Check D configuration
   if (
     !dUSDConfig?.initialFeeReceiver ||
     !isAddress(dUSDConfig.initialFeeReceiver)
   ) {
-    missingConfigs.push("dStables.dUSD.initialFeeReceiver");
+    missingConfigs.push("dStables.D.initialFeeReceiver");
   }
 
   if (dUSDConfig?.initialRedemptionFeeBps === undefined) {
-    missingConfigs.push("dStables.dUSD.initialRedemptionFeeBps");
+    missingConfigs.push("dStables.D.initialRedemptionFeeBps");
   }
 
 

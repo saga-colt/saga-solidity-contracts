@@ -69,7 +69,7 @@ describe("dLEND Pool", () => {
     }
 
     // Find a dStable asset and a collateral asset
-    dStableAsset = fixture.dStables.dUSD; // Default to dUSD as the dStable to test with
+    dStableAsset = fixture.dStables.D; // Default to D as the dStable to test with
 
     // Look for a non-dStable collateral asset (specifically sfrxUSD or stS)
     for (const [asset, config] of Object.entries(fixture.assets)) {

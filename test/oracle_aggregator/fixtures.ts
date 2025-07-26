@@ -10,7 +10,6 @@ import {
   S_API3_ORACLE_WRAPPER_ID,
   S_API3_WRAPPER_WITH_THRESHOLDING_ID,
   S_API3_COMPOSITE_WRAPPER_WITH_THRESHOLDING_ID,
-  DS_HARD_PEG_ORACLE_WRAPPER_ID,
   USD_REDSTONE_ORACLE_WRAPPER_ID,
   USD_REDSTONE_WRAPPER_WITH_THRESHOLDING_ID,
   USD_REDSTONE_COMPOSITE_WRAPPER_WITH_THRESHOLDING_ID,
@@ -132,8 +131,12 @@ export const createOracleAggregatorFixture = (
     }): Promise<OracleAggregatorFixtureResult> => {
       const { deployer } = await getNamedAccounts();
 
-      await deployments.fixture(); // Start from a fresh deployment
-      await deployments.fixture([config.deploymentTag, "local-setup"]); // Include local-setup to use the mock Oracle
+      // Deploy only the necessary components for oracle testing (avoid dStake dependencies)
+      if (config.currency === "USD") {
+        await deployments.fixture(["deploy-mocks", "usd-oracle", "dusd", "local-setup"]);
+      } else {
+        await deployments.fixture(["deploy-mocks", "s-oracle", "local-setup"]);
+      }
 
       // Get contract instances
       const { address: oracleAggregatorAddress } = await deployments.get(
@@ -168,13 +171,17 @@ export const createOracleAggregatorFixture = (
         api3CompositeWrapperWithThresholdingAddress
       );
 
-      const { address: hardPegWrapperAddress } = await deployments.get(
-        config.wrapperIds.hardPegWrapper
-      );
-      const hardPegWrapper = await ethers.getContractAt(
-        "HardPegOracleWrapper",
-        hardPegWrapperAddress
-      );
+      // Hard peg wrapper is only available for USD currency (for dUSD)
+      let hardPegWrapper: HardPegOracleWrapper | undefined;
+      if (config.wrapperIds.hardPegWrapper) {
+        const { address: hardPegWrapperAddress } = await deployments.get(
+          config.wrapperIds.hardPegWrapper
+        );
+        hardPegWrapper = await ethers.getContractAt(
+          "HardPegOracleWrapper",
+          hardPegWrapperAddress
+        );
+      }
 
       // Get Redstone wrapper instances
       const { address: redstoneChainlinkWrapperAddress } =
@@ -398,7 +405,7 @@ export const getOracleAggregatorFixture = async (currency: string) => {
   const fixtureConfig: OracleAggregatorFixtureConfig = {
     ...oracleAggregatorConfig,
     currency,
-    deploymentTag: currency === "USD" ? "dusd-ecosystem" : "ds-ecosystem",
+    deploymentTag: currency === "USD" ? "usd-oracle" : "s-oracle",
     oracleAggregatorId:
       currency === "USD" ? USD_ORACLE_AGGREGATOR_ID : S_ORACLE_AGGREGATOR_ID,
     wrapperIds: {
@@ -417,7 +424,7 @@ export const getOracleAggregatorFixture = async (currency: string) => {
       hardPegWrapper:
         currency === "USD"
           ? DUSD_HARD_PEG_ORACLE_WRAPPER_ID
-          : DS_HARD_PEG_ORACLE_WRAPPER_ID,
+          : "", // S currency doesn't have a hard peg wrapper
       redstoneChainlinkWrapper:
         currency === "USD"
           ? USD_REDSTONE_ORACLE_WRAPPER_ID

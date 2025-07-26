@@ -47,7 +47,7 @@ describe("dLEND UiPoolDataProviderV3", () => {
     // Get test assets from the fixture's assets mapping
     const assets = Object.entries(fixture.assets);
     dStableAsset =
-      assets.find(([_, config]) => config.symbol === "dUSD")?.[0] || "";
+      assets.find(([_, config]) => config.symbol === "D")?.[0] || "";
     collateralAsset =
       assets.find(([_, config]) => config.ltv.toString() !== "0")?.[0] || "";
 

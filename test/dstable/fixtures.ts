@@ -13,6 +13,7 @@ import { getTokenContractForSymbol } from "../../typescript/token/utils";
 
 export interface DStableFixtureConfig {
   symbol: "D";
+  deploymentTag: string;
   issuerContractId: string;
   redeemerContractId: string;
   collateralVaultContractId: string;
@@ -26,7 +27,7 @@ export interface DStableFixtureConfig {
 export const createDStableFixture = (config: DStableFixtureConfig) => {
   return deployments.createFixture(async ({ deployments }) => {
     await deployments.fixture(); // Start from a fresh deployment
-    await deployments.fixture(["local-setup", config.symbol.toLowerCase()]); // Include local-setup to use the mock Oracle
+    await deployments.fixture(["local-setup", config.deploymentTag]); // Include local-setup to use the mock Oracle
   });
 };
 
@@ -71,6 +72,7 @@ export const createDStableAmoFixture = (config: DStableFixtureConfig) => {
 // Predefined configurations
 export const DUSD_CONFIG: DStableFixtureConfig = {
   symbol: "D",
+  deploymentTag: "dusd",
   issuerContractId: DUSD_ISSUER_CONTRACT_ID,
   redeemerContractId: DUSD_REDEEMER_CONTRACT_ID,
   collateralVaultContractId: DUSD_COLLATERAL_VAULT_CONTRACT_ID,

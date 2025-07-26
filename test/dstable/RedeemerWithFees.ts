@@ -92,19 +92,19 @@ dstableConfigs.forEach((config) => {
       let configuredFeeReceiver: string;
       let configuredDefaultFeeBps: number;
 
-      if (config.symbol === "dUSD") {
+      if (config.symbol === "D") {
         if (
-          appConfig.dStables.dUSD?.initialFeeReceiver === undefined ||
-          appConfig.dStables.dUSD?.initialRedemptionFeeBps === undefined
+          appConfig.dStables.D?.initialFeeReceiver === undefined ||
+          appConfig.dStables.D?.initialRedemptionFeeBps === undefined
         ) {
           throw new Error(
-            "dUSD initialFeeReceiver or initialRedemptionFeeBps is undefined in config"
+            "D initialFeeReceiver or initialRedemptionFeeBps is undefined in config"
           );
         }
         redeemerWithFeesContractId = DUSD_REDEEMER_WITH_FEES_CONTRACT_ID;
-        configuredFeeReceiver = appConfig.dStables.dUSD.initialFeeReceiver;
+        configuredFeeReceiver = appConfig.dStables.D.initialFeeReceiver;
         configuredDefaultFeeBps =
-          appConfig.dStables.dUSD.initialRedemptionFeeBps;
+          appConfig.dStables.D.initialRedemptionFeeBps;
       } else {
         throw new Error(
           `Unsupported dStable symbol for RedeemerWithFees tests: ${config.symbol}`
@@ -208,18 +208,18 @@ dstableConfigs.forEach((config) => {
         let expectedFeeReceiver: string;
         let expectedDefaultFeeBps: bigint;
 
-        if (config.symbol === "dUSD") {
+        if (config.symbol === "D") {
           if (
-            appConfig.dStables.dUSD?.initialFeeReceiver === undefined ||
-            appConfig.dStables.dUSD?.initialRedemptionFeeBps === undefined
+            appConfig.dStables.D?.initialFeeReceiver === undefined ||
+            appConfig.dStables.D?.initialRedemptionFeeBps === undefined
           ) {
             throw new Error(
-              "dUSD initialFeeReceiver or initialRedemptionFeeBps is undefined in config for assertion"
+              "D initialFeeReceiver or initialRedemptionFeeBps is undefined in config for assertion"
             );
           }
-          expectedFeeReceiver = appConfig.dStables.dUSD.initialFeeReceiver;
+          expectedFeeReceiver = appConfig.dStables.D.initialFeeReceiver;
           expectedDefaultFeeBps = BigInt(
-            appConfig.dStables.dUSD.initialRedemptionFeeBps
+            appConfig.dStables.D.initialRedemptionFeeBps
           );
         } else {
           throw new Error(`Unsupported dStable symbol: ${config.symbol}`);

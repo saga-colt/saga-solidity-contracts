@@ -4,6 +4,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { ONE_PERCENT_BPS } from "../../typescript/common/bps_constants";
 import {
   DUSD_TOKEN_ID,
+  DUSD_A_TOKEN_WRAPPER_ID,
   INCENTIVES_PROXY_ID,
 } from "../../typescript/deploy-ids";
 import {
@@ -49,7 +50,7 @@ export async function getConfig(
 
   // Fetch deployed dLend StaticATokenLM wrappers
   const dLendATokenWrapperDUSDDeployment = await _hre.deployments.getOrNull(
-    "dLend_ATokenWrapper_dUSD",
+    DUSD_A_TOKEN_WRAPPER_ID,
   );
 
   // Fetch deployed dLend RewardsController
@@ -57,7 +58,7 @@ export async function getConfig(
     await _hre.deployments.getOrNull(INCENTIVES_PROXY_ID);
 
   // Fetch deployed dLend aTokens
-  const aTokenDUSDDeployment = await _hre.deployments.getOrNull("dLEND-dUSD");
+  const aTokenDUSDDeployment = await _hre.deployments.getOrNull("dLEND-D");
 
 
   // Get mock oracle deployments
@@ -384,7 +385,7 @@ export async function getConfig(
     dStake: {
       sD: {
         dStable: emptyStringIfUndefined(dUSDDeployment?.address),
-        name: "Staked Saga Dollar",
+        name: "Staked D",
         symbol: "sD",
         initialAdmin: user1,
         initialFeeManager: user1,
@@ -408,7 +409,7 @@ export async function getConfig(
           ), // This should be the deployed StaticATokenLM address for dUSD
           dLendAssetToClaimFor: emptyStringIfUndefined(
             aTokenDUSDDeployment?.address,
-          ), // Use the deployed dLEND-dUSD aToken address
+          ), // Use the deployed D aToken address
           dLendRewardsController: emptyStringIfUndefined(
             rewardsControllerDeployment?.address,
           ), // This will be fetched after dLend incentives deployment
