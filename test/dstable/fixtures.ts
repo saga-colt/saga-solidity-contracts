@@ -5,7 +5,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import {
   USD_ORACLE_AGGREGATOR_ID,
   DUSD_ISSUER_CONTRACT_ID,
-  DUSD_REDEEMER_CONTRACT_ID,
+  DUSD_REDEEMER_WITH_FEES_CONTRACT_ID,
   DUSD_COLLATERAL_VAULT_CONTRACT_ID,
   DUSD_AMO_MANAGER_ID,
 } from "../../typescript/deploy-ids";
@@ -74,11 +74,10 @@ export const DUSD_CONFIG: DStableFixtureConfig = {
   symbol: "D",
   deploymentTag: "dusd",
   issuerContractId: DUSD_ISSUER_CONTRACT_ID,
-  redeemerContractId: DUSD_REDEEMER_CONTRACT_ID,
+  redeemerContractId: DUSD_REDEEMER_WITH_FEES_CONTRACT_ID,
   collateralVaultContractId: DUSD_COLLATERAL_VAULT_CONTRACT_ID,
   amoManagerId: DUSD_AMO_MANAGER_ID,
   oracleAggregatorId: USD_ORACLE_AGGREGATOR_ID,
   peggedCollaterals: ["frxUSD", "USDC", "USDS"], // USDC is interesting due to 6 decimals
   yieldBearingCollaterals: ["sfrxUSD", "sUSDS"],
 };
-

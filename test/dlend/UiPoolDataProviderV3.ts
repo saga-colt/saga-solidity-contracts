@@ -28,11 +28,11 @@ describe("dLEND UiPoolDataProviderV3", () => {
     // Get oracle address
     const priceOracleAddress = await addressesProvider.getPriceOracle();
 
-    // Get wS token address
+    // Use WSAGA (wrapped native asset) as market reference currency
     const { contract: wSToken } = await getTokenContractForSymbol(
       hre,
       deployer,
-      "wS"
+      "WSAGA"
     );
 
     // Deploy UiPoolDataProviderV3 with the oracle and wS token address

@@ -158,7 +158,10 @@ export async function getConfig(
         priceDecimals: ORACLE_AGGREGATOR_PRICE_DECIMALS,
         baseCurrency: ZeroAddress,
         api3OracleAssets: {
-          plainApi3OracleWrappers: {},
+          plainApi3OracleWrappers: {
+            [WSAGADeployment?.address || ""]:
+              mockOracleNameToAddress["WSAGA_USD"],
+          },
           api3OracleWrappersWithThresholding: {},
           compositeApi3OracleWrappersWithThresholding: {},
         },

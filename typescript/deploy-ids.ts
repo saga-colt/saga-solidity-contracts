@@ -12,7 +12,7 @@ export const USD_REDSTONE_COMPOSITE_WRAPPER_WITH_THRESHOLDING_ID =
   "USD_RedstoneChainlinkCompositeWrapperWithThresholding";
 
 // dUSD
-export const DUSD_TOKEN_ID = "dUSD";
+export const DUSD_TOKEN_ID = "D";
 export const DUSD_ISSUER_CONTRACT_ID = "dUSD_Issuer";
 export const DUSD_REDEEMER_CONTRACT_ID = "dUSD_Redeemer";
 export const DUSD_COLLATERAL_VAULT_CONTRACT_ID = "dUSD_CollateralHolderVault";

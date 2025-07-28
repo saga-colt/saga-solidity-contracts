@@ -154,7 +154,7 @@ DSTAKE_CONFIGS.forEach((config: DStakeFixtureConfig) => {
       });
 
       it("Should have correct name and symbol", async () => {
-        const expectedName = `Staked ${config.DStakeTokenSymbol.substring(1)}`;
+        const expectedName = config.name;
         const expectedSymbol = config.DStakeTokenSymbol;
         expect(await DStakeToken.name()).to.equal(expectedName);
         expect(await DStakeToken.symbol()).to.equal(expectedSymbol);
@@ -674,13 +674,18 @@ DSTAKE_CONFIGS.forEach((config: DStakeFixtureConfig) => {
 
         // Set up for test: user1 deposits assets
         assetsToDeposit = parseUnits(1000, dStableDecimals);
-        
+
         // Give user1 some dStable tokens
         await stable.connect(deployer).mint(user1.address, assetsToDeposit);
-        await dStableToken.connect(user1).approve(DStakeToken.target, assetsToDeposit);
-        
+        await dStableToken
+          .connect(user1)
+          .approve(DStakeToken.target, assetsToDeposit);
+
         // User1 deposits assets
-        await DStakeToken.connect(user1).deposit(assetsToDeposit, user1.address);
+        await DStakeToken.connect(user1).deposit(
+          assetsToDeposit,
+          user1.address
+        );
         shares = await DStakeToken.balanceOf(user1.address);
       });
 
@@ -691,9 +696,12 @@ DSTAKE_CONFIGS.forEach((config: DStakeFixtureConfig) => {
           DStakeToken.connect(user2).withdraw(
             1, // minimal amount to avoid max withdraw check
             user2.address, // attacker as receiver
-            user1.address  // victim as owner
+            user1.address // victim as owner
           )
-        ).to.be.revertedWithCustomError(DStakeToken, "ERC20InsufficientAllowance");
+        ).to.be.revertedWithCustomError(
+          DStakeToken,
+          "ERC20InsufficientAllowance"
+        );
       });
 
       it("should prevent unauthorized redeem without allowance", async () => {
@@ -703,32 +711,37 @@ DSTAKE_CONFIGS.forEach((config: DStakeFixtureConfig) => {
           DStakeToken.connect(user2).redeem(
             1, // minimal amount to avoid max redeem check
             user2.address, // attacker as receiver
-            user1.address  // victim as owner
+            user1.address // victim as owner
           )
-        ).to.be.revertedWithCustomError(DStakeToken, "ERC20InsufficientAllowance");
+        ).to.be.revertedWithCustomError(
+          DStakeToken,
+          "ERC20InsufficientAllowance"
+        );
       });
 
       it("should allow withdrawal with proper allowance", async () => {
         // user1 grants allowance to user2
         await DStakeToken.connect(user1).approve(user2.address, shares);
-        
+
         // Get the net amount user can withdraw (after fees)
         const netAmount = await DStakeToken.previewRedeem(shares);
-        
+
         // Now user2 can withdraw on behalf of user1
         await expect(
           DStakeToken.connect(user2).withdraw(
             netAmount,
             user2.address, // user2 as receiver
-            user1.address  // user1 as owner
+            user1.address // user1 as owner
           )
         ).to.not.be.reverted;
-        
+
         // Verify user1's shares were burned
         expect(await DStakeToken.balanceOf(user1.address)).to.equal(0);
-        
+
         // Verify user2 received the assets
-        expect(await dStableToken.balanceOf(user2.address)).to.be.greaterThan(0);
+        expect(await dStableToken.balanceOf(user2.address)).to.be.greaterThan(
+          0
+        );
       });
     });
   });

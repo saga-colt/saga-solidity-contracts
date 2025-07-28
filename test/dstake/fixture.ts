@@ -1,10 +1,7 @@
 import hre, { deployments } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { ethers, BigNumberish } from "ethers";
-import {
-  DStableFixtureConfig,
-  DUSD_CONFIG,
-} from "../dstable/fixtures";
+import { DStableFixtureConfig, DUSD_CONFIG } from "../dstable/fixtures";
 import {
   getTokenContractForSymbol,
   TokenInfo,
@@ -12,10 +9,6 @@ import {
 import { ERC20 } from "../../typechain-types";
 import { IERC20 } from "../../typechain-types/@openzeppelin/contracts/token/ERC20/IERC20";
 import {
-  DSTAKE_DEPLOYMENT_TAG,
-  SDUSD_DSTAKE_TOKEN_ID,
-  SDUSD_COLLATERAL_VAULT_ID,
-  SDUSD_ROUTER_ID,
   DUSD_A_TOKEN_WRAPPER_ID,
   INCENTIVES_PROXY_ID,
   PULL_REWARDS_TRANSFER_STRATEGY_ID,
@@ -37,11 +30,12 @@ export interface DStakeFixtureConfig {
 
 export const SDUSD_CONFIG: DStakeFixtureConfig = {
   dStableSymbol: "D",
-  DStakeTokenSymbol: "sD",
-  DStakeTokenContractId: SDUSD_DSTAKE_TOKEN_ID,
-  collateralVaultContractId: SDUSD_COLLATERAL_VAULT_ID,
-  routerContractId: SDUSD_ROUTER_ID,
+  DStakeTokenSymbol: "stkD",
+  DStakeTokenContractId: "DStakeToken_stkD",
+  collateralVaultContractId: "DStakeCollateralVault_stkD",
+  routerContractId: "DStakeRouter_stkD",
   defaultVaultAssetSymbol: "wdD",
+  name: "Staked Saga Dollar",
   underlyingDStableConfig: DUSD_CONFIG,
   deploymentTags: [
     "local-setup", // mock tokens and oracles
@@ -53,7 +47,6 @@ export const SDUSD_CONFIG: DStakeFixtureConfig = {
     "ds", // Required by the Redstone plain feed setup
   ],
 };
-
 
 // Array of all DStake configurations
 export const DSTAKE_CONFIGS: DStakeFixtureConfig[] = [SDUSD_CONFIG];
@@ -90,11 +83,8 @@ async function fetchDStakeComponents(
     (await deployments.get(config.routerContractId)).address
   );
 
-  const wrappedATokenAddress = (
-    await deployments.get(
-      DUSD_A_TOKEN_WRAPPER_ID
-    )
-  ).address;
+  const wrappedATokenAddress = (await deployments.get(DUSD_A_TOKEN_WRAPPER_ID))
+    .address;
   const wrappedAToken = await ethers.getContractAt(
     "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
     wrappedATokenAddress
@@ -310,4 +300,3 @@ export const SDUSDRewardsFixture = setupDLendRewardsFixture(
   ethers.parseUnits("100", 6), // total reward amount
   ethers.parseUnits("1", 6) // emission per second (1 token/sec in 6-decimals)
 );
-

@@ -155,7 +155,10 @@ export async function getConfig(
         baseCurrency: ZeroAddress, // Note that USD is represented by the zero address, per Aave's convention
         api3OracleAssets: {
           // All configurations moved to redstoneOracleAssets
-          plainApi3OracleWrappers: {},
+          plainApi3OracleWrappers: {
+            [WSAGADeployment?.address || ""]:
+              mockOracleNameToAddress["WSAGA_USD"],
+          },
           api3OracleWrappersWithThresholding: {},
           compositeApi3OracleWrappersWithThresholding: {},
         },

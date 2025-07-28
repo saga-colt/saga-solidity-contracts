@@ -19,6 +19,7 @@ export type OracleProvider = "REDSTONE"; // Only Redstone now
 // api3Feeds is removed as all feeds are now Redstone
 export const redstoneFeeds: OracleFeedConfig[] = [
   // USD price feeds
+  { name: "WSAGA_USD", symbol: "WSAGA", price: "0.30" },
   { name: "frxUSD_USD", symbol: "frxUSD", price: "1" },
   { name: "USDC_USD", symbol: "USDC", price: "1" },
   { name: "USDS_USD", symbol: "USDS", price: "1" },
