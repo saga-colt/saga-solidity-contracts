@@ -153,18 +153,12 @@ export async function getConfig(
         hardDStablePeg: 10n ** BigInt(ORACLE_AGGREGATOR_PRICE_DECIMALS),
         priceDecimals: ORACLE_AGGREGATOR_PRICE_DECIMALS,
         baseCurrency: ZeroAddress, // Note that USD is represented by the zero address, per Aave's convention
-        api3OracleAssets: {
-          // All configurations moved to redstoneOracleAssets
-          plainApi3OracleWrappers: {
+        redstoneOracleAssets: {
+          // Moved from API3
+          plainRedstoneOracleWrappers: {
             [WSAGADeployment?.address || ""]:
               mockOracleNameToAddress["WSAGA_USD"],
           },
-          api3OracleWrappersWithThresholding: {},
-          compositeApi3OracleWrappersWithThresholding: {},
-        },
-        redstoneOracleAssets: {
-          // Moved from API3
-          plainRedstoneOracleWrappers: {},
           // Moved from API3
           redstoneOracleWrappersWithThresholding: {
             ...(USDCDeployment?.address && mockOracleNameToAddress["USDC_USD"]

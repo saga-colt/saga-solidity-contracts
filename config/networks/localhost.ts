@@ -157,16 +157,11 @@ export async function getConfig(
         hardDStablePeg: 1n * ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
         priceDecimals: ORACLE_AGGREGATOR_PRICE_DECIMALS,
         baseCurrency: ZeroAddress,
-        api3OracleAssets: {
-          plainApi3OracleWrappers: {
+        redstoneOracleAssets: {
+          plainRedstoneOracleWrappers: {
             [WSAGADeployment?.address || ""]:
               mockOracleNameToAddress["WSAGA_USD"],
           },
-          api3OracleWrappersWithThresholding: {},
-          compositeApi3OracleWrappersWithThresholding: {},
-        },
-        redstoneOracleAssets: {
-          plainRedstoneOracleWrappers: {},
           redstoneOracleWrappersWithThresholding: {
             ...(USDCDeployment?.address && mockOracleNameToAddress["USDC_USD"]
               ? {

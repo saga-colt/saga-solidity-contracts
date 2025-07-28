@@ -40,15 +40,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     throw new Error("WARNING - should not deploy mock oracles on mainnet");
   }
 
-  // Deploy a mock API3 server V1 (this would be the actual API3 server on mainnet) - Removed
-  // const mockAPI3ServerV1 = await hre.deployments.deploy("MockAPI3ServerV1", { ... }); // Removed
-
   // Track deployed mock oracles
   const mockOracleNameToAddress: Record<string, string> = {};
   const mockOracleNameToProvider: Record<string, OracleProvider> = {};
-
-  // Deploy individual MockAPI3OracleAlwaysAlive instances for each feed - Removed
-  // for (const feed of api3Feeds) { ... } // Removed loop
 
   // Deploy individual MockRedstoneChainlinkOracleAlwaysAlive instances for each Redstone feed
   for (const feed of redstoneFeeds) {

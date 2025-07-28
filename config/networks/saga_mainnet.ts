@@ -130,13 +130,6 @@ export async function getConfig(
         baseCurrency: ZeroAddress, // Note that USD is represented by the zero address, per Aave's convention
         hardDStablePeg: 10n ** BigInt(ORACLE_AGGREGATOR_PRICE_DECIMALS),
         priceDecimals: ORACLE_AGGREGATOR_PRICE_DECIMALS,
-        api3OracleAssets: {
-          plainApi3OracleWrappers: {
-            [wSAddress]: "0xAf9647E1F86406BC38F42FE630E9Fa8CBcd59B19", // S/USD dTRINITY OEV
-          },
-          api3OracleWrappersWithThresholding: {},
-          compositeApi3OracleWrappersWithThresholding: {},
-        },
         redstoneOracleAssets: {
           plainRedstoneOracleWrappers: {},
           redstoneOracleWrappersWithThresholding: {
