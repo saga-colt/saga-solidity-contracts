@@ -4,6 +4,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { ONE_PERCENT_BPS } from "../../typescript/common/bps_constants";
 import {
   DUSD_TOKEN_ID,
+  DUSD_A_TOKEN_WRAPPER_ID,
   INCENTIVES_PROXY_ID,
 } from "../../typescript/deploy-ids";
 import {
@@ -44,7 +45,7 @@ export async function getConfig(
 
   // Fetch deployed dLend StaticATokenLM wrapper (optional, may be undefined on testnet)
   const dLendATokenWrapperDUSDDeployment = await _hre.deployments.getOrNull(
-    "dLend_ATokenWrapper_dUSD"
+    DUSD_A_TOKEN_WRAPPER_ID
   );
 
   // Fetch deployed dLend RewardsController (optional)
@@ -52,7 +53,7 @@ export async function getConfig(
     await _hre.deployments.getOrNull(INCENTIVES_PROXY_ID);
 
   // Fetch deployed dLend aToken for dUSD (optional)
-  const aTokenDUSDDeployment = await _hre.deployments.getOrNull("dLEND-dUSD");
+  const aTokenDUSDDeployment = await _hre.deployments.getOrNull("dLEND-D");
 
   // Get mock oracle deployments
   const mockOracleNameToAddress: Record<string, string> = {};
@@ -150,7 +151,7 @@ export async function getConfig(
     },
     oracleAggregators: {
       USD: {
-        hardDStablePeg: 10n ** BigInt(ORACLE_AGGREGATOR_PRICE_DECIMALS),
+        hardDStablePeg: 1n * ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
         priceDecimals: ORACLE_AGGREGATOR_PRICE_DECIMALS,
         baseCurrency: ZeroAddress, // Note that USD is represented by the zero address, per Aave's convention
         redstoneOracleAssets: {
@@ -277,7 +278,7 @@ export async function getConfig(
           ), // This should be the deployed StaticATokenLM address for dUSD
           dLendAssetToClaimFor: emptyStringIfUndefined(
             aTokenDUSDDeployment?.address
-          ), // Use the deployed dLEND-dUSD aToken address
+          ), // Use the deployed dLEND-D aToken address
           dLendRewardsController: emptyStringIfUndefined(
             rewardsControllerDeployment?.address
           ), // This will be fetched after dLend incentives deployment

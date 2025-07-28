@@ -1,4 +1,4 @@
-import { ethers, deployments, getNamedAccounts } from "hardhat";
+import hre, { ethers, deployments, getNamedAccounts } from "hardhat";
 import { expect } from "chai";
 import {
   DStakeToken,
@@ -16,6 +16,7 @@ import { ZeroAddress } from "ethers";
 import { ERC20StablecoinUpgradeable } from "../../typechain-types/contracts/dstable/ERC20StablecoinUpgradeable";
 import { WrappedDLendConversionAdapter__factory } from "../../typechain-types/factories/contracts/vaults/dstake/adapters/WrappedDLendConversionAdapter__factory";
 import { WrappedDLendConversionAdapter } from "../../typechain-types/contracts/vaults/dstake/adapters/WrappedDLendConversionAdapter";
+import { getConfig } from "../../config/config";
 
 const parseUnits = (value: string | number, decimals: number | bigint) =>
   ethers.parseUnits(value.toString(), decimals);
@@ -150,7 +151,12 @@ DSTAKE_CONFIGS.forEach((config: DStakeFixtureConfig) => {
       });
 
       it("Fixture withdrawalFeeBps should equal initial config value", async () => {
-        expect(await DStakeToken.withdrawalFeeBps()).to.equal(10);
+        const networkConfig = await getConfig(hre);
+        const dstakeConfig = networkConfig.dStake?.stkD;
+        expect(dstakeConfig).to.exist;
+        expect(await DStakeToken.withdrawalFeeBps()).to.equal(
+          dstakeConfig!.initialWithdrawalFeeBps
+        );
       });
 
       it("Should have correct name and symbol", async () => {
