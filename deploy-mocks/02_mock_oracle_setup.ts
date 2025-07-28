@@ -22,19 +22,10 @@ export const redstoneFeeds: OracleFeedConfig[] = [
   { name: "frxUSD_USD", symbol: "frxUSD", price: "1" },
   { name: "USDC_USD", symbol: "USDC", price: "1" },
   { name: "USDS_USD", symbol: "USDS", price: "1" },
-  { name: "wS_USD", symbol: "wS", price: "4.2" },
-  { name: "scUSD_USD", symbol: "scUSD", price: "1" }, // Moved from original redstoneFeeds
 
   // Vault feeds
   { name: "sfrxUSD_frxUSD", symbol: "sfrxUSD", price: "1.1" },
   { name: "sUSDS_USDS", symbol: "sUSDS", price: "1.1" },
-  { name: "wstkscUSD_scUSD", symbol: "wstkscUSD", price: "1.15" }, // Moved from original redstoneFeeds
-  { name: "wOS_OS", symbol: "wOS", price: "1.1" }, // Moved from original redstoneFeeds
-
-  // S feeds
-  { name: "stS_S", symbol: "stS", price: "1.1" },
-  { name: "OS_S", symbol: "OS", price: "1.0" }, // Moved from original redstoneFeeds
-  { name: "wOS_S", symbol: "wOS", price: "1.1" }, // Required for S aggregator plain wrapper on testnet
 ];
 
 // Redstone oracle feeds - This array is now merged into redstoneFeeds above

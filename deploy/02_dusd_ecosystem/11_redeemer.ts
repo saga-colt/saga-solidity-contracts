@@ -1,56 +1,97 @@
+import { isAddress } from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 
 import { getConfig } from "../../config/config";
 import {
   DUSD_COLLATERAL_VAULT_CONTRACT_ID,
-  DUSD_REDEEMER_CONTRACT_ID,
+  DUSD_REDEEMER_WITH_FEES_CONTRACT_ID,
   DUSD_TOKEN_ID,
   USD_ORACLE_AGGREGATOR_ID,
 } from "../../typescript/deploy-ids";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployer } = await hre.getNamedAccounts();
+  const { deploy, get } = hre.deployments;
+  const config = await getConfig(hre);
 
-  // Get deployed addresses
-  const { address: oracleAggregatorAddress } = await hre.deployments.get(
-    USD_ORACLE_AGGREGATOR_ID,
+  // Check all required configuration values at the top
+  const dUSDConfig = config.dStables.D;
+
+  const missingConfigs: string[] = [];
+
+  // Check D configuration
+  if (
+    !dUSDConfig?.initialFeeReceiver ||
+    !isAddress(dUSDConfig.initialFeeReceiver)
+  ) {
+    missingConfigs.push("dStables.D.initialFeeReceiver");
+  }
+
+  if (dUSDConfig?.initialRedemptionFeeBps === undefined) {
+    missingConfigs.push("dStables.D.initialRedemptionFeeBps");
+  }
+
+  // If any required config values are missing, skip deployment
+  if (missingConfigs.length > 0) {
+    console.log(
+      `⚠️  Skipping RedeemerWithFees deployment - missing configuration values: ${missingConfigs.join(", ")}`
+    );
+    console.log(
+      `☯️  ${__filename.split("/").slice(-2).join("/")}: ⏭️  (skipped)`
+    );
+    return true;
+  }
+
+  // Deploy RedeemerWithFees for dUSD
+  const dUSDToken = await get(DUSD_TOKEN_ID);
+  const dUSDCollateralVaultDeployment = await get(
+    DUSD_COLLATERAL_VAULT_CONTRACT_ID
+  );
+  const usdOracleAggregator = await get(USD_ORACLE_AGGREGATOR_ID);
+
+  const dUSDRedeemerWithFeesDeployment = await deploy(
+    DUSD_REDEEMER_WITH_FEES_CONTRACT_ID,
+    {
+      from: deployer,
+      contract: "RedeemerWithFees",
+      args: [
+        dUSDCollateralVaultDeployment.address,
+        dUSDToken.address,
+        usdOracleAggregator.address,
+        dUSDConfig.initialFeeReceiver,
+        dUSDConfig.initialRedemptionFeeBps,
+      ],
+    }
   );
 
-  const { address: collateralVaultAddress } = await hre.deployments.get(
-    DUSD_COLLATERAL_VAULT_CONTRACT_ID,
+  const dUSDCollateralVaultContract = await hre.ethers.getContractAt(
+    "CollateralVault",
+    dUSDCollateralVaultDeployment.address,
+    await hre.ethers.getSigner(deployer)
   );
-  const collateralVault = await hre.ethers.getContractAt(
-    "CollateralHolderVault",
-    collateralVaultAddress,
-    await hre.ethers.getSigner(deployer),
-  );
-  const { tokenAddresses } = await getConfig(hre);
-
-  const deployment = await hre.deployments.deploy(DUSD_REDEEMER_CONTRACT_ID, {
-    from: deployer,
-    args: [
-      collateralVaultAddress,
-      tokenAddresses.D,
-      oracleAggregatorAddress,
-    ],
-    contract: "Redeemer",
-    autoMine: true,
-    log: false,
-  });
-
-  console.log("Allowing Redeemer to withdraw collateral");
-  await collateralVault.grantRole(
-    await collateralVault.COLLATERAL_WITHDRAWER_ROLE(),
-    deployment.address,
+  const dUSDWithdrawerRole =
+    await dUSDCollateralVaultContract.COLLATERAL_WITHDRAWER_ROLE();
+  const dUSDHasRole = await dUSDCollateralVaultContract.hasRole(
+    dUSDWithdrawerRole,
+    dUSDRedeemerWithFeesDeployment.address
   );
 
-  console.log(`☯️ ${__filename.split("/").slice(-2).join("/")}: ✅`);
+  if (!dUSDHasRole) {
+    console.log("Granting role for dUSD RedeemerWithFees.");
+    await dUSDCollateralVaultContract.grantRole(
+      dUSDWithdrawerRole,
+      dUSDRedeemerWithFeesDeployment.address
+    );
+    console.log("Role granted for dUSD RedeemerWithFees.");
+  }
+
+  console.log(`☯️  ${__filename.split("/").slice(-2).join("/")}: ✅`);
 
   return true;
 };
 
-func.id = DUSD_REDEEMER_CONTRACT_ID;
+func.id = DUSD_REDEEMER_WITH_FEES_CONTRACT_ID;
 func.tags = ["dusd"];
 func.dependencies = [
   DUSD_COLLATERAL_VAULT_CONTRACT_ID,

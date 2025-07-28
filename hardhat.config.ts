@@ -83,6 +83,7 @@ const config: HardhatUserConfig = {
       deploy: ["deploy-mocks", "deploy"],
       saveDeployments: true,
       accounts: getEnvPrivateKeys("saga_testnet"),
+      gasPrice: 0,
     },
     saga_mainnet: {
       url: `https://sagaevm.jsonrpc.sagarpc.io/`,

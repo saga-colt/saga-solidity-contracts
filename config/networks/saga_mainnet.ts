@@ -103,31 +103,11 @@ export async function getConfig(
       governanceMultisig: governanceSafeMultisig, // Created via Safe
       incentivesVault: "0x4B4B5cC616be4cd1947B93f2304d36b3e80D3ef6", // TODO: Add incentives vault address
     },
-    pendle: {
-      ptYtLpOracleAddress: "0x9a9Fa8338dd5E5B2188006f1Cd2Ef26d921650C2", // Universal Pendle PT/YT/LP Oracle address
-      ptTokens: [
-        {
-          name: "PT-aUSDC-14AUG2025",
-          ptToken: "0x930441Aa7Ab17654dF5663781CA0C02CC17e6643",
-          market: "0x3f5ea53d1160177445b1898afbb16da111182418",
-          oracleType: "PT_TO_ASSET", // Quote price of USDC directly
-          twapDuration: 900,
-        },
-        {
-          name: "PT-wstkscUSD-18DEC2025",
-          ptToken: "0x0Fb682C9692AddCc1769f4D4d938c54420D54fA3",
-          market: "0x004f76045b42ef3e89814b12b37e69da19c8a212",
-          oracleType: "PT_TO_ASSET", // Quote price of scUSD directly
-          twapDuration: 900,
-        },
-      ],
-    },
     dStables: {
       D: {
         collaterals: [
           frxUSDAddress,
           sfrxUSDAddress,
-          // wstkscUSDAddress,
           USDCeAddress,
           scUSDAddress,
         ],
@@ -255,35 +235,6 @@ export async function getConfig(
               fixedPriceInBase2: 0n,
             },
           },
-        },
-        chainlinkCompositeAggregator: {
-          [osAddress]: {
-            name: "OS_S_USD",
-            feedAsset: osAddress,
-            sourceFeed1: "0x125629732C21A403Ae1eFf159467971ee01470a6", // Our own ChainlinkDecimalConverter which wraps the OS/S Chainlink feed and converts 18 -> 8 decimals
-            sourceFeed2: "0xc76dFb89fF298145b417d221B2c747d84952e01d", // S/USD Chainlink price feed
-            lowerThresholdInBase1: 0n, // No thresholding for OS/S
-            fixedPriceInBase1: 0n,
-            lowerThresholdInBase2: 0n, // No thresholding for S/USD
-            fixedPriceInBase2: 0n,
-          },
-        },
-      },
-      S: {
-        hardDStablePeg: 10n ** BigInt(ORACLE_AGGREGATOR_PRICE_DECIMALS),
-        priceDecimals: ORACLE_AGGREGATOR_PRICE_DECIMALS,
-        baseCurrency: wSAddress,
-        api3OracleAssets: {
-          plainApi3OracleWrappers: {},
-          api3OracleWrappersWithThresholding: {},
-          compositeApi3OracleWrappersWithThresholding: {},
-        },
-        redstoneOracleAssets: {
-          plainRedstoneOracleWrappers: {
-            [stSAddress]: "0x65d0F14f7809CdC4f90c3978c753C4671b6B815b", // stS/S Redstone Fundamental feed
-          },
-          redstoneOracleWrappersWithThresholding: {},
-          compositeRedstoneOracleWrappersWithThresholding: {},
         },
       },
     },

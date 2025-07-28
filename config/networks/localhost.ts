@@ -32,7 +32,7 @@ import { Config } from "../types";
  * @returns The configuration for the network
  */
 export async function getConfig(
-  _hre: HardhatRuntimeEnvironment,
+  _hre: HardhatRuntimeEnvironment
 ): Promise<Config> {
   // Token info will only be populated after their deployment
   const dUSDDeployment = await _hre.deployments.getOrNull(DUSD_TOKEN_ID);
@@ -41,16 +41,11 @@ export async function getConfig(
   const sUSDSDeployment = await _hre.deployments.getOrNull("sUSDS");
   const frxUSDDeployment = await _hre.deployments.getOrNull("frxUSD");
   const sfrxUSDDeployment = await _hre.deployments.getOrNull("sfrxUSD");
-  const wSTokenDeployment = await _hre.deployments.getOrNull("wS");
-  const OSTokenDeployment = await _hre.deployments.getOrNull("OS");
-  const wOSTokenDeployment = await _hre.deployments.getOrNull("wOS");
-  const stSTokenDeployment = await _hre.deployments.getOrNull("stS");
-  const scUSDDeployment = await _hre.deployments.getOrNull("scUSD");
-  const wstkscUSDDeployment = await _hre.deployments.getOrNull("wstkscUSD");
+  const WSAGADeployment = await _hre.deployments.getOrNull("WSAGA");
 
   // Fetch deployed dLend StaticATokenLM wrappers
   const dLendATokenWrapperDUSDDeployment = await _hre.deployments.getOrNull(
-    DUSD_A_TOKEN_WRAPPER_ID,
+    DUSD_A_TOKEN_WRAPPER_ID
   );
 
   // Fetch deployed dLend RewardsController
@@ -60,23 +55,22 @@ export async function getConfig(
   // Fetch deployed dLend aTokens
   const aTokenDUSDDeployment = await _hre.deployments.getOrNull("dLEND-D");
 
-
   // Get mock oracle deployments
   const mockOracleNameToAddress: Record<string, string> = {};
 
   // REFACTOR: Load addresses directly using getOrNull
   const mockOracleAddressesDeployment = await _hre.deployments.getOrNull(
-    "MockOracleNameToAddress",
+    "MockOracleNameToAddress"
   );
 
   if (mockOracleAddressesDeployment?.linkedData) {
     Object.assign(
       mockOracleNameToAddress,
-      mockOracleAddressesDeployment.linkedData,
+      mockOracleAddressesDeployment.linkedData
     );
   } else {
     console.warn(
-      "WARN: MockOracleNameToAddress deployment not found or has no linkedData. Oracle addresses might be incomplete.",
+      "WARN: MockOracleNameToAddress deployment not found or has no linkedData. Oracle addresses might be incomplete."
     );
   }
 
@@ -86,6 +80,12 @@ export async function getConfig(
   return {
     MOCK_ONLY: {
       tokens: {
+        WSAGA: {
+          name: "Wrapped Saga",
+          address: WSAGADeployment?.address,
+          decimals: 18,
+          initialSupply: 1e6,
+        },
         USDC: {
           name: "USD Coin",
           address: USDCDeployment?.address,
@@ -116,53 +116,12 @@ export async function getConfig(
           decimals: 18,
           initialSupply: 1e6,
         },
-        wS: {
-          name: "Wrapped S",
-          address: wSTokenDeployment?.address,
-          decimals: 18,
-          initialSupply: 1e6,
-        },
-        OS: {
-          name: "Origin S",
-          address: OSTokenDeployment?.address,
-          decimals: 18,
-          initialSupply: 1e6,
-        },
-        wOS: {
-          name: "Wrapped Origin S",
-          address: wOSTokenDeployment?.address,
-          decimals: 18,
-          initialSupply: 1e6,
-        },
-        stS: {
-          name: "Staked S",
-          address: stSTokenDeployment?.address,
-          decimals: 18,
-          initialSupply: 1e6,
-        },
-        scUSD: {
-          name: "Sonic USD",
-          address: scUSDDeployment?.address,
-          decimals: 18,
-          initialSupply: 1e6,
-        },
-        wstkscUSD: {
-          name: "Wrapped Staked Saga Dollar",
-          address: wstkscUSDDeployment?.address,
-          decimals: 18,
-          initialSupply: 1e6,
-        },
-      },
-      curvePools: {
-        // Removed curve pool configs - dPOOL system was removed
       },
     },
     tokenAddresses: {
+      WSAGA: emptyStringIfUndefined(WSAGADeployment?.address), // Used by dLEND
       D: emptyStringIfUndefined(dUSDDeployment?.address),
-      wS: emptyStringIfUndefined(wSTokenDeployment?.address),
-      sfrxUSD: emptyStringIfUndefined(sfrxUSDDeployment?.address), // Used by dLEND
-      stS: emptyStringIfUndefined(stSTokenDeployment?.address), // Used by dLEND
-      wstkscUSD: emptyStringIfUndefined(wstkscUSDDeployment?.address), // Used by dLEND
+      sfrxUSD: emptyStringIfUndefined(sfrxUSDDeployment?.address),
       USDC: emptyStringIfUndefined(USDCDeployment?.address),
       USDS: emptyStringIfUndefined(USDSDeployment?.address),
       frxUSD: emptyStringIfUndefined(frxUSDDeployment?.address),
@@ -204,10 +163,7 @@ export async function getConfig(
           compositeApi3OracleWrappersWithThresholding: {},
         },
         redstoneOracleAssets: {
-          plainRedstoneOracleWrappers: {
-            [wSTokenDeployment?.address || ""]:
-              mockOracleNameToAddress["wS_USD"],
-          },
+          plainRedstoneOracleWrappers: {},
           redstoneOracleWrappersWithThresholding: {
             ...(USDCDeployment?.address && mockOracleNameToAddress["USDC_USD"]
               ? {
@@ -269,93 +225,6 @@ export async function getConfig(
                   },
                 }
               : {}),
-            ...(wstkscUSDDeployment?.address &&
-            mockOracleNameToAddress["wstkscUSD_scUSD"] &&
-            mockOracleNameToAddress["scUSD_USD"]
-              ? {
-                  [wstkscUSDDeployment.address]: {
-                    feedAsset: wstkscUSDDeployment.address,
-                    feed1: mockOracleNameToAddress["wstkscUSD_scUSD"],
-                    feed2: mockOracleNameToAddress["scUSD_USD"],
-                    lowerThresholdInBase1: 0n,
-                    fixedPriceInBase1: 0n,
-                    lowerThresholdInBase2: 0n,
-                    fixedPriceInBase2: 0n,
-                  },
-                }
-              : {}),
-            ...(stSTokenDeployment?.address
-              ? {
-                  [stSTokenDeployment.address]: {
-                    feedAsset: stSTokenDeployment.address,
-                    feed1: mockOracleNameToAddress["stS_S"],
-                    feed2: mockOracleNameToAddress["wS_USD"],
-                    lowerThresholdInBase1: 0n,
-                    fixedPriceInBase1: 0n,
-                    lowerThresholdInBase2: 0n,
-                    fixedPriceInBase2: 0n,
-                  },
-                }
-              : {}),
-            ...(wOSTokenDeployment?.address &&
-            mockOracleNameToAddress["wOS_S"] &&
-            mockOracleNameToAddress["wS_USD"]
-              ? {
-                  [wOSTokenDeployment.address]: {
-                    feedAsset: wOSTokenDeployment.address,
-                    feed1: mockOracleNameToAddress["wOS_OS"],
-                    feed2: mockOracleNameToAddress["OS_S"],
-                    lowerThresholdInBase1: 0n,
-                    fixedPriceInBase1: 0n,
-                    lowerThresholdInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-                    fixedPriceInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-                  },
-                }
-              : {}),
-          },
-        },
-      },
-      S: {
-        hardDStablePeg: 1n * ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-        priceDecimals: ORACLE_AGGREGATOR_PRICE_DECIMALS,
-        baseCurrency: wSTokenDeployment?.address || ZeroAddress, // Base currency is S
-        api3OracleAssets: {
-          plainApi3OracleWrappers: {},
-          api3OracleWrappersWithThresholding: {},
-          compositeApi3OracleWrappersWithThresholding: {},
-        },
-        redstoneOracleAssets: {
-          plainRedstoneOracleWrappers: {
-            [stSTokenDeployment?.address || ""]:
-              mockOracleNameToAddress["stS_S"],
-          },
-          redstoneOracleWrappersWithThresholding: {
-            ...(OSTokenDeployment?.address && mockOracleNameToAddress["OS_S"]
-              ? {
-                  [OSTokenDeployment.address]: {
-                    feed: mockOracleNameToAddress["OS_S"],
-                    lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT, // 1.0 in S terms
-                    fixedPrice: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT, // 1.0 in S terms
-                  },
-                }
-              : {}),
-          },
-          compositeRedstoneOracleWrappersWithThresholding: {
-            ...(wOSTokenDeployment?.address &&
-            mockOracleNameToAddress["wOS_OS"] &&
-            mockOracleNameToAddress["OS_S"]
-              ? {
-                  [wOSTokenDeployment.address]: {
-                    feedAsset: wOSTokenDeployment.address,
-                    feed1: mockOracleNameToAddress["wOS_OS"],
-                    feed2: mockOracleNameToAddress["OS_S"],
-                    lowerThresholdInBase1: 0n,
-                    fixedPriceInBase1: 0n,
-                    lowerThresholdInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-                    fixedPriceInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-                  },
-                }
-              : {}),
           },
         },
       },
@@ -383,35 +252,35 @@ export async function getConfig(
       router: "", // Odos doesn't work on localhost
     },
     dStake: {
-      sD: {
+      stkD: {
         dStable: emptyStringIfUndefined(dUSDDeployment?.address),
-        name: "Staked D",
-        symbol: "sD",
+        name: "Staked Saga Dollar",
+        symbol: "stkD",
         initialAdmin: user1,
         initialFeeManager: user1,
         initialWithdrawalFeeBps: 10,
         adapters: [
           {
             vaultAsset: emptyStringIfUndefined(
-              dLendATokenWrapperDUSDDeployment?.address,
+              dLendATokenWrapperDUSDDeployment?.address
             ),
             adapterContract: "WrappedDLendConversionAdapter",
           },
         ],
         defaultDepositVaultAsset: emptyStringIfUndefined(
-          dLendATokenWrapperDUSDDeployment?.address,
+          dLendATokenWrapperDUSDDeployment?.address
         ),
         collateralVault: "DStakeCollateralVault_sdUSD",
         collateralExchangers: [user1],
         dLendRewardManager: {
           managedVaultAsset: emptyStringIfUndefined(
-            dLendATokenWrapperDUSDDeployment?.address,
+            dLendATokenWrapperDUSDDeployment?.address
           ), // This should be the deployed StaticATokenLM address for dUSD
           dLendAssetToClaimFor: emptyStringIfUndefined(
-            aTokenDUSDDeployment?.address,
+            aTokenDUSDDeployment?.address
           ), // Use the deployed D aToken address
           dLendRewardsController: emptyStringIfUndefined(
-            rewardsControllerDeployment?.address,
+            rewardsControllerDeployment?.address
           ), // This will be fetched after dLend incentives deployment
           treasury: user1, // Or a dedicated treasury address
           maxTreasuryFeeBps: 500, // Example: 5%

@@ -11,38 +11,13 @@ export const USD_REDSTONE_WRAPPER_WITH_THRESHOLDING_ID =
 export const USD_REDSTONE_COMPOSITE_WRAPPER_WITH_THRESHOLDING_ID =
   "USD_RedstoneChainlinkCompositeWrapperWithThresholding";
 
-// Pendle PT Oracles
-export const PENDLE_CHAINLINK_ORACLE_FACTORY_ID =
-  "PendleChainlinkOracleFactory";
-export const PENDLE_PT_AUSDC_DECIMAL_CONVERTER_ID =
-  "ChainlinkDecimalConverter_PT_aUSDC_14AUG2025";
-export const PENDLE_PT_WSTKSCUSD_DECIMAL_CONVERTER_ID =
-  "ChainlinkDecimalConverter_PT_wstkscUSD_18DEC2025";
-export const OS_TO_S_DECIMAL_CONVERTER_ID = "ChainlinkDecimalConverter_OS_to_S";
-export const WOS_TO_OS_DECIMAL_CONVERTER_ID =
-  "ChainlinkDecimalConverter_wOS_to_OS";
-
-// S Oracles
-export const S_ORACLE_AGGREGATOR_ID = "S_OracleAggregator";
-export const S_API3_ORACLE_WRAPPER_ID = "S_API3Wrapper";
-export const S_API3_WRAPPER_WITH_THRESHOLDING_ID =
-  "S_API3WrapperWithThresholding";
-export const S_API3_COMPOSITE_WRAPPER_WITH_THRESHOLDING_ID =
-  "S_API3CompositeWrapperWithThresholding";
-export const S_REDSTONE_ORACLE_WRAPPER_ID = "S_RedstoneWrapper";
-export const S_REDSTONE_WRAPPER_WITH_THRESHOLDING_ID =
-  "S_RedstoneWrapperWithThresholding";
-export const S_REDSTONE_COMPOSITE_WRAPPER_WITH_THRESHOLDING_ID =
-  "S_RedstoneCompositeWrapperWithThresholding";
-
 // dUSD
-export const DUSD_TOKEN_ID = "D";
+export const DUSD_TOKEN_ID = "dUSD";
 export const DUSD_ISSUER_CONTRACT_ID = "dUSD_Issuer";
 export const DUSD_REDEEMER_CONTRACT_ID = "dUSD_Redeemer";
 export const DUSD_COLLATERAL_VAULT_CONTRACT_ID = "dUSD_CollateralHolderVault";
 export const DUSD_AMO_MANAGER_ID = "dUSD_AmoManager";
 export const DUSD_HARD_PEG_ORACLE_WRAPPER_ID = "dUSD_HardPegOracleWrapper";
-
 
 // dLEND
 export const TREASURY_PROXY_ID = "TreasuryProxy";
@@ -83,13 +58,6 @@ export const PULL_REWARDS_TRANSFER_STRATEGY_ID = "PullRewardsTransferStrategy";
 export const ORACLE_AGGREGATOR_WRAPPER_BASE_ID =
   "oracle-aggregator-wrapper-base";
 
-
-// Chainlink Oracle Converters
-export const CHAINLINK_DECIMAL_CONVERTER_WSTKSCUSD_ID =
-  "ChainlinkDecimalConverter_wstkscUSD";
-export const CHAINLINK_DECIMAL_CONVERTER_WSTKSCETH_ID =
-  "ChainlinkDecimalConverter_wstkscETH";
-
 // Wrapped dLEND ATokens
 export const DLEND_STATIC_A_TOKEN_FACTORY_ID = "dLend_StaticATokenFactory";
 export const DLEND_A_TOKEN_WRAPPER_PREFIX = "dLend_ATokenWrapper";
@@ -108,7 +76,5 @@ export const SDUSD_DSTAKE_TOKEN_ID = `${DSTAKE_TOKEN_ID_PREFIX}_sD`;
 export const SDUSD_COLLATERAL_VAULT_ID = `${DSTAKE_COLLATERAL_VAULT_ID_PREFIX}_sD`;
 export const SDUSD_ROUTER_ID = `${DSTAKE_ROUTER_ID_PREFIX}_sD`;
 
-
 // RedeemerWithFees
 export const DUSD_REDEEMER_WITH_FEES_CONTRACT_ID = "dUSD_RedeemerWithFees";
-
