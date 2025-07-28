@@ -20,10 +20,7 @@ import {
   DUSD_CONFIG,
   DStableFixtureConfig,
 } from "./fixtures";
-import {
-  USD_ORACLE_AGGREGATOR_ID,
-  S_ORACLE_AGGREGATOR_ID,
-} from "../../typescript/deploy-ids";
+import { USD_ORACLE_AGGREGATOR_ID } from "../../typescript/deploy-ids";
 
 // Define which assets are yield-bearing vs stable for reference
 const yieldBearingAssets = new Set(["sfrxUSD", "sUSDS", "stS", "wOS"]);

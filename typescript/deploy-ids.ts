@@ -1,10 +1,5 @@
 // USD Oracles
 export const USD_ORACLE_AGGREGATOR_ID = "USD_OracleAggregator";
-export const USD_API3_ORACLE_WRAPPER_ID = "USD_API3Wrapper";
-export const USD_API3_WRAPPER_WITH_THRESHOLDING_ID =
-  "USD_API3WrapperWithThresholding";
-export const USD_API3_COMPOSITE_WRAPPER_WITH_THRESHOLDING_ID =
-  "USD_API3CompositeWrapperWithThresholding";
 export const USD_REDSTONE_ORACLE_WRAPPER_ID = "USD_RedstoneChainlinkWrapper";
 export const USD_REDSTONE_WRAPPER_WITH_THRESHOLDING_ID =
   "USD_RedstoneChainlinkWrapperWithThresholding";
