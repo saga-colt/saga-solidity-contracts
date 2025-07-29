@@ -6,9 +6,48 @@ import "@nomicfoundation/hardhat-verify";
 import "hardhat-deploy";
 import "dotenv/config";
 
-import { HardhatUserConfig } from "hardhat/config";
+import { HardhatUserConfig, extendEnvironment } from "hardhat/config";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { getEnvPrivateKeys } from "./typescript/hardhat/named-accounts";
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Wrapper function to add a delay to transactions
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const wrapSigner = (signer: any, hre: HardhatRuntimeEnvironment) => {
+  const originalSendTransaction = signer.sendTransaction;
+  signer.sendTransaction = async (tx: any) => {
+    const result = await originalSendTransaction.apply(signer, [tx]);
+    if (hre.network.live) {
+      const sleepTime = 5000;
+      console.log(
+        `\n>>> Waiting ${sleepTime}ms after transaction to ${
+          result.to || "a new contract"
+        }`
+      );
+      await sleep(sleepTime);
+    }
+    return result;
+  };
+  return signer;
+};
+
+extendEnvironment((hre: HardhatRuntimeEnvironment) => {
+  // Wrap hre.ethers.getSigner
+  const originalGetSigner = hre.ethers.getSigner;
+  hre.ethers.getSigner = async (address) => {
+    const signer = await originalGetSigner(address);
+    return wrapSigner(signer, hre);
+  };
+
+  // Wrap hre.ethers.getSigners
+  const originalGetSigners = hre.ethers.getSigners;
+  hre.ethers.getSigners = async () => {
+    const signers = await originalGetSigners();
+    return signers.map((signer) => wrapSigner(signer, hre));
+  };
+});
 
 /* eslint-disable camelcase -- Network names follow specific naming conventions that require snake_case */
 const config: HardhatUserConfig = {
@@ -84,6 +123,7 @@ const config: HardhatUserConfig = {
       saveDeployments: true,
       accounts: getEnvPrivateKeys("saga_testnet"),
       gasPrice: 0,
+      live: true,
     },
     saga_mainnet: {
       url: `https://sagaevm.jsonrpc.sagarpc.io/`,
