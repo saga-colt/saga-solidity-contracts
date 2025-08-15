@@ -5,7 +5,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 import { getConfig } from "../../config/config";
 import {
   DUSD_COLLATERAL_VAULT_CONTRACT_ID,
-  DUSD_REDEEMER_WITH_FEES_CONTRACT_ID,
+  DUSD_REDEEMER_CONTRACT_ID,
   DUSD_TOKEN_ID,
   USD_ORACLE_AGGREGATOR_ID,
 } from "../../typescript/deploy-ids";
@@ -35,7 +35,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // If any required config values are missing, skip deployment
   if (missingConfigs.length > 0) {
     console.log(
-      `⚠️  Skipping RedeemerWithFees deployment - missing configuration values: ${missingConfigs.join(", ")}`
+      `⚠️  Skipping RedeemerV2 deployment - missing configuration values: ${missingConfigs.join(", ")}`
     );
     console.log(
       `☯️  ${__filename.split("/").slice(-2).join("/")}: ⏭️  (skipped)`
@@ -43,18 +43,18 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     return true;
   }
 
-  // Deploy RedeemerWithFees for dUSD
+  // Deploy RedeemerV2 for dUSD
   const dUSDToken = await get(DUSD_TOKEN_ID);
   const dUSDCollateralVaultDeployment = await get(
     DUSD_COLLATERAL_VAULT_CONTRACT_ID
   );
   const usdOracleAggregator = await get(USD_ORACLE_AGGREGATOR_ID);
 
-  const dUSDRedeemerWithFeesDeployment = await deploy(
-    DUSD_REDEEMER_WITH_FEES_CONTRACT_ID,
+  const dUSDRedeemerV2Deployment = await deploy(
+    DUSD_REDEEMER_CONTRACT_ID,
     {
       from: deployer,
-      contract: "RedeemerWithFees",
+      contract: "RedeemerV2",
       args: [
         dUSDCollateralVaultDeployment.address,
         dUSDToken.address,
@@ -74,16 +74,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     await dUSDCollateralVaultContract.COLLATERAL_WITHDRAWER_ROLE();
   const dUSDHasRole = await dUSDCollateralVaultContract.hasRole(
     dUSDWithdrawerRole,
-    dUSDRedeemerWithFeesDeployment.address
+    dUSDRedeemerV2Deployment.address
   );
 
   if (!dUSDHasRole) {
-    console.log("Granting role for dUSD RedeemerWithFees.");
+    console.log("Granting role for dUSD RedeemerV2.");
     await dUSDCollateralVaultContract.grantRole(
       dUSDWithdrawerRole,
-      dUSDRedeemerWithFeesDeployment.address
+      dUSDRedeemerV2Deployment.address
     );
-    console.log("Role granted for dUSD RedeemerWithFees.");
+    console.log("Role granted for dUSD RedeemerV2.");
   }
 
   console.log(`☯️  ${__filename.split("/").slice(-2).join("/")}: ✅`);
@@ -91,7 +91,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   return true;
 };
 
-func.id = DUSD_REDEEMER_WITH_FEES_CONTRACT_ID;
+func.id = DUSD_REDEEMER_CONTRACT_ID;
 func.tags = ["dusd"];
 func.dependencies = [
   DUSD_COLLATERAL_VAULT_CONTRACT_ID,

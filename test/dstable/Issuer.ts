@@ -5,7 +5,7 @@ import { Address } from "hardhat-deploy/types";
 import {
   AmoManager,
   CollateralHolderVault,
-  Issuer,
+  IssuerV2,
   TestERC20,
   TestMintableERC20,
   OracleAggregator,
@@ -78,8 +78,8 @@ async function calculateExpectedDstableFromBase(
 const dstableConfigs: DStableFixtureConfig[] = [DUSD_CONFIG];
 
 dstableConfigs.forEach((config) => {
-  describe(`Issuer for ${config.symbol}`, () => {
-    let issuerContract: Issuer;
+  describe(`IssuerV2 for ${config.symbol}`, () => {
+    let issuerContract: IssuerV2;
     let collateralVaultContract: CollateralHolderVault;
     let amoManagerContract: AmoManager;
     let oracleAggregatorContract: OracleAggregator;
@@ -102,7 +102,7 @@ dstableConfigs.forEach((config) => {
       const issuerAddress = (await hre.deployments.get(config.issuerContractId))
         .address;
       issuerContract = await hre.ethers.getContractAt(
-        "Issuer",
+        "IssuerV2",
         issuerAddress,
         await hre.ethers.getSigner(deployer)
       );
