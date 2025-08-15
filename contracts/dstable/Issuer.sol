@@ -15,12 +15,13 @@
  * dTRINITY Protocol: https://github.com/dtrinity                                   *
  * ———————————————————————————————————————————————————————————————————————————————— */
 
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 
 import "contracts/common/IAaveOracle.sol";
@@ -30,10 +31,10 @@ import "./AmoManager.sol";
 import "./OracleAware.sol";
 
 /**
- * @title Issuer
- * @notice Contract responsible for issuing dStable tokens
+ * @title IssuerV2
+ * @notice Extended issuer responsible for issuing dStable tokens with asset-level minting overrides and global pause
  */
-contract Issuer is AccessControl, OracleAware, ReentrancyGuard {
+contract IssuerV2 is AccessControl, OracleAware, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20Metadata;
 
     /* Core state */
@@ -47,12 +48,14 @@ contract Issuer is AccessControl, OracleAware, ReentrancyGuard {
 
     event CollateralVaultSet(address indexed collateralVault);
     event AmoManagerSet(address indexed amoManager);
+    event AssetMintingPauseUpdated(address indexed asset, bool paused);
 
     /* Roles */
 
     bytes32 public constant AMO_MANAGER_ROLE = keccak256("AMO_MANAGER_ROLE");
     bytes32 public constant INCENTIVES_MANAGER_ROLE =
         keccak256("INCENTIVES_MANAGER_ROLE");
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     /* Errors */
 
@@ -65,9 +68,15 @@ contract Issuer is AccessControl, OracleAware, ReentrancyGuard {
         uint256 circulatingDstableBefore,
         uint256 circulatingDstableAfter
     );
+    error AssetMintingPaused(address asset);
+
+    /* Overrides */
+
+    // If true, minting with this collateral asset is paused at the issuer level
+    mapping(address => bool) public assetMintingPaused;
 
     /**
-     * @notice Initializes the Issuer contract with core dependencies
+     * @notice Initializes the IssuerV2 contract with core dependencies
      * @param _collateralVault The address of the collateral vault
      * @param _dstable The address of the dStable stablecoin
      * @param oracle The address of the price oracle
@@ -87,6 +96,7 @@ contract Issuer is AccessControl, OracleAware, ReentrancyGuard {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         grantRole(AMO_MANAGER_ROLE, msg.sender);
         grantRole(INCENTIVES_MANAGER_ROLE, msg.sender);
+        grantRole(PAUSER_ROLE, msg.sender);
     }
 
     /* Issuer */
@@ -101,10 +111,15 @@ contract Issuer is AccessControl, OracleAware, ReentrancyGuard {
         uint256 collateralAmount,
         address collateralAsset,
         uint256 minDStable
-    ) external nonReentrant {
+    ) external nonReentrant whenNotPaused {
         // Ensure the collateral asset is supported by the vault before any further processing
         if (!collateralVault.isCollateralSupported(collateralAsset)) {
             revert CollateralVault.UnsupportedCollateral(collateralAsset);
+        }
+
+        // Ensure the issuer has not paused this asset for minting
+        if (assetMintingPaused[collateralAsset]) {
+            revert AssetMintingPaused(collateralAsset);
         }
 
         uint8 collateralDecimals = IERC20Metadata(collateralAsset).decimals();
@@ -136,7 +151,7 @@ contract Issuer is AccessControl, OracleAware, ReentrancyGuard {
     function issueUsingExcessCollateral(
         address receiver,
         uint256 dstableAmount
-    ) external onlyRole(INCENTIVES_MANAGER_ROLE) {
+    ) external onlyRole(INCENTIVES_MANAGER_ROLE) whenNotPaused {
         dstable.mint(receiver, dstableAmount);
 
         // We don't use the buffer value here because we only mint up to the excess collateral
@@ -156,7 +171,7 @@ contract Issuer is AccessControl, OracleAware, ReentrancyGuard {
      */
     function increaseAmoSupply(
         uint256 dstableAmount
-    ) external onlyRole(AMO_MANAGER_ROLE) {
+    ) external onlyRole(AMO_MANAGER_ROLE) whenNotPaused {
         uint256 _circulatingDstableBefore = circulatingDstable();
 
         dstable.mint(address(amoManager), dstableAmount);
@@ -202,6 +217,15 @@ contract Issuer is AccessControl, OracleAware, ReentrancyGuard {
         return Math.mulDiv(baseValue, 10 ** dstableDecimals, baseCurrencyUnit);
     }
 
+    /**
+     * @notice Returns whether `asset` is currently enabled for minting by the issuer
+     * @dev Asset must be supported by the collateral vault and not paused by issuer
+     */
+    function isAssetMintingEnabled(address asset) public view returns (bool) {
+        if (!collateralVault.isCollateralSupported(asset)) return false;
+        return !assetMintingPaused[asset];
+    }
+
     /* Admin */
 
     /**
@@ -211,8 +235,12 @@ contract Issuer is AccessControl, OracleAware, ReentrancyGuard {
     function setAmoManager(
         address _amoManager
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        address old = address(amoManager);
         amoManager = AmoManager(_amoManager);
         grantRole(AMO_MANAGER_ROLE, _amoManager);
+        if (old != address(0) && old != _amoManager) {
+            revokeRole(AMO_MANAGER_ROLE, old);
+        }
         emit AmoManagerSet(_amoManager);
     }
 
@@ -225,5 +253,36 @@ contract Issuer is AccessControl, OracleAware, ReentrancyGuard {
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         collateralVault = CollateralVault(_collateralVault);
         emit CollateralVaultSet(_collateralVault);
+    }
+
+    /**
+     * @notice Set minting pause override for a specific collateral asset
+     * @param asset The collateral asset address
+     * @param paused True to pause minting; false to enable
+     */
+    function setAssetMintingPause(
+        address asset,
+        bool paused
+    ) external onlyRole(PAUSER_ROLE) {
+        // Optional guard: if vault does not support the asset, setting an override is meaningless
+        if (!collateralVault.isCollateralSupported(asset)) {
+            revert CollateralVault.UnsupportedCollateral(asset);
+        }
+        assetMintingPaused[asset] = paused;
+        emit AssetMintingPauseUpdated(asset, paused);
+    }
+
+    /**
+     * @notice Pause all minting operations
+     */
+    function pauseMinting() external onlyRole(PAUSER_ROLE) {
+        _pause();
+    }
+
+    /**
+     * @notice Unpause all minting operations
+     */
+    function unpauseMinting() external onlyRole(PAUSER_ROLE) {
+        _unpause();
     }
 }
