@@ -1,20 +1,18 @@
-import hre, { deployments } from "hardhat";
+import { BigNumberish, ethers } from "ethers";
+import { deployments } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { ethers, BigNumberish } from "ethers";
-import { DStableFixtureConfig, DUSD_CONFIG } from "../dstable/fixtures";
-import {
-  getTokenContractForSymbol,
-  TokenInfo,
-} from "../../typescript/token/utils";
+
 import { ERC20 } from "../../typechain-types";
 import { IERC20 } from "../../typechain-types/@openzeppelin/contracts/token/ERC20/IERC20";
 import {
   DUSD_A_TOKEN_WRAPPER_ID,
-  INCENTIVES_PROXY_ID,
-  PULL_REWARDS_TRANSFER_STRATEGY_ID,
-  POOL_ADDRESSES_PROVIDER_ID,
   EMISSION_MANAGER_ID,
+  INCENTIVES_PROXY_ID,
+  POOL_ADDRESSES_PROVIDER_ID,
+  PULL_REWARDS_TRANSFER_STRATEGY_ID,
 } from "../../typescript/deploy-ids";
+import { getTokenContractForSymbol } from "../../typescript/token/utils";
+import { DStableFixtureConfig, DUSD_CONFIG } from "../dstable/fixtures";
 
 export interface DStakeFixtureConfig {
   dStableSymbol: "D" | "dS";
@@ -52,6 +50,15 @@ export const SDUSD_CONFIG: DStakeFixtureConfig = {
 export const DSTAKE_CONFIGS: DStakeFixtureConfig[] = [SDUSD_CONFIG];
 
 // Core logic for fetching dStake components *after* deployments are done
+/**
+ *
+ * @param hreElements
+ * @param hreElements.deployments
+ * @param hreElements.getNamedAccounts
+ * @param hreElements.ethers
+ * @param hreElements.globalHre
+ * @param config
+ */
 async function fetchDStakeComponents(
   hreElements: {
     deployments: HardhatRuntimeEnvironment["deployments"];
@@ -59,7 +66,7 @@ async function fetchDStakeComponents(
     ethers: HardhatRuntimeEnvironment["ethers"];
     globalHre: HardhatRuntimeEnvironment; // For getTokenContractForSymbol
   },
-  config: DStakeFixtureConfig
+  config: DStakeFixtureConfig,
 ) {
   const { deployments, getNamedAccounts, ethers, globalHre } = hreElements;
   const { deployer } = await getNamedAccounts();
@@ -70,34 +77,35 @@ async function fetchDStakeComponents(
 
   const DStakeToken = await ethers.getContractAt(
     "DStakeToken",
-    (await deployments.get(config.DStakeTokenContractId)).address
+    (await deployments.get(config.DStakeTokenContractId)).address,
   );
 
   const collateralVault = await ethers.getContractAt(
     "DStakeCollateralVault",
-    (await deployments.get(config.collateralVaultContractId)).address
+    (await deployments.get(config.collateralVaultContractId)).address,
   );
 
   const router = await ethers.getContractAt(
     "DStakeRouterDLend",
-    (await deployments.get(config.routerContractId)).address
+    (await deployments.get(config.routerContractId)).address,
   );
 
   const wrappedATokenAddress = (await deployments.get(DUSD_A_TOKEN_WRAPPER_ID))
     .address;
   const wrappedAToken = await ethers.getContractAt(
     "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
-    wrappedATokenAddress
+    wrappedATokenAddress,
   );
 
   const vaultAssetAddress = wrappedATokenAddress;
   let adapterAddress;
   let adapter;
   adapterAddress = await router.vaultAssetToAdapter(vaultAssetAddress);
+
   if (adapterAddress !== ethers.ZeroAddress) {
     adapter = await ethers.getContractAt(
       "IDStableConversionAdapter",
-      adapterAddress
+      adapterAddress,
     );
   } else {
     adapter = null;
@@ -119,6 +127,19 @@ async function fetchDStakeComponents(
 }
 
 // Main fixture setup function to be called from tests
+/**
+ *
+ * @param hreElements
+ * @param hreElements.deployments
+ * @param hreElements.ethers
+ * @param hreElements.getNamedAccounts
+ * @param hreElements.globalHre
+ * @param config
+ * @param rewardTokenSymbol
+ * @param rewardAmount
+ * @param emissionPerSecondSetting
+ * @param distributionDuration
+ */
 export async function executeSetupDLendRewards(
   hreElements: {
     deployments: HardhatRuntimeEnvironment["deployments"];
@@ -130,7 +151,7 @@ export async function executeSetupDLendRewards(
   rewardTokenSymbol: string,
   rewardAmount: BigNumberish,
   emissionPerSecondSetting?: BigNumberish, // Optional, with default below
-  distributionDuration: number = 3600
+  distributionDuration: number = 3600,
 ) {
   const { deployments, ethers, getNamedAccounts, globalHre } = hreElements;
 
@@ -152,11 +173,11 @@ export async function executeSetupDLendRewards(
 
   // Get DStakeRewardManagerDLend related contracts
   const rewardManagerDeployment = await deployments.get(
-    `DStakeRewardManagerDLend_${config.DStakeTokenSymbol}`
+    `DStakeRewardManagerDLend_${config.DStakeTokenSymbol}`,
   );
   const rewardManager = await ethers.getContractAt(
     "DStakeRewardManagerDLend",
-    rewardManagerDeployment.address
+    rewardManagerDeployment.address,
   );
 
   const targetStaticATokenWrapper =
@@ -167,19 +188,19 @@ export async function executeSetupDLendRewards(
     await getTokenContractForSymbol(
       globalHre,
       signer.address,
-      rewardTokenSymbol
+      rewardTokenSymbol,
     );
 
   // Get EmissionManager and RewardsController instances
   const emissionManagerDeployment = await deployments.get(EMISSION_MANAGER_ID);
   const emissionManager = await ethers.getContractAt(
     "EmissionManager",
-    emissionManagerDeployment.address
+    emissionManagerDeployment.address,
   );
   const incentivesProxy = await deployments.get(INCENTIVES_PROXY_ID);
   const rewardsController = await ethers.getContractAt(
     "RewardsController",
-    incentivesProxy.address
+    incentivesProxy.address,
   );
 
   // For configureAssets, deployer (owner of EmissionManager) must set itself as emission admin for the reward token first
@@ -193,11 +214,11 @@ export async function executeSetupDLendRewards(
   const block = (await ethers.provider.getBlock("latest"))!;
   const distributionEnd = block.timestamp + distributionDuration;
   const poolAddressesProviderDeployment = await deployments.get(
-    POOL_ADDRESSES_PROVIDER_ID
+    POOL_ADDRESSES_PROVIDER_ID,
   );
   const poolAddressesProvider = await ethers.getContractAt(
     "PoolAddressesProvider",
-    poolAddressesProviderDeployment.address
+    poolAddressesProviderDeployment.address,
   );
   const rewardOracle = await poolAddressesProvider.getPriceOracle();
 
@@ -224,7 +245,7 @@ export async function executeSetupDLendRewards(
   // Fund the rewards vault for PullRewardsTransferStrategy and approve
   const pullStrategy = await ethers.getContractAt(
     "IPullRewardsTransferStrategy",
-    transferStrategyAddress
+    transferStrategyAddress,
   );
   const rewardsVault = await pullStrategy.getRewardsVault();
   // Transfer reward tokens to the vault address
@@ -260,9 +281,9 @@ export const createDStakeFixture = (config: DStakeFixtureConfig) => {
           ethers: hreFixtureEnv.ethers,
           globalHre: hreFixtureEnv,
         },
-        config
+        config,
       );
-    }
+    },
   );
 };
 
@@ -271,12 +292,11 @@ export const setupDLendRewardsFixture = (
   rewardTokenSymbol: string,
   rewardAmount: BigNumberish,
   emissionPerSecond?: BigNumberish,
-  distributionDuration: number = 3600
+  distributionDuration: number = 3600,
 ) =>
   deployments.createFixture(
     async (hreFixtureEnv: HardhatRuntimeEnvironment) => {
       // Execute DStake rewards setup, which includes its own deployments.fixture(allDeploymentTags)
-      // Don't run all deployments to avoid interference from RedeemerWithFees
       return executeSetupDLendRewards(
         {
           deployments: hreFixtureEnv.deployments,
@@ -288,9 +308,9 @@ export const setupDLendRewardsFixture = (
         rewardTokenSymbol,
         rewardAmount,
         emissionPerSecond,
-        distributionDuration
+        distributionDuration,
       );
-    }
+    },
   );
 
 // Pre-bound SDUSD rewards fixture for tests
@@ -298,5 +318,5 @@ export const SDUSDRewardsFixture = setupDLendRewardsFixture(
   SDUSD_CONFIG,
   "sfrxUSD",
   ethers.parseUnits("100", 6), // total reward amount
-  ethers.parseUnits("1", 6) // emission per second (1 token/sec in 6-decimals)
+  ethers.parseUnits("1", 6), // emission per second (1 token/sec in 6-decimals)
 );
