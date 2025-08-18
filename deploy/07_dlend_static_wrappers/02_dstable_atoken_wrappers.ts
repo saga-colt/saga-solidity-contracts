@@ -53,15 +53,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   let dUSDAToken;
 
   try {
-    const dUSDReserveData = await poolContract.getReserveData(
-      tokenAddresses.D,
-    );
+    const dUSDReserveData = await poolContract.getReserveData(tokenAddresses.D);
     dUSDAToken = dUSDReserveData.aTokenAddress;
   } catch (error: any) {
     console.log(`Error getting dUSD aToken: ${error.message}`);
     return;
   }
-
 
   // Deploy StaticATokenLM for dUSD
   if (dUSDAToken && dUSDAToken !== ethers.ZeroAddress) {
@@ -89,7 +86,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       "dUSD aToken not found or invalid, skipping wrapper deployment",
     );
   }
-
 
   console.log(`🧧 ${__filename.split("/").slice(-2).join("/")}: ✅`);
 

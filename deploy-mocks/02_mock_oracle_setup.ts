@@ -2,8 +2,7 @@ import { ZeroAddress } from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 
-import { isMainnet, isSagaTestnet } from "../typescript/hardhat/deploy";
-import { getTokenContractForSymbol } from "../typescript/token/utils";
+import { isMainnet } from "../typescript/hardhat/deploy";
 
 // Define the oracle feed structure
 export interface OracleFeedConfig {
@@ -59,7 +58,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const mockOracleContract = await hre.ethers.getContractAt(
       "MockRedstoneChainlinkOracleAlwaysAlive",
       mockOracle.address,
-      signer
+      signer,
     );
 
     // Convert price to int256 format expected by Redstone (8 decimals)
@@ -71,7 +70,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     mockOracleNameToProvider[feed.name] = "REDSTONE"; // All are Redstone now
 
     console.log(
-      `Deployed ${mockOracleName} at ${mockOracle.address} with price ${feed.price}`
+      `Deployed ${mockOracleName} at ${mockOracle.address} with price ${feed.price}`,
     );
   }
 

@@ -1,21 +1,21 @@
-import { deployments } from "hardhat";
-import hre from "hardhat";
-import {
-  USD_ORACLE_AGGREGATOR_ID,
-  DUSD_HARD_PEG_ORACLE_WRAPPER_ID,
-  USD_REDSTONE_ORACLE_WRAPPER_ID,
-  USD_REDSTONE_WRAPPER_WITH_THRESHOLDING_ID,
-  USD_REDSTONE_COMPOSITE_WRAPPER_WITH_THRESHOLDING_ID,
-} from "../../typescript/deploy-ids";
-import {
-  OracleAggregator,
-  HardPegOracleWrapper,
-  RedstoneChainlinkWrapper,
-  RedstoneChainlinkWrapperWithThresholding,
-  RedstoneChainlinkCompositeWrapperWithThresholding,
-} from "../../typechain-types";
+import hre, { deployments } from "hardhat";
+
 import { getConfig } from "../../config/config";
 import { OracleAggregatorConfig } from "../../config/types";
+import {
+  HardPegOracleWrapper,
+  OracleAggregator,
+  RedstoneChainlinkCompositeWrapperWithThresholding,
+  RedstoneChainlinkWrapper,
+  RedstoneChainlinkWrapperWithThresholding,
+} from "../../typechain-types";
+import {
+  DUSD_HARD_PEG_ORACLE_WRAPPER_ID,
+  USD_ORACLE_AGGREGATOR_ID,
+  USD_REDSTONE_COMPOSITE_WRAPPER_WITH_THRESHOLDING_ID,
+  USD_REDSTONE_ORACLE_WRAPPER_ID,
+  USD_REDSTONE_WRAPPER_WITH_THRESHOLDING_ID,
+} from "../../typescript/deploy-ids";
 
 /**
  * Configuration for oracle aggregator fixtures
@@ -78,9 +78,11 @@ export interface OracleAggregatorFixtureResult {
 
 /**
  * Create a fixture factory for any oracle aggregator based on its configuration
+ *
+ * @param config
  */
 export const createOracleAggregatorFixture = (
-  config: OracleAggregatorFixtureConfig
+  config: OracleAggregatorFixtureConfig,
 ) => {
   return deployments.createFixture(
     async ({
@@ -100,28 +102,29 @@ export const createOracleAggregatorFixture = (
         ]);
       } else {
         throw new Error(
-          `Unsupported currency: ${config.currency}. Only USD is supported.`
+          `Unsupported currency: ${config.currency}. Only USD is supported.`,
         );
       }
 
       // Get contract instances
       const { address: oracleAggregatorAddress } = await deployments.get(
-        config.oracleAggregatorId
+        config.oracleAggregatorId,
       );
       const oracleAggregator = await ethers.getContractAt(
         "OracleAggregator",
-        oracleAggregatorAddress
+        oracleAggregatorAddress,
       );
 
       // Hard peg wrapper is only available for USD currency (for dUSD)
       let hardPegWrapper: HardPegOracleWrapper | undefined;
+
       if (config.wrapperIds.hardPegWrapper) {
         const { address: hardPegWrapperAddress } = await deployments.get(
-          config.wrapperIds.hardPegWrapper
+          config.wrapperIds.hardPegWrapper,
         );
         hardPegWrapper = await ethers.getContractAt(
           "HardPegOracleWrapper",
-          hardPegWrapperAddress
+          hardPegWrapperAddress,
         );
       }
 
@@ -130,28 +133,28 @@ export const createOracleAggregatorFixture = (
         await deployments.get(config.wrapperIds.redstoneChainlinkWrapper);
       const redstoneChainlinkWrapper = await ethers.getContractAt(
         "RedstoneChainlinkWrapper",
-        redstoneChainlinkWrapperAddress
+        redstoneChainlinkWrapperAddress,
       );
 
       const { address: redstoneChainlinkWrapperWithThresholdingAddress } =
         await deployments.get(
-          config.wrapperIds.redstoneChainlinkWrapperWithThresholding
+          config.wrapperIds.redstoneChainlinkWrapperWithThresholding,
         );
       const redstoneChainlinkWrapperWithThresholding =
         await ethers.getContractAt(
           "RedstoneChainlinkWrapperWithThresholding",
-          redstoneChainlinkWrapperWithThresholdingAddress
+          redstoneChainlinkWrapperWithThresholdingAddress,
         );
 
       const {
         address: redstoneChainlinkCompositeWrapperWithThresholdingAddress,
       } = await deployments.get(
-        config.wrapperIds.redstoneChainlinkCompositeWrapperWithThresholding
+        config.wrapperIds.redstoneChainlinkCompositeWrapperWithThresholding,
       );
       const redstoneChainlinkCompositeWrapperWithThresholding =
         await ethers.getContractAt(
           "RedstoneChainlinkCompositeWrapperWithThresholding",
-          redstoneChainlinkCompositeWrapperWithThresholdingAddress
+          redstoneChainlinkCompositeWrapperWithThresholdingAddress,
         );
 
       // Find the mock oracle deployments
@@ -185,7 +188,7 @@ export const createOracleAggregatorFixture = (
 
       // Populate Redstone plain assets
       for (const [address, feed] of Object.entries(
-        config.redstoneOracleAssets.plainRedstoneOracleWrappers
+        config.redstoneOracleAssets.plainRedstoneOracleWrappers,
       )) {
         redstonePlainAssets[address] = {
           address,
@@ -195,7 +198,7 @@ export const createOracleAggregatorFixture = (
 
       // Populate Redstone threshold assets
       for (const [address, data] of Object.entries(
-        config.redstoneOracleAssets.redstoneOracleWrappersWithThresholding
+        config.redstoneOracleAssets.redstoneOracleWrappersWithThresholding,
       )) {
         redstoneThresholdAssets[address] = {
           address,
@@ -208,7 +211,7 @@ export const createOracleAggregatorFixture = (
       // Populate Redstone composite assets
       for (const [address, data] of Object.entries(
         config.redstoneOracleAssets
-          .compositeRedstoneOracleWrappersWithThresholding
+          .compositeRedstoneOracleWrappersWithThresholding,
       )) {
         redstoneCompositeAssets[address] = {
           address,
@@ -224,7 +227,7 @@ export const createOracleAggregatorFixture = (
 
       const allAssets = Object.keys(redstonePlainAssets).concat(
         Object.keys(redstoneThresholdAssets),
-        Object.keys(redstoneCompositeAssets)
+        Object.keys(redstoneCompositeAssets),
       );
 
       return {
@@ -245,19 +248,20 @@ export const createOracleAggregatorFixture = (
         },
         mockOracles,
       };
-    }
+    },
   );
 };
 
 /**
  * Helper function to get an oracle aggregator fixture by currency
+ *
  * @param currency The currency to get the fixture for (only "USD" is supported)
  * @returns The fixture for the specified currency
  */
 export const getOracleAggregatorFixture = async (currency: string) => {
   if (currency !== "USD") {
     throw new Error(
-      `Unsupported currency: ${currency}. Only USD oracle aggregator is supported.`
+      `Unsupported currency: ${currency}. Only USD oracle aggregator is supported.`,
     );
   }
 
@@ -266,7 +270,7 @@ export const getOracleAggregatorFixture = async (currency: string) => {
 
   if (!oracleAggregatorConfig) {
     throw new Error(
-      `No oracle aggregator config found for currency ${currency}`
+      `No oracle aggregator config found for currency ${currency}`,
     );
   }
 
@@ -290,6 +294,7 @@ export const getOracleAggregatorFixture = async (currency: string) => {
 
 /**
  * Helper function to check if an asset has a mock oracle
+ *
  * @param mockOracles The mock oracles object from the fixture
  * @param assetSymbol The asset symbol to check
  * @param baseCurrency The base currency (e.g., "USD", "wS")
@@ -298,7 +303,7 @@ export const getOracleAggregatorFixture = async (currency: string) => {
 export function hasOracleForAsset(
   mockOracles: { [feedName: string]: string },
   assetSymbol: string,
-  baseCurrency: string
+  baseCurrency: string,
 ): boolean {
   const directFeed = `${assetSymbol}_${baseCurrency}`;
   return directFeed in mockOracles;
@@ -306,12 +311,14 @@ export function hasOracleForAsset(
 
 /**
  * Helper function to log available oracles for debugging
+ *
  * @param mockOracles The mock oracles object from the fixture
  */
 export function logAvailableOracles(mockOracles: {
   [feedName: string]: string;
 }): void {
   console.log("Available mock oracles:");
+
   for (const [feedName, address] of Object.entries(mockOracles)) {
     console.log(`  ${feedName}: ${address}`);
   }
@@ -319,6 +326,7 @@ export function logAvailableOracles(mockOracles: {
 
 /**
  * Helper function to get a random item from a list
+ *
  * @param list The list to get a random item from
  * @returns A randomly selected item from the list
  * @throws Error if the list is empty
