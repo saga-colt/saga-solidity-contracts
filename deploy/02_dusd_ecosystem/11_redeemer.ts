@@ -50,20 +50,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
   const usdOracleAggregator = await get(USD_ORACLE_AGGREGATOR_ID);
 
-  const dUSDRedeemerV2Deployment = await deploy(
-    DUSD_REDEEMER_CONTRACT_ID,
-    {
-      from: deployer,
-      contract: "RedeemerV2",
-      args: [
-        dUSDCollateralVaultDeployment.address,
-        dUSDToken.address,
-        usdOracleAggregator.address,
-        dUSDConfig.initialFeeReceiver,
-        dUSDConfig.initialRedemptionFeeBps,
-      ],
-    }
-  );
+  const dUSDRedeemerV2Deployment = await deploy(DUSD_REDEEMER_CONTRACT_ID, {
+    from: deployer,
+    contract: "RedeemerV2",
+    args: [
+      dUSDCollateralVaultDeployment.address,
+      dUSDToken.address,
+      usdOracleAggregator.address,
+      dUSDConfig.initialFeeReceiver,
+      dUSDConfig.initialRedemptionFeeBps,
+    ],
+  });
 
   const dUSDCollateralVaultContract = await hre.ethers.getContractAt(
     "CollateralVault",
