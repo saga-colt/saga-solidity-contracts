@@ -57,46 +57,47 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Preemptively disable minting for wstkscUSD if it exists in config and is supported by the vault
   // This is to ensure wstkscUSD minting is disabled by default as per requirements
   const config = await getConfig(hre);
+
   try {
     const wstkscUSDAddress = (config as any).tokenAddresses?.wstkscUSD;
 
     if (wstkscUSDAddress && wstkscUSDAddress !== "") {
       const vaultContract = await hre.ethers.getContractAt(
         "CollateralHolderVault",
-        collateralVaultAddress
+        collateralVaultAddress,
       );
 
       if (await vaultContract.isCollateralSupported(wstkscUSDAddress)) {
         const issuer = await hre.ethers.getContractAt(
           "IssuerV2",
           issuerAddress,
-          await hre.ethers.getSigner(deployer)
+          await hre.ethers.getSigner(deployer),
         );
         const isEnabled = await issuer.isAssetMintingEnabled(wstkscUSDAddress);
 
         if (isEnabled) {
           await issuer.setAssetMintingPause(wstkscUSDAddress, true);
           console.log(
-            `Disabled minting for wstkscUSD on IssuerV2 at ${issuerAddress}`
+            `Disabled minting for wstkscUSD on IssuerV2 at ${issuerAddress}`,
           );
         } else {
           console.log(
-            `Minting for wstkscUSD already disabled on IssuerV2 at ${issuerAddress}`
+            `Minting for wstkscUSD already disabled on IssuerV2 at ${issuerAddress}`,
           );
         }
       } else {
         console.log(
-          `wstkscUSD not supported by collateral vault; skipping issuer-level pause`
+          `wstkscUSD not supported by collateral vault; skipping issuer-level pause`,
         );
       }
     } else {
       console.log(
-        "wstkscUSD address not present in config; skipping issuer-level pause"
+        "wstkscUSD address not present in config; skipping issuer-level pause",
       );
     }
   } catch (e) {
     console.log(
-      `Could not check/disable wstkscUSD minting: ${(e as Error).message}`
+      `Could not check/disable wstkscUSD minting: ${(e as Error).message}`,
     );
   }
 

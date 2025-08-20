@@ -12,7 +12,6 @@ import {
   PoolConfigurator,
   IPoolDataProvider,
   ERC20StablecoinUpgradeable,
-  Issuer,
   OracleAggregator,
   IAaveOracle,
 } from "../../typechain-types";
@@ -169,7 +168,7 @@ async function setupDLendFixture(): Promise<DLendFixtureResult> {
   const dusdIssuerAddress = (await hre.deployments.get(DUSD_ISSUER_CONTRACT_ID))
     .address;
   const dusdIssuer = await hre.ethers.getContractAt(
-    "Issuer",
+    "IssuerV2",
     dusdIssuerAddress
   );
   const usdOracleAddress = (await hre.deployments.get(USD_ORACLE_AGGREGATOR_ID))
@@ -211,7 +210,6 @@ async function setupDLendFixture(): Promise<DLendFixtureResult> {
     usdCollateralInfo.address,
     expectedDusdAmount
   );
-
 
   return {
     contracts: {

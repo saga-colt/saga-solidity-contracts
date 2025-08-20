@@ -35,10 +35,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // If any required config values are missing, skip deployment
   if (missingConfigs.length > 0) {
     console.log(
-      `⚠️  Skipping RedeemerV2 deployment - missing configuration values: ${missingConfigs.join(", ")}`
+      `⚠️  Skipping RedeemerV2 deployment - missing configuration values: ${missingConfigs.join(", ")}`,
     );
     console.log(
-      `☯️  ${__filename.split("/").slice(-2).join("/")}: ⏭️  (skipped)`
+      `☯️  ${__filename.split("/").slice(-2).join("/")}: ⏭️  (skipped)`,
     );
     return true;
   }
@@ -46,7 +46,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Deploy RedeemerV2 for dUSD
   const dUSDToken = await get(DUSD_TOKEN_ID);
   const dUSDCollateralVaultDeployment = await get(
-    DUSD_COLLATERAL_VAULT_CONTRACT_ID
+    DUSD_COLLATERAL_VAULT_CONTRACT_ID,
   );
   const usdOracleAggregator = await get(USD_ORACLE_AGGREGATOR_ID);
 
@@ -65,20 +65,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const dUSDCollateralVaultContract = await hre.ethers.getContractAt(
     "CollateralVault",
     dUSDCollateralVaultDeployment.address,
-    await hre.ethers.getSigner(deployer)
+    await hre.ethers.getSigner(deployer),
   );
   const dUSDWithdrawerRole =
     await dUSDCollateralVaultContract.COLLATERAL_WITHDRAWER_ROLE();
   const dUSDHasRole = await dUSDCollateralVaultContract.hasRole(
     dUSDWithdrawerRole,
-    dUSDRedeemerV2Deployment.address
+    dUSDRedeemerV2Deployment.address,
   );
 
   if (!dUSDHasRole) {
     console.log("Granting role for dUSD RedeemerV2.");
     await dUSDCollateralVaultContract.grantRole(
       dUSDWithdrawerRole,
-      dUSDRedeemerV2Deployment.address
+      dUSDRedeemerV2Deployment.address,
     );
     console.log("Role granted for dUSD RedeemerV2.");
   }

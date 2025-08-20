@@ -4,7 +4,7 @@ import { Address } from "hardhat-deploy/types";
 
 import {
   AmoManager,
-  Issuer,
+  IssuerV2,
   TestMintableERC20,
   TestERC20,
   OracleAggregator,
@@ -51,7 +51,7 @@ async function runTestsForDStable(
 ) {
   describe(`AmoManager for ${config.symbol}`, () => {
     let amoManagerContract: AmoManager;
-    let issuerContract: Issuer;
+    let issuerContract: IssuerV2;
     let dstableContract: TestMintableERC20;
     let dstableInfo: TokenInfo;
     let oracleAggregatorContract: OracleAggregator;
@@ -82,7 +82,7 @@ async function runTestsForDStable(
       const issuerAddress = (await hre.deployments.get(config.issuerContractId))
         .address;
       issuerContract = await hre.ethers.getContractAt(
-        "Issuer",
+        "IssuerV2",
         issuerAddress,
         await hre.ethers.getSigner(deployer)
       );

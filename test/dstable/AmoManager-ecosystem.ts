@@ -5,7 +5,7 @@ import { Address } from "hardhat-deploy/types";
 import {
   AmoManager,
   CollateralHolderVault,
-  Issuer,
+  IssuerV2,
   MockAmoVault,
   TestERC20,
   TestMintableERC20,
@@ -28,7 +28,7 @@ const dstableConfigs: DStableFixtureConfig[] = [DUSD_CONFIG];
 dstableConfigs.forEach((config) => {
   describe(`AmoManager Ecosystem Tests for ${config.symbol}`, () => {
     let amoManagerContract: AmoManager;
-    let issuerContract: Issuer;
+    let issuerContract: IssuerV2;
     let collateralVaultContract: CollateralHolderVault;
     let mockAmoVaultContract: MockAmoVault;
     let oracleAggregatorContract: OracleAggregator;
@@ -55,7 +55,7 @@ dstableConfigs.forEach((config) => {
       const issuerAddress = (await hre.deployments.get(config.issuerContractId))
         .address;
       issuerContract = await hre.ethers.getContractAt(
-        "Issuer",
+        "IssuerV2",
         issuerAddress,
         await hre.ethers.getSigner(deployer)
       );

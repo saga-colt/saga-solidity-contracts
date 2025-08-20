@@ -20,32 +20,9 @@ import {
   DUSD_CONFIG,
   DStableFixtureConfig,
 } from "./fixtures"; // Assuming fixtures.ts is in the same directory
-import {
-  DUSD_REDEEMER_CONTRACT_ID,
-} from "../../typescript/deploy-ids";
+import { DUSD_REDEEMER_CONTRACT_ID } from "../../typescript/deploy-ids";
 import { getConfig } from "../../config/config"; // To access deployment config for verification
 import { ONE_HUNDRED_PERCENT_BPS } from "../../typescript/common/bps_constants";
-
-// Helper to calculate expected collateral amount based on oracle prices
-async function calculateExpectedCollateralAmount(
-  dstableAmount: bigint,
-  dstableSymbol: string,
-  dstableDecimals: number,
-  collateralSymbol: string,
-  collateralDecimals: number,
-  oracleAggregator: OracleAggregator,
-  dstableAddress: string,
-  collateralAddress: string
-): Promise<bigint> {
-  const dstablePrice = await oracleAggregator.getAssetPrice(dstableAddress);
-  const collateralPrice =
-    await oracleAggregator.getAssetPrice(collateralAddress);
-  const dstableBaseValue =
-    (dstableAmount * dstablePrice) / 10n ** BigInt(dstableDecimals);
-  return (
-    (dstableBaseValue * 10n ** BigInt(collateralDecimals)) / collateralPrice
-  );
-}
 
 // Create a new fixture factory for dstable with RedeemerV2
 export const createDStableWithRedeemerV2Fixture = (
@@ -103,8 +80,7 @@ dstableConfigs.forEach((config) => {
         }
         redeemerV2ContractId = DUSD_REDEEMER_CONTRACT_ID;
         configuredFeeReceiver = appConfig.dStables.D.initialFeeReceiver;
-        configuredDefaultFeeBps =
-          appConfig.dStables.D.initialRedemptionFeeBps;
+        configuredDefaultFeeBps = appConfig.dStables.D.initialRedemptionFeeBps;
       } else {
         throw new Error(
           `Unsupported dStable symbol for RedeemerV2 tests: ${config.symbol}`
@@ -249,8 +225,7 @@ dstableConfigs.forEach((config) => {
           const collateralInfo = collateralInfos.get(collateralSymbol)!;
           const userSigner = await hre.ethers.getSigner(user1);
           const redeemerAddress = await redeemerV2Contract.getAddress();
-          const feeReceiverAddress =
-            await redeemerV2Contract.feeReceiver();
+          const feeReceiverAddress = await redeemerV2Contract.feeReceiver();
           // Redeem amount
           const redeemAmount = hre.ethers.parseUnits(
             "100",
@@ -262,18 +237,14 @@ dstableConfigs.forEach((config) => {
             .approve(redeemerAddress, redeemAmount);
           // Calculate expected total collateral using contract logic
           const dstableValue =
-            await redeemerV2Contract.dstableAmountToBaseValue(
-              redeemAmount
-            );
+            await redeemerV2Contract.dstableAmountToBaseValue(redeemAmount);
           const totalCollateral =
             await collateralVaultContract.assetAmountFromValue(
               dstableValue,
               collateralInfo.address
             );
           const defaultFeeBp = BigInt(
-            (
-              await redeemerV2Contract.defaultRedemptionFeeBps()
-            ).toString()
+            (await redeemerV2Contract.defaultRedemptionFeeBps()).toString()
           );
           const expectedFee =
             (totalCollateral * defaultFeeBp) / BigInt(ONE_HUNDRED_PERCENT_BPS);

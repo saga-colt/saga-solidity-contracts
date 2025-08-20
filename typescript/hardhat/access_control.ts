@@ -11,6 +11,14 @@ export const ZERO_BYTES_32 =
  * - Ensures/attempts `adminToKeep` has DEFAULT_ADMIN_ROLE before removing it from `adminToRevoke`.
  * - If caller is the same as `adminToRevoke`, will self-renounce via renounceRole once `adminToKeep` is confirmed.
  * - Falls back to manual actions when permissions are insufficient.
+ *
+ * @param hre - Hardhat Runtime Environment for contract interaction
+ * @param contractName - Name of the contract to operate on
+ * @param contractAddress - Address of the deployed contract
+ * @param adminToKeep - Address that should retain DEFAULT_ADMIN_ROLE
+ * @param adminToRevoke - Address to remove DEFAULT_ADMIN_ROLE from
+ * @param callerSigner - Signer to use for contract transactions
+ * @param manualActions - Optional array to collect manual action instructions
  */
 export async function ensureDefaultAdminExistsAndRevokeFrom(
   hre: HardhatRuntimeEnvironment,
@@ -32,6 +40,7 @@ export async function ensureDefaultAdminExistsAndRevokeFrom(
   // Phase 1: Ensure adminToKeep has DEFAULT_ADMIN_ROLE
   try {
     const hasAdmin = await contract.hasRole(DEFAULT_ADMIN_ROLE, adminToKeep);
+
     if (!hasAdmin) {
       try {
         await contract.grantRole(DEFAULT_ADMIN_ROLE, adminToKeep);
@@ -62,6 +71,7 @@ export async function ensureDefaultAdminExistsAndRevokeFrom(
       DEFAULT_ADMIN_ROLE,
       adminToKeep
     );
+
     if (!keepHasAdmin) {
       // Do not proceed with removal to avoid lockout
       console.log(
@@ -88,6 +98,7 @@ export async function ensureDefaultAdminExistsAndRevokeFrom(
       DEFAULT_ADMIN_ROLE,
       adminToRevoke
     );
+
     if (!revokeNeeded) {
       return;
     }
@@ -102,6 +113,7 @@ export async function ensureDefaultAdminExistsAndRevokeFrom(
   }
 
   const caller = (await callerSigner.getAddress()).toLowerCase();
+
   if (caller === adminToRevoke.toLowerCase()) {
     // Self-removal path: use renounceRole after confirming adminToKeep already has admin
     try {
