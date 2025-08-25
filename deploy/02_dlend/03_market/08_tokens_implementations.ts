@@ -2,6 +2,7 @@ import { ZeroAddress } from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 
+import { getConfig } from "../../../config/config";
 import {
   ATOKEN_IMPL_ID,
   POOL_ADDRESSES_PROVIDER_ID,
@@ -11,6 +12,14 @@ import {
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployer } = await hre.getNamedAccounts();
+  const config = await getConfig(hre);
+
+  if (!config.dLend) {
+    console.log(
+      "No dLend configuration found for this network. Skipping dLend deployment.",
+    );
+    return true;
+  }
 
   const { address: addressesProviderAddress } = await hre.deployments.get(
     POOL_ADDRESSES_PROVIDER_ID,

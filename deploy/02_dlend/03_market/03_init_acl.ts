@@ -1,6 +1,7 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 
+import { getConfig } from "../../../config/config";
 import {
   ACL_MANAGER_ID,
   POOL_ADDRESSES_PROVIDER_ID,
@@ -9,6 +10,14 @@ import { ZERO_BYTES_32 } from "../../../typescript/dlend/constants";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const [deployer] = await hre.ethers.getSigners();
+  const config = await getConfig(hre);
+
+  if (!config.dLend) {
+    console.log(
+      "No dLend configuration found for this network. Skipping dLend deployment.",
+    );
+    return true;
+  }
 
   const addressesProviderDeployedResult = await hre.deployments.get(
     POOL_ADDRESSES_PROVIDER_ID,

@@ -12,6 +12,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const marketID = `${hre.network.name}_dtrinity_market`;
   const config = await getConfig(hre);
 
+  if (!config.dLend) {
+    console.log(
+      "No dLend configuration found for this network. Skipping dLend deployment.",
+    );
+    return true;
+  }
+
   // 1. Deploy PoolAddressesProvider
   // NOTE: We pass 0 as market id to create the same address of PoolAddressesProvider
   // in multiple networks via CREATE2. Later we update the corresponding Market ID.

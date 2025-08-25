@@ -1,6 +1,7 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 
+import { getConfig } from "../../../config/config";
 import {
   BORROW_LOGIC_ID,
   BRIDGE_LOGIC_ID,
@@ -14,6 +15,14 @@ import {
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployer } = await hre.getNamedAccounts();
+  const config = await getConfig(hre);
+
+  if (!config.dLend) {
+    console.log(
+      "No dLend configuration found for this network. Skipping dLend deployment.",
+    );
+    return true;
+  }
 
   // Deploy SupplyLogic
   await hre.deployments.deploy(SUPPLY_LOGIC_ID, {

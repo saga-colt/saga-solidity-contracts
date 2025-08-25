@@ -18,7 +18,7 @@ import {
   rateStrategyMediumLiquidityVolatile,
 } from "../dlend/interest-rate-strategies";
 import {
-  strategyDUSD,
+  strategyD,
   strategySfrxUSD,
   strategyStS,
   strategyWstkscUSD,
@@ -241,7 +241,7 @@ export async function getConfig(
         rateStrategyMediumLiquidityStable,
       ],
       reservesConfig: {
-        D: strategyDUSD,
+        D: strategyD,
         stS: strategyStS,
         sfrxUSD: strategySfrxUSD,
         wstkscUSD: strategyWstkscUSD,

@@ -17,6 +17,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const config = await getConfig(hre);
 
+  if (!config.dLend) {
+    console.log(
+      "No dLend configuration found for this network. Skipping dLend deployment.",
+    );
+    return true;
+  }
+
   const proxyArtifact = await hre.deployments.getExtendedArtifact(
     "InitializableImmutableAdminUpgradeabilityProxy",
   );

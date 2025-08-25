@@ -14,6 +14,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployer } = await getNamedAccounts();
   const config = await getConfig(hre);
 
+  if (!config.dLend) {
+    console.log(
+      "No dLend configuration found for this network. Skipping dLend deployment.",
+    );
+    return true;
+  }
+
   // Get the Aave price oracle address
   const priceOracle = await deployments.get(PRICE_ORACLE_ID);
 

@@ -11,6 +11,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Get wrapped native token address for the network
   const config = await getConfig(hre);
+
+  if (!config.dLend) {
+    console.log(
+      "No dLend configuration found for this network. Skipping dLend deployment.",
+    );
+    return true;
+  }
+
   const wrappedNativeTokenAddress = config.tokenAddresses.WSAGA;
 
   // Get pool address

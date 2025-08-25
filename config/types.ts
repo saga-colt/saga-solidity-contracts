@@ -12,7 +12,7 @@ export interface Config {
   readonly dStables: {
     [key: string]: DStableConfig;
   };
-  readonly dLend: DLendConfig;
+  readonly dLend?: DLendConfig;
   readonly dStake?: {
     [key: string]: DStakeInstanceConfig; // e.g., sdUSD, sdS
   };

@@ -17,6 +17,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployer } = await getNamedAccounts();
   const config = await getConfig(hre);
 
+  if (!config.dLend) {
+    console.log(
+      "No dLend configuration found for this network. Skipping dLend deployment.",
+    );
+    return true;
+  }
+
   // Get AddressesProvider address
   const addressesProvider = await deployments.get(POOL_ADDRESSES_PROVIDER_ID);
   const addressesProviderInstance = await ethers.getContractAt(

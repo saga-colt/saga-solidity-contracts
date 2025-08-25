@@ -1,6 +1,7 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 
+import { getConfig } from "../../../config/config";
 import {
   POOL_ADDRESSES_PROVIDER_ID,
   PRICE_ORACLE_ID,
@@ -9,6 +10,14 @@ import {
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployer } = await hre.getNamedAccounts();
+  const config = await getConfig(hre);
+
+  if (!config.dLend) {
+    console.log(
+      "No dLend configuration found for this network. Skipping dLend deployment.",
+    );
+    return true;
+  }
 
   // Get oracle aggregator address
   const { address: oracleAggregatorAddress } = await hre.deployments.get(

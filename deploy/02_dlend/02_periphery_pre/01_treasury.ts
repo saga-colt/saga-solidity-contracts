@@ -10,7 +10,16 @@ import {
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployer } = await hre.getNamedAccounts();
-  const { walletAddresses } = await getConfig(hre);
+  const config = await getConfig(hre);
+
+  if (!config.dLend) {
+    console.log(
+      "No dLend configuration found for this network. Skipping dLend deployment.",
+    );
+    return true;
+  }
+
+  const { walletAddresses } = config;
 
   const governanceMultisig = walletAddresses.governanceMultisig;
 

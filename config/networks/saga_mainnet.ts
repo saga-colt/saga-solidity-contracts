@@ -8,25 +8,6 @@ import {
   ORACLE_AGGREGATOR_PRICE_DECIMALS,
 } from "../../typescript/oracle_aggregator/constants";
 import { fetchTokenInfo } from "../../typescript/token/utils";
-import {
-  rateStrategyHighLiquidityStable,
-  rateStrategyHighLiquidityVolatile,
-  rateStrategyMediumLiquidityStable,
-  rateStrategyMediumLiquidityVolatile,
-} from "../dlend/interest-rate-strategies";
-import {
-  strategyDUSD,
-  strategyPTaUSDC,
-  strategyPTwstkscUSD,
-  strategyscETH,
-  strategySfrxUSD,
-  strategyStS,
-  strategyWETH,
-  strategywOS,
-  strategywstkscETH,
-  strategyWstkscUSD,
-  // strategyWstkscUSD,
-} from "../dlend/reserves-params";
 import { Config } from "../types";
 
 /**
@@ -44,13 +25,14 @@ export async function getConfig(
 
   const governanceSafeMultisig = "0xE83c188a7BE46B90715C757A06cF917175f30262";
 
-  // Fetch deployed dLend StaticATokenLM wrapper, aToken and RewardsController (may be undefined prior to deployment)
-  const dLendATokenWrapperDUSDDeployment = await _hre.deployments.getOrNull(
-    "dLend_ATokenWrapper_dUSD",
-  );
-  const rewardsControllerDeployment =
-    await _hre.deployments.getOrNull(INCENTIVES_PROXY_ID);
-  const aTokenDUSDDeployment = await _hre.deployments.getOrNull("dLEND-dUSD");
+  // TODO: will be deployed in a later PR
+  // // Fetch deployed dLend StaticATokenLM wrapper, aToken and RewardsController (may be undefined prior to deployment)
+  // const dLendATokenWrapperDDeployment = await _hre.deployments.getOrNull(
+  //   "dLend_ATokenWrapper_D",
+  // );
+  // const rewardsControllerDeployment =
+  //   await _hre.deployments.getOrNull(INCENTIVES_PROXY_ID);
+  // const aTokenDDeployment = await _hre.deployments.getOrNull("dLEND-D");
 
   // Fetch d token decimals from the contract if deployed
   let dDecimals = 0;
@@ -110,68 +92,61 @@ export async function getConfig(
         },
       },
     },
-    dLend: {
-      providerID: 1, // Arbitrary as long as we don't repeat
-      flashLoanPremium: {
-        total: 0.0005e4, // 0.05%
-        protocol: 0.0004e4, // 0.04%
-      },
-      rateStrategies: [
-        rateStrategyHighLiquidityVolatile,
-        rateStrategyMediumLiquidityVolatile,
-        rateStrategyHighLiquidityStable,
-        rateStrategyMediumLiquidityStable,
-      ],
-      reservesConfig: {
-        D: strategyDUSD,
-        stS: strategyStS,
-        sfrxUSD: strategySfrxUSD,
-        wstkscUSD: strategyWstkscUSD,
-        WETH: strategyWETH,
-        scETH: strategyscETH,
-        wstkscETH: strategywstkscETH,
-        PTaUSDC: strategyPTaUSDC,
-        PTwstkscUSD: strategyPTwstkscUSD,
-        wOS: strategywOS,
-      },
-    },
+    // TODO: will be deployed in a later PR
+    // dLend: {
+      // providerID: 1, // Arbitrary as long as we don't repeat
+      // flashLoanPremium: {
+      //   total: 0.0005e4, // 0.05%
+      //   protocol: 0.0004e4, // 0.04%
+      // },
+      // rateStrategies: [
+      //   rateStrategyHighLiquidityVolatile,
+      //   rateStrategyMediumLiquidityVolatile,
+      //   rateStrategyHighLiquidityStable,
+      //   rateStrategyMediumLiquidityStable,
+      // ],
+      // reservesConfig: {
+      //   D: strategyD,
+      // },
+    // },
     dStake: {
-      sD: {
-        dStable: emptyStringIfUndefined(dDeployment?.address),
-        name: "Staked Saga Dollar",
-        symbol: "sD",
-        initialAdmin: governanceSafeMultisig,
-        initialFeeManager: governanceSafeMultisig,
-        initialWithdrawalFeeBps: 0.1 * ONE_PERCENT_BPS, // 0.1%
-        adapters: [
-          {
-            vaultAsset: emptyStringIfUndefined(
-              dLendATokenWrapperDUSDDeployment?.address,
-            ),
-            adapterContract: "WrappedDLendConversionAdapter",
-          },
-        ],
-        defaultDepositVaultAsset: emptyStringIfUndefined(
-          dLendATokenWrapperDUSDDeployment?.address,
-        ),
-        collateralVault: "DStakeCollateralVault_sdUSD", // Keep in sync with deploy ID constants
-        collateralExchangers: [governanceSafeMultisig],
-        dLendRewardManager: {
-          managedVaultAsset: emptyStringIfUndefined(
-            dLendATokenWrapperDUSDDeployment?.address,
-          ), // StaticATokenLM wrapper
-          dLendAssetToClaimFor: emptyStringIfUndefined(
-            aTokenDUSDDeployment?.address,
-          ), // dLEND aToken for dUSD
-          dLendRewardsController: emptyStringIfUndefined(
-            rewardsControllerDeployment?.address,
-          ), // RewardsController proxy
-          treasury: governanceSafeMultisig,
-          maxTreasuryFeeBps: 5 * ONE_PERCENT_BPS, // 5%
-          initialTreasuryFeeBps: 1 * ONE_PERCENT_BPS, // 1%
-          initialExchangeThreshold: 1n * 10n ** BigInt(dDecimals), // TODO: 1 dStable token (fetched from contract decimals), for QA ONLY
-        },
-      },
+      // TODO: will be deployed in a later PR
+      // stkD: {
+      //   dStable: emptyStringIfUndefined(dDeployment?.address),
+      //   name: "Staked Saga Dollar",
+      //   symbol: "stkD",
+      //   initialAdmin: governanceSafeMultisig,
+      //   initialFeeManager: governanceSafeMultisig,
+      //   initialWithdrawalFeeBps: 0.1 * ONE_PERCENT_BPS, // 0.1%
+      //   adapters: [
+      //     {
+      //       vaultAsset: emptyStringIfUndefined(
+      //         dLendATokenWrapperDDeployment?.address,
+      //       ),
+      //       adapterContract: "WrappedDLendConversionAdapter",
+      //     },
+      //   ],
+      //   defaultDepositVaultAsset: emptyStringIfUndefined(
+      //     dLendATokenWrapperDDeployment?.address,
+      //   ),
+      //   collateralVault: "DStakeCollateralVault_stkD", // Keep in sync with deploy ID constants
+      //   collateralExchangers: [governanceSafeMultisig],
+      //   dLendRewardManager: {
+      //     managedVaultAsset: emptyStringIfUndefined(
+      //       dLendATokenWrapperDDeployment?.address,
+      //     ), // StaticATokenLM wrapper
+      //     dLendAssetToClaimFor: emptyStringIfUndefined(
+      //       aTokenDDeployment?.address,
+      //     ), // dLEND aToken for D
+      //     dLendRewardsController: emptyStringIfUndefined(
+      //       rewardsControllerDeployment?.address,
+      //     ), // RewardsController proxy
+      //     treasury: governanceSafeMultisig,
+      //     maxTreasuryFeeBps: 5 * ONE_PERCENT_BPS, // 5%
+      //     initialTreasuryFeeBps: 1 * ONE_PERCENT_BPS, // 1%
+      //     initialExchangeThreshold: 1n * 10n ** BigInt(dDecimals), // TODO: 1 dStable token (fetched from contract decimals), for QA ONLY
+      //   },
+      // },
     },
   };
 }
