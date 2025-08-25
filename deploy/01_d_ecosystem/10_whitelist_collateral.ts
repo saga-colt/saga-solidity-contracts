@@ -4,7 +4,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 
 import { getConfig } from "../../config/config";
 import {
-  DUSD_COLLATERAL_VAULT_CONTRACT_ID,
+  D_COLLATERAL_VAULT_CONTRACT_ID,
   USD_ORACLE_AGGREGATOR_ID,
 } from "../../typescript/deploy-ids";
 
@@ -14,7 +14,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Get the CollateralVault contract
   const { address: collateralVaultAddress } = await hre.deployments.get(
-    DUSD_COLLATERAL_VAULT_CONTRACT_ID,
+    D_COLLATERAL_VAULT_CONTRACT_ID,
   );
   const collateralVault = await hre.ethers.getContractAt(
     "CollateralHolderVault",
@@ -87,8 +87,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   return true;
 };
 
-func.tags = ["dusd"];
-func.dependencies = ["dusd-collateral-vault", "usd-oracle"];
-func.id = "dusd-whitelist-collateral";
+func.tags = ["d"];
+func.dependencies = ["d-collateral-vault", "usd-oracle"];
+func.id = "d-whitelist-collateral";
 
 export default func;

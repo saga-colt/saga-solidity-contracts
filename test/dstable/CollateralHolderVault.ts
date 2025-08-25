@@ -13,12 +13,12 @@ import {
 } from "../../typescript/token/utils";
 import {
   createDStableFixture,
-  DUSD_CONFIG,
+  D_CONFIG,
   DStableFixtureConfig,
 } from "./fixtures";
 
 // Run tests for each dStable configuration
-const dstableConfigs: DStableFixtureConfig[] = [DUSD_CONFIG];
+const dstableConfigs: DStableFixtureConfig[] = [D_CONFIG];
 
 dstableConfigs.forEach((config) => {
   describe(`CollateralHolderVault for ${config.symbol}`, () => {

@@ -17,10 +17,10 @@ import {
 } from "../../typescript/token/utils";
 import {
   createDStableFixture,
-  DUSD_CONFIG,
+  D_CONFIG,
   DStableFixtureConfig,
 } from "./fixtures"; // Assuming fixtures.ts is in the same directory
-import { DUSD_REDEEMER_CONTRACT_ID } from "../../typescript/deploy-ids";
+import { D_REDEEMER_CONTRACT_ID } from "../../typescript/deploy-ids";
 import { getConfig } from "../../config/config"; // To access deployment config for verification
 import { ONE_HUNDRED_PERCENT_BPS } from "../../typescript/common/bps_constants";
 
@@ -40,7 +40,7 @@ export const createDStableWithRedeemerV2Fixture = (
 };
 
 // Run tests for each dStable configuration
-const dstableConfigs: DStableFixtureConfig[] = [DUSD_CONFIG];
+const dstableConfigs: DStableFixtureConfig[] = [D_CONFIG];
 
 dstableConfigs.forEach((config) => {
   describe(`RedeemerV2 for ${config.symbol}`, () => {
@@ -78,7 +78,7 @@ dstableConfigs.forEach((config) => {
             "D initialFeeReceiver or initialRedemptionFeeBps is undefined in config"
           );
         }
-        redeemerV2ContractId = DUSD_REDEEMER_CONTRACT_ID;
+        redeemerV2ContractId = D_REDEEMER_CONTRACT_ID;
         configuredFeeReceiver = appConfig.dStables.D.initialFeeReceiver;
         configuredDefaultFeeBps = appConfig.dStables.D.initialRedemptionFeeBps;
       } else {

@@ -6,7 +6,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 
 import { getConfig } from "../../config/config";
 import {
-  DUSD_HARD_PEG_ORACLE_WRAPPER_ID,
+  D_HARD_PEG_ORACLE_WRAPPER_ID,
   USD_ORACLE_AGGREGATOR_ID,
 } from "../../typescript/deploy-ids";
 
@@ -25,7 +25,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   const { address: hardPegAddress } = await hre.deployments.get(
-    DUSD_HARD_PEG_ORACLE_WRAPPER_ID,
+    D_HARD_PEG_ORACLE_WRAPPER_ID,
   );
 
   console.log(
@@ -41,8 +41,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   return true;
 };
 
-func.tags = ["dusd"];
-func.dependencies = [DUSD_HARD_PEG_ORACLE_WRAPPER_ID, USD_ORACLE_AGGREGATOR_ID];
-func.id = "point-usd-oracle-aggregator-for-usd";
+func.tags = ["d"];
+func.dependencies = [D_HARD_PEG_ORACLE_WRAPPER_ID, USD_ORACLE_AGGREGATOR_ID];
+func.id = "point-usd-oracle-aggregator-to-d";
 
 export default func;

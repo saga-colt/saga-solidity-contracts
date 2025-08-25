@@ -4,9 +4,9 @@ import { DeployFunction } from "hardhat-deploy/types";
 
 import { getConfig } from "../../config/config";
 import {
-  DUSD_COLLATERAL_VAULT_CONTRACT_ID,
-  DUSD_REDEEMER_CONTRACT_ID,
-  DUSD_TOKEN_ID,
+  D_COLLATERAL_VAULT_CONTRACT_ID,
+  D_REDEEMER_CONTRACT_ID,
+  D_TOKEN_ID,
   USD_ORACLE_AGGREGATOR_ID,
 } from "../../typescript/deploy-ids";
 
@@ -16,19 +16,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const config = await getConfig(hre);
 
   // Check all required configuration values at the top
-  const dUSDConfig = config.dStables.D;
+  const dConfig = config.dStables.D;
 
   const missingConfigs: string[] = [];
 
   // Check D configuration
-  if (
-    !dUSDConfig?.initialFeeReceiver ||
-    !isAddress(dUSDConfig.initialFeeReceiver)
-  ) {
+  if (!dConfig?.initialFeeReceiver || !isAddress(dConfig.initialFeeReceiver)) {
     missingConfigs.push("dStables.D.initialFeeReceiver");
   }
 
-  if (dUSDConfig?.initialRedemptionFeeBps === undefined) {
+  if (dConfig?.initialRedemptionFeeBps === undefined) {
     missingConfigs.push("dStables.D.initialRedemptionFeeBps");
   }
 
@@ -43,44 +40,42 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     return true;
   }
 
-  // Deploy RedeemerV2 for dUSD
-  const dUSDToken = await get(DUSD_TOKEN_ID);
-  const dUSDCollateralVaultDeployment = await get(
-    DUSD_COLLATERAL_VAULT_CONTRACT_ID,
-  );
+  // Deploy RedeemerV2 for d
+  const dToken = await get(D_TOKEN_ID);
+  const dCollateralVaultDeployment = await get(D_COLLATERAL_VAULT_CONTRACT_ID);
   const usdOracleAggregator = await get(USD_ORACLE_AGGREGATOR_ID);
 
-  const dUSDRedeemerV2Deployment = await deploy(DUSD_REDEEMER_CONTRACT_ID, {
+  const dRedeemerV2Deployment = await deploy(D_REDEEMER_CONTRACT_ID, {
     from: deployer,
     contract: "RedeemerV2",
     args: [
-      dUSDCollateralVaultDeployment.address,
-      dUSDToken.address,
+      dCollateralVaultDeployment.address,
+      dToken.address,
       usdOracleAggregator.address,
-      dUSDConfig.initialFeeReceiver,
-      dUSDConfig.initialRedemptionFeeBps,
+      dConfig.initialFeeReceiver,
+      dConfig.initialRedemptionFeeBps,
     ],
   });
 
-  const dUSDCollateralVaultContract = await hre.ethers.getContractAt(
+  const dCollateralVaultContract = await hre.ethers.getContractAt(
     "CollateralVault",
-    dUSDCollateralVaultDeployment.address,
+    dCollateralVaultDeployment.address,
     await hre.ethers.getSigner(deployer),
   );
-  const dUSDWithdrawerRole =
-    await dUSDCollateralVaultContract.COLLATERAL_WITHDRAWER_ROLE();
-  const dUSDHasRole = await dUSDCollateralVaultContract.hasRole(
-    dUSDWithdrawerRole,
-    dUSDRedeemerV2Deployment.address,
+  const dWithdrawerRole =
+    await dCollateralVaultContract.COLLATERAL_WITHDRAWER_ROLE();
+  const dHasRole = await dCollateralVaultContract.hasRole(
+    dWithdrawerRole,
+    dRedeemerV2Deployment.address,
   );
 
-  if (!dUSDHasRole) {
-    console.log("Granting role for dUSD RedeemerV2.");
-    await dUSDCollateralVaultContract.grantRole(
-      dUSDWithdrawerRole,
-      dUSDRedeemerV2Deployment.address,
+  if (!dHasRole) {
+    console.log("Granting role for d RedeemerV2.");
+    await dCollateralVaultContract.grantRole(
+      dWithdrawerRole,
+      dRedeemerV2Deployment.address,
     );
-    console.log("Role granted for dUSD RedeemerV2.");
+    console.log("Role granted for d RedeemerV2.");
   }
 
   console.log(`☯️  ${__filename.split("/").slice(-2).join("/")}: ✅`);
@@ -88,12 +83,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   return true;
 };
 
-func.id = DUSD_REDEEMER_CONTRACT_ID;
-func.tags = ["dusd"];
-func.dependencies = [
-  DUSD_COLLATERAL_VAULT_CONTRACT_ID,
-  DUSD_TOKEN_ID,
-  "usd-oracle",
-];
+func.id = D_REDEEMER_CONTRACT_ID;
+func.tags = ["d"];
+func.dependencies = [D_COLLATERAL_VAULT_CONTRACT_ID, D_TOKEN_ID, "usd-oracle"];
 
 export default func;

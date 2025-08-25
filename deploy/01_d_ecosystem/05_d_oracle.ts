@@ -3,7 +3,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 
 import { getConfig } from "../../config/config";
 import {
-  DUSD_HARD_PEG_ORACLE_WRAPPER_ID,
+  D_HARD_PEG_ORACLE_WRAPPER_ID,
   USD_ORACLE_AGGREGATOR_ID,
 } from "../../typescript/deploy-ids";
 
@@ -12,7 +12,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const config = await getConfig(hre);
 
-  await hre.deployments.deploy(DUSD_HARD_PEG_ORACLE_WRAPPER_ID, {
+  await hre.deployments.deploy(D_HARD_PEG_ORACLE_WRAPPER_ID, {
     from: deployer,
     args: [
       config.oracleAggregators.USD.baseCurrency, // USD as base currency (address 0)
@@ -36,7 +36,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Get HardPegOracleWrapper contract
   const { address: hardPegOracleWrapperAddress } = await hre.deployments.get(
-    DUSD_HARD_PEG_ORACLE_WRAPPER_ID,
+    D_HARD_PEG_ORACLE_WRAPPER_ID,
   );
 
   // Set the HardPegOracleWrapper as the oracle for D
@@ -54,8 +54,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   return true;
 };
 
-func.tags = ["dusd"];
+func.tags = ["d"];
 func.dependencies = ["usd-oracle"];
-func.id = DUSD_HARD_PEG_ORACLE_WRAPPER_ID;
+func.id = D_HARD_PEG_ORACLE_WRAPPER_ID;
 
 export default func;

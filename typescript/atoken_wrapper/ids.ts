@@ -1,4 +1,4 @@
-import { DUSD_A_TOKEN_WRAPPER_ID } from "../deploy-ids";
+import { D_A_TOKEN_WRAPPER_ID } from "../deploy-ids";
 
 const DLEND_A_TOKEN_WRAPPER_PREFIX = "dLend_ATokenWrapper";
 
@@ -11,7 +11,7 @@ const DLEND_A_TOKEN_WRAPPER_PREFIX = "dLend_ATokenWrapper";
 export const getWrappedATokenId = (dStableSymbol: string): string => {
   // Use the existing constants for well-known dStables
   if (dStableSymbol === "D") {
-    return DUSD_A_TOKEN_WRAPPER_ID;
+    return D_A_TOKEN_WRAPPER_ID;
   }
   // For any other dStable, use the standard prefix
   return `${DLEND_A_TOKEN_WRAPPER_PREFIX}_${dStableSymbol}`;

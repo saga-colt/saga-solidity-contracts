@@ -1,7 +1,7 @@
 import hre, { deployments } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { ethers, BigNumberish } from "ethers";
-import { DStableFixtureConfig, DUSD_CONFIG } from "../dstable/fixtures";
+import { DStableFixtureConfig, D_CONFIG } from "../dstable/fixtures";
 import {
   getTokenContractForSymbol,
   TokenInfo,
@@ -9,7 +9,7 @@ import {
 import { ERC20 } from "../../typechain-types";
 import { IERC20 } from "../../typechain-types/@openzeppelin/contracts/token/ERC20/IERC20";
 import {
-  DUSD_A_TOKEN_WRAPPER_ID,
+  D_A_TOKEN_WRAPPER_ID,
   INCENTIVES_PROXY_ID,
   PULL_REWARDS_TRANSFER_STRATEGY_ID,
   POOL_ADDRESSES_PROVIDER_ID,
@@ -28,7 +28,7 @@ export interface DStakeFixtureConfig {
   deploymentTags: string[];
 }
 
-export const SDUSD_CONFIG: DStakeFixtureConfig = {
+export const SD_CONFIG: DStakeFixtureConfig = {
   dStableSymbol: "D",
   DStakeTokenSymbol: "stkD",
   DStakeTokenContractId: "DStakeToken_stkD",
@@ -36,7 +36,7 @@ export const SDUSD_CONFIG: DStakeFixtureConfig = {
   routerContractId: "DStakeRouter_stkD",
   defaultVaultAssetSymbol: "wdD",
   name: "Staked Saga Dollar",
-  underlyingDStableConfig: DUSD_CONFIG,
+  underlyingDStableConfig: D_CONFIG,
   deploymentTags: [
     "local-setup", // mock tokens and oracles
     "oracle", // mock oracle setup uses this tag
@@ -49,7 +49,7 @@ export const SDUSD_CONFIG: DStakeFixtureConfig = {
 };
 
 // Array of all DStake configurations
-export const DSTAKE_CONFIGS: DStakeFixtureConfig[] = [SDUSD_CONFIG];
+export const DSTAKE_CONFIGS: DStakeFixtureConfig[] = [SD_CONFIG];
 
 // Core logic for fetching dStake components *after* deployments are done
 async function fetchDStakeComponents(
@@ -83,7 +83,7 @@ async function fetchDStakeComponents(
     (await deployments.get(config.routerContractId)).address
   );
 
-  const wrappedATokenAddress = (await deployments.get(DUSD_A_TOKEN_WRAPPER_ID))
+  const wrappedATokenAddress = (await deployments.get(D_A_TOKEN_WRAPPER_ID))
     .address;
   const wrappedAToken = await ethers.getContractAt(
     "@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20",
@@ -136,7 +136,7 @@ export async function executeSetupDLendRewards(
 
   // Combine all necessary tags for a single deployment run
   const allDeploymentTags = [
-    ...config.deploymentTags, // from SDUSD_CONFIG (includes local-setup, oracles, dStable, dlend, dStake)
+    ...config.deploymentTags, // from SD_CONFIG (includes local-setup, oracles, dStable, dlend, dStake)
     "dlend-static-wrapper-factory", // ensure static wrapper factory runs before static wrappers
     "dStakeRewards", // Tag for DStakeRewardManagerDLend deployment script and its dependencies
     // Add "dlend-static-wrapper-factory" if it's not reliably covered by dStake->dStakeAdapters dependency chain
@@ -294,8 +294,8 @@ export const setupDLendRewardsFixture = (
   );
 
 // Pre-bound SDUSD rewards fixture for tests
-export const SDUSDRewardsFixture = setupDLendRewardsFixture(
-  SDUSD_CONFIG,
+export const SDRewardsFixture = setupDLendRewardsFixture(
+  SD_CONFIG,
   "sfrxUSD",
   ethers.parseUnits("100", 6), // total reward amount
   ethers.parseUnits("1", 6) // emission per second (1 token/sec in 6-decimals)

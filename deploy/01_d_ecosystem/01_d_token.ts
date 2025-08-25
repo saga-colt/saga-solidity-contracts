@@ -1,13 +1,13 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 
-import { DUSD_TOKEN_ID } from "../../typescript/deploy-ids";
+import { D_TOKEN_ID } from "../../typescript/deploy-ids";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployer } = await hre.getNamedAccounts();
 
-  // Deploy dUSD token as an upgradeable contract with proxy
-  await hre.deployments.deploy(DUSD_TOKEN_ID, {
+  // Deploy d token as an upgradeable contract with proxy
+  await hre.deployments.deploy(D_TOKEN_ID, {
     from: deployer,
     contract: "ERC20StablecoinUpgradeable",
     proxy: {
@@ -28,7 +28,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   return true;
 };
 
-func.id = DUSD_TOKEN_ID;
-func.tags = ["dusd", "token", "upgradeable"];
+func.id = D_TOKEN_ID;
+func.tags = ["d", "token", "upgradeable"];
 
 export default func;

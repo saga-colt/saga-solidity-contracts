@@ -4,7 +4,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 
 import { getConfig } from "../../config/config";
 import {
-  DUSD_A_TOKEN_WRAPPER_ID,
+  D_A_TOKEN_WRAPPER_ID,
   INCENTIVES_PROXY_ID,
   POOL_ADDRESSES_PROVIDER_ID,
 } from "../../typescript/deploy-ids";
@@ -50,41 +50,39 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   // Get dUSD aToken address
-  let dUSDAToken;
+  let dAToken;
 
   try {
-    const dUSDReserveData = await poolContract.getReserveData(tokenAddresses.D);
-    dUSDAToken = dUSDReserveData.aTokenAddress;
+    const dReserveData = await poolContract.getReserveData(tokenAddresses.D);
+    dAToken = dReserveData.aTokenAddress;
   } catch (error: any) {
-    console.log(`Error getting dUSD aToken: ${error.message}`);
+    console.log(`Error getting d aToken: ${error.message}`);
     return;
   }
 
-  // Deploy StaticATokenLM for dUSD
-  if (dUSDAToken && dUSDAToken !== ethers.ZeroAddress) {
-    const dUSDATokenContract = await ethers.getContractAt(
+  // Deploy StaticATokenLM for d
+  if (dAToken && dAToken !== ethers.ZeroAddress) {
+    const dATokenContract = await ethers.getContractAt(
       "IERC20Detailed",
-      dUSDAToken,
+      dAToken,
     );
-    const dUSDATokenSymbol = await dUSDATokenContract.symbol();
+    const dATokenSymbol = await dATokenContract.symbol();
 
-    // console.log(`Deploying StaticATokenLM wrapper for ${dUSDATokenSymbol}...`);
+    // console.log(`Deploying StaticATokenLM wrapper for ${dATokenSymbol}...`);
 
-    await deploy(DUSD_A_TOKEN_WRAPPER_ID, {
+    await deploy(D_A_TOKEN_WRAPPER_ID, {
       from: deployer,
       contract: "StaticATokenLM",
       args: [
         poolAddress,
         rewardsControllerAddress,
-        dUSDAToken,
-        `Static ${dUSDATokenSymbol}`,
-        `stk${dUSDATokenSymbol}`,
+        dAToken,
+        `Static ${dATokenSymbol}`,
+        `stk${dATokenSymbol}`,
       ],
     });
   } else {
-    console.log(
-      "dUSD aToken not found or invalid, skipping wrapper deployment",
-    );
+    console.log("d aToken not found or invalid, skipping wrapper deployment");
   }
 
   console.log(`🧧 ${__filename.split("/").slice(-2).join("/")}: ✅`);

@@ -13,9 +13,6 @@ export interface Config {
     [key: string]: DStableConfig;
   };
   readonly dLend: DLendConfig;
-  readonly odos?: {
-    readonly router: string;
-  };
   readonly dStake?: {
     [key: string]: DStakeInstanceConfig; // e.g., sdUSD, sdS
   };

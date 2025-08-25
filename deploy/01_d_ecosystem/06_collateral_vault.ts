@@ -2,7 +2,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 
 import {
-  DUSD_COLLATERAL_VAULT_CONTRACT_ID,
+  D_COLLATERAL_VAULT_CONTRACT_ID,
   USD_ORACLE_AGGREGATOR_ID,
 } from "../../typescript/deploy-ids";
 
@@ -13,7 +13,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     USD_ORACLE_AGGREGATOR_ID,
   );
 
-  await hre.deployments.deploy(DUSD_COLLATERAL_VAULT_CONTRACT_ID, {
+  await hre.deployments.deploy(D_COLLATERAL_VAULT_CONTRACT_ID, {
     from: deployer,
     args: [oracleAggregatorAddress],
     contract: "CollateralHolderVault",
@@ -26,8 +26,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   return true;
 };
 
-func.id = DUSD_COLLATERAL_VAULT_CONTRACT_ID;
-func.tags = ["dusd"];
+func.id = D_COLLATERAL_VAULT_CONTRACT_ID;
+func.tags = ["d", "d-collateral-vault"];
 func.dependencies = ["usd-oracle"];
 
 export default func;

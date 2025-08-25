@@ -9,8 +9,8 @@ import {
 } from "../../config/types";
 import { DStakeRewardManagerDLend } from "../../typechain-types";
 import {
-  DUSD_A_TOKEN_WRAPPER_ID,
-  DUSD_TOKEN_ID,
+  D_A_TOKEN_WRAPPER_ID,
+  D_TOKEN_ID,
   EMISSION_MANAGER_ID,
   INCENTIVES_PROXY_ID,
   POOL_DATA_PROVIDER_ID,
@@ -334,10 +334,10 @@ func.dependencies = [
   "dlend-market",
   "dlend-periphery-post", // this tag covers the RewardsController/ IncentivesProxy deployment
   // Specific deployment IDs that adapters/reward-manager rely on
-  DUSD_A_TOKEN_WRAPPER_ID,
+  D_A_TOKEN_WRAPPER_ID,
   INCENTIVES_PROXY_ID,
   POOL_DATA_PROVIDER_ID,
-  DUSD_TOKEN_ID,
+  D_TOKEN_ID,
   EMISSION_MANAGER_ID,
 ];
 func.runAtTheEnd = true;

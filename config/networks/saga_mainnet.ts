@@ -2,10 +2,7 @@ import { ZeroAddress } from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { ONE_PERCENT_BPS } from "../../typescript/common/bps_constants";
-import {
-  DUSD_TOKEN_ID,
-  INCENTIVES_PROXY_ID,
-} from "../../typescript/deploy-ids";
+import { D_TOKEN_ID, INCENTIVES_PROXY_ID } from "../../typescript/deploy-ids";
 import {
   ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
   ORACLE_AGGREGATOR_PRICE_DECIMALS,
@@ -41,23 +38,9 @@ import { Config } from "../types";
 export async function getConfig(
   _hre: HardhatRuntimeEnvironment,
 ): Promise<Config> {
-  const dUSDDeployment = await _hre.deployments.getOrNull(DUSD_TOKEN_ID);
-  const wSAddress = "0x039e2fB66102314Ce7b64Ce5Ce3E5183bc94aD38";
-  const stSAddress = "0xE5DA20F15420aD15DE0fa650600aFc998bbE3955";
-  const frxUSDAddress = "0x80Eede496655FB9047dd39d9f418d5483ED600df";
-  const sfrxUSDAddress = "0x5Bff88cA1442c2496f7E475E9e7786383Bc070c0";
-  const wstkscUSDAddress = "0x9fb76f7ce5FCeAA2C42887ff441D46095E494206";
-  const USDCeAddress = "0x29219dd400f2Bf60E5a23d13Be72B486D4038894";
-  const scUSDAddress = "0xd3DCe716f3eF535C5Ff8d041c1A41C3bd89b97aE";
-  const WETHAddress = "0x50c42dEAcD8Fc9773493ED674b675bE577f2634b";
-  const scETHAddress = "0x3bcE5CB273F0F148010BbEa2470e7b5df84C7812";
-  const wstkscETHAddress = "0xE8a41c62BB4d5863C6eadC96792cFE90A1f37C47";
-  const ptaUSDCAddress = "0x930441Aa7Ab17654dF5663781CA0C02CC17e6643";
-  const ptwstkscUSDAddress = "0x0Fb682C9692AddCc1769f4D4d938c54420D54fA3";
-  const wOSAddress = "0x9F0dF7799f6FDAd409300080cfF680f5A23df4b1";
-  const osAddress = "0xb1e25689D55734FD3ffFc939c4C3Eb52DFf8A794";
-
-  const odoRouterV2Address = "0xaC041Df48dF9791B0654f1Dbbf2CC8450C5f2e9D"; // OdoRouterV2
+  const dDeployment = await _hre.deployments.getOrNull(D_TOKEN_ID);
+  const usdtAddress = "0xC8fe3C1de344854f4429bB333AFFAeF97eF88CEa";
+  const usdcAddress = "0xfc960C233B8E98e0Cf282e29BDE8d3f105fc24d5";
 
   const governanceSafeMultisig = "0xE83c188a7BE46B90715C757A06cF917175f30262";
 
@@ -69,35 +52,23 @@ export async function getConfig(
     await _hre.deployments.getOrNull(INCENTIVES_PROXY_ID);
   const aTokenDUSDDeployment = await _hre.deployments.getOrNull("dLEND-dUSD");
 
-  // Fetch dUSD token decimals from the contract if deployed
-  let dUSDDecimals = 0;
+  // Fetch d token decimals from the contract if deployed
+  let dDecimals = 0;
 
-  if (dUSDDeployment?.address) {
-    const dUSDTokenInfo = await fetchTokenInfo(_hre, dUSDDeployment.address);
-    dUSDDecimals = dUSDTokenInfo.decimals;
+  if (dDeployment?.address) {
+    const dTokenInfo = await fetchTokenInfo(_hre, dDeployment.address);
+    dDecimals = dTokenInfo.decimals;
 
-    if (dUSDDecimals < 1) {
-      throw Error("dUSD token decimals must be greater than 0");
+    if (dDecimals < 1) {
+      throw Error("d token decimals must be greater than 0");
     }
   }
 
   return {
     tokenAddresses: {
-      D: emptyStringIfUndefined(dUSDDeployment?.address),
-      wS: wSAddress,
-      stS: stSAddress,
-      frxUSD: frxUSDAddress,
-      sfrxUSD: sfrxUSDAddress,
-      wstkscUSD: wstkscUSDAddress,
-      USDCe: USDCeAddress,
-      scUSD: scUSDAddress,
-      WETH: WETHAddress,
-      scETH: scETHAddress,
-      wstkscETH: wstkscETHAddress,
-      PTaUSDC: ptaUSDCAddress,
-      PTwstkscUSD: ptwstkscUSDAddress,
-      wOS: wOSAddress,
-      OS: osAddress,
+      D: emptyStringIfUndefined(dDeployment?.address),
+      USDT: usdtAddress,
+      USDC: usdcAddress,
     },
     walletAddresses: {
       governanceMultisig: governanceSafeMultisig, // Created via Safe
@@ -105,23 +76,14 @@ export async function getConfig(
     },
     dStables: {
       D: {
-        collaterals: [
-          frxUSDAddress,
-          sfrxUSDAddress,
-          USDCeAddress,
-          scUSDAddress,
-        ],
+        collaterals: [usdcAddress, usdtAddress],
         // TODO: review – set to governance multisig for now
         initialFeeReceiver: governanceSafeMultisig, // governanceMultisig
         initialRedemptionFeeBps: 0.4 * ONE_PERCENT_BPS, // Default for stablecoins
         collateralRedemptionFees: {
           // Stablecoins: 0.4%
-          [frxUSDAddress]: 0.4 * ONE_PERCENT_BPS,
-          [USDCeAddress]: 0.4 * ONE_PERCENT_BPS,
-          [scUSDAddress]: 0.4 * ONE_PERCENT_BPS,
-          // Yield bearing stablecoins: 0.5%
-          [sfrxUSDAddress]: 0.5 * ONE_PERCENT_BPS,
-          [wstkscUSDAddress]: 0.5 * ONE_PERCENT_BPS,
+          [usdcAddress]: 0.4 * ONE_PERCENT_BPS,
+          [usdtAddress]: 0.4 * ONE_PERCENT_BPS,
         },
       },
     },
@@ -133,101 +95,18 @@ export async function getConfig(
         redstoneOracleAssets: {
           plainRedstoneOracleWrappers: {},
           redstoneOracleWrappersWithThresholding: {
-            [frxUSDAddress]: {
-              feed: "0xC3346631E0A9720582fB9CAbdBEA22BC2F57741b", // frxUSD/USD Redstone price feed
+            [usdcAddress]: {
+              feed: "0x6c85266a8D3Ce564058667dc5c7E9d58da454ecc", // USDC/USD Tellor price feed
               lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
               fixedPrice: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
             },
-            [USDCeAddress]: {
-              feed: "0x3587a73AA02519335A8a6053a97657BECe0bC2Cc", // USDC/USD Redstone price feed
+            [usdtAddress]: {
+              feed: "0x62E537964E2452aD6F08976dA251C4B33c04B96C", // USDT/USD Tellor price feed
               lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
               fixedPrice: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
             },
-            [WETHAddress]: {
-              feed: "0x824364077993847f71293B24ccA8567c00c2de11", // WETH/USD Chainlink price feed
-              lowerThreshold: 0n, // No thresholding
-              fixedPrice: 0n,
-            },
-            [scETHAddress]: {
-              feed: "0x19A95E6203A0611b6be322c25b63Ec989fFE15c1", // scETH/USD Chainlink price feed
-              lowerThreshold: 0n, // No thresholding
-              fixedPrice: 0n,
-            },
           },
-          compositeRedstoneOracleWrappersWithThresholding: {
-            [sfrxUSDAddress]: {
-              feedAsset: sfrxUSDAddress,
-              feed1: "0xebE443E20ADf302B59419648c4dbA0c7299cf1A2", // sfrxUSD/frxUSD Redstone Fundamental feed
-              feed2: "0xC3346631E0A9720582fB9CAbdBEA22BC2F57741b", // frxUSD/USD Redstone price feed
-              lowerThresholdInBase1: 0n, // No thresholding
-              fixedPriceInBase1: 0n,
-              lowerThresholdInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT, // Only threshold frxUSD/USD
-              fixedPriceInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-            },
-            [scUSDAddress]: {
-              feedAsset: scUSDAddress,
-              feed1: "0xb81131B6368b3F0a83af09dB4E39Ac23DA96C2Db", // scUSD/USDC Redstone Fundamental feed
-              feed2: "0x3587a73AA02519335A8a6053a97657BECe0bC2Cc", // USDC/USD Redstone price feed
-              lowerThresholdInBase1: 0n, // No thresholding
-              fixedPriceInBase1: 0n,
-              lowerThresholdInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT, // Only threshold scUSD/USD
-              fixedPriceInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-            },
-            [stSAddress]: {
-              feedAsset: stSAddress,
-              feed1: "0x65d0F14f7809CdC4f90c3978c753C4671b6B815b", // stS/S Redstone Fundamental feed
-              feed2: "0xa8a94Da411425634e3Ed6C331a32ab4fd774aa43", // S/USD Redstone price feed
-              lowerThresholdInBase1: 0n, // No thresholding
-              fixedPriceInBase1: 0n,
-              lowerThresholdInBase2: 0n, // Do not threshold S/USD
-              fixedPriceInBase2: 0n,
-            },
-            [wstkscUSDAddress]: {
-              feedAsset: wstkscUSDAddress,
-              feed1: "0x39EEB8955948B980d9ad09F92F95cdD980751ce1", // Our own ChainlinkDecimalConverter which wraps the wstkscUSD/stkscUSD Chainlink feed and converts 18 -> 8 decimals
-              feed2: "0xACE5e348a341a740004304c2c228Af1A4581920F", // scUSD/USD Chainlink price feed
-              lowerThresholdInBase1: 0n, // No thresholding
-              fixedPriceInBase1: 0n,
-              lowerThresholdInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT, // Only threshold scUSD/USD
-              fixedPriceInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-            },
-            [wstkscETHAddress]: {
-              feedAsset: wstkscETHAddress,
-              feed1: "0xaA0eA5aa28dCB4280d0469167Bb8Bf99F51427D3", // Our own ChainlinkDecimalConverter which wraps the wstkscETH/stkscETH Chainlink feed and converts 18 -> 8 decimals
-              feed2: "0x19A95E6203A0611b6be322c25b63Ec989fFE15c1", // scETH/USD Chainlink price feed
-              lowerThresholdInBase1: 0n, // No thresholding
-              fixedPriceInBase1: 0n,
-              lowerThresholdInBase2: 0n, // No thresholding
-              fixedPriceInBase2: 0n,
-            },
-            [ptaUSDCAddress]: {
-              feedAsset: ptaUSDCAddress,
-              feed1: "0xc65F6b9dBAFa2A9243CeceDbf80EE9a79d6ADf09", // Our own ChainlinkDecimalConverter which wraps the PT-aUSDC/USDC Pendle Chainlink feed and converts 18 -> 8 decimals
-              feed2: "0x3587a73AA02519335A8a6053a97657BECe0bC2Cc", // USDC/USD Redstone price feed
-              lowerThresholdInBase1: 0n, // No thresholding
-              fixedPriceInBase1: 0n,
-              lowerThresholdInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT, // Only threshold USDC/USD
-              fixedPriceInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-            },
-            [ptwstkscUSDAddress]: {
-              feedAsset: ptwstkscUSDAddress,
-              feed1: "0x2EfEb81d6A0E5638bfe917C6cFCeb42989058d08", // Our own ChainlinkDecimalConverter which wraps the PT-wstkscUSD/scUSD Pendle Chainlink feed and converts 18 -> 8 decimals
-              feed2: "0xACE5e348a341a740004304c2c228Af1A4581920F", // scUSD/USD Chainlink price feed
-              lowerThresholdInBase1: 0n, // No thresholding
-              fixedPriceInBase1: 0n,
-              lowerThresholdInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT, // Only threshold scUSD/USD
-              fixedPriceInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-            },
-            [wOSAddress]: {
-              feedAsset: wOSAddress,
-              feed1: "0x19E84B1f41d1Eb2ff22baC55797bD767558585De", // Our own ChainlinkDecimalConverter which wraps the wOS/OS Chainlink feed and converts 18 -> 8 decimals
-              feed2: "0xF6819756b86678dEd7A0aECD983697c4F7D42bbc", // Our own ChainlinkCompositeAggregator which composes OS/S and S/USD
-              lowerThresholdInBase1: 0n, // No thresholding
-              fixedPriceInBase1: 0n,
-              lowerThresholdInBase2: 0n, // No thresholding
-              fixedPriceInBase2: 0n,
-            },
-          },
+          compositeRedstoneOracleWrappersWithThresholding: {},
         },
       },
     },
@@ -256,12 +135,9 @@ export async function getConfig(
         wOS: strategywOS,
       },
     },
-    odos: {
-      router: odoRouterV2Address,
-    },
     dStake: {
       sD: {
-        dStable: emptyStringIfUndefined(dUSDDeployment?.address),
+        dStable: emptyStringIfUndefined(dDeployment?.address),
         name: "Staked Saga Dollar",
         symbol: "sD",
         initialAdmin: governanceSafeMultisig,
@@ -293,7 +169,7 @@ export async function getConfig(
           treasury: governanceSafeMultisig,
           maxTreasuryFeeBps: 5 * ONE_PERCENT_BPS, // 5%
           initialTreasuryFeeBps: 1 * ONE_PERCENT_BPS, // 1%
-          initialExchangeThreshold: 1n * 10n ** BigInt(dUSDDecimals), // TODO: 1 dStable token (fetched from contract decimals), for QA ONLY
+          initialExchangeThreshold: 1n * 10n ** BigInt(dDecimals), // TODO: 1 dStable token (fetched from contract decimals), for QA ONLY
         },
       },
     },

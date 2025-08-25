@@ -6,13 +6,19 @@ export const USD_REDSTONE_WRAPPER_WITH_THRESHOLDING_ID =
 export const USD_REDSTONE_COMPOSITE_WRAPPER_WITH_THRESHOLDING_ID =
   "USD_RedstoneChainlinkCompositeWrapperWithThresholding";
 
-// dUSD
-export const DUSD_TOKEN_ID = "D";
-export const DUSD_ISSUER_CONTRACT_ID = "dUSD_Issuer";
-export const DUSD_REDEEMER_CONTRACT_ID = "dUSD_Redeemer";
-export const DUSD_COLLATERAL_VAULT_CONTRACT_ID = "dUSD_CollateralHolderVault";
-export const DUSD_AMO_MANAGER_ID = "dUSD_AmoManager";
-export const DUSD_HARD_PEG_ORACLE_WRAPPER_ID = "dUSD_HardPegOracleWrapper";
+// Decimal Converters
+export const USDC_TO_USD_DECIMAL_CONVERTER_ID =
+  "ChainlinkDecimalConverter_USDC_to_USD";
+export const USDT_TO_USD_DECIMAL_CONVERTER_ID =
+  "ChainlinkDecimalConverter_USDT_to_USD";
+
+// d
+export const D_TOKEN_ID = "D";
+export const D_ISSUER_CONTRACT_ID = "d_Issuer";
+export const D_REDEEMER_CONTRACT_ID = "d_Redeemer";
+export const D_COLLATERAL_VAULT_CONTRACT_ID = "d_CollateralHolderVault";
+export const D_AMO_MANAGER_ID = "d_AmoManager";
+export const D_HARD_PEG_ORACLE_WRAPPER_ID = "d_HardPegOracleWrapper";
 
 // dLEND
 export const TREASURY_PROXY_ID = "TreasuryProxy";
@@ -56,7 +62,7 @@ export const ORACLE_AGGREGATOR_WRAPPER_BASE_ID =
 // Wrapped dLEND ATokens
 export const DLEND_STATIC_A_TOKEN_FACTORY_ID = "dLend_StaticATokenFactory";
 export const DLEND_A_TOKEN_WRAPPER_PREFIX = "dLend_ATokenWrapper";
-export const DUSD_A_TOKEN_WRAPPER_ID = `${DLEND_A_TOKEN_WRAPPER_PREFIX}_D`;
+export const D_A_TOKEN_WRAPPER_ID = `${DLEND_A_TOKEN_WRAPPER_PREFIX}_D`;
 
 // dSTAKE deployment tag
 export const DSTAKE_DEPLOYMENT_TAG = "dStake"; // Define the deployment tag
@@ -67,9 +73,9 @@ export const DSTAKE_COLLATERAL_VAULT_ID_PREFIX = "DStakeCollateralVault";
 export const DSTAKE_ROUTER_ID_PREFIX = "DStakeRouter";
 
 // dSTAKE specific instance IDs
-export const SDUSD_DSTAKE_TOKEN_ID = `${DSTAKE_TOKEN_ID_PREFIX}_sD`;
-export const SDUSD_COLLATERAL_VAULT_ID = `${DSTAKE_COLLATERAL_VAULT_ID_PREFIX}_sD`;
-export const SDUSD_ROUTER_ID = `${DSTAKE_ROUTER_ID_PREFIX}_sD`;
+export const SD_DSTAKE_TOKEN_ID = `${DSTAKE_TOKEN_ID_PREFIX}_sD`;
+export const SD_COLLATERAL_VAULT_ID = `${DSTAKE_COLLATERAL_VAULT_ID_PREFIX}_sD`;
+export const SD_ROUTER_ID = `${DSTAKE_ROUTER_ID_PREFIX}_sD`;
 
 // RedeemerWithFees
-export const DUSD_REDEEMER_WITH_FEES_CONTRACT_ID = "dUSD_RedeemerWithFees";
+export const D_REDEEMER_WITH_FEES_CONTRACT_ID = "d_RedeemerWithFees";

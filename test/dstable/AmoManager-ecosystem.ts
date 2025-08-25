@@ -18,12 +18,12 @@ import {
 import { ORACLE_AGGREGATOR_PRICE_DECIMALS } from "../../typescript/oracle_aggregator/constants";
 import {
   createDStableAmoFixture,
-  DUSD_CONFIG,
+  D_CONFIG,
   DStableFixtureConfig,
 } from "./fixtures";
 
 // Run tests for each dStable configuration
-const dstableConfigs: DStableFixtureConfig[] = [DUSD_CONFIG];
+const dstableConfigs: DStableFixtureConfig[] = [D_CONFIG];
 
 dstableConfigs.forEach((config) => {
   describe(`AmoManager Ecosystem Tests for ${config.symbol}`, () => {

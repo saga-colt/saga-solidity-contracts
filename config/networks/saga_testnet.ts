@@ -3,8 +3,8 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { ONE_PERCENT_BPS } from "../../typescript/common/bps_constants";
 import {
-  DUSD_A_TOKEN_WRAPPER_ID,
-  DUSD_TOKEN_ID,
+  D_A_TOKEN_WRAPPER_ID,
+  D_TOKEN_ID,
   INCENTIVES_PROXY_ID,
 } from "../../typescript/deploy-ids";
 import {
@@ -35,7 +35,7 @@ export async function getConfig(
   _hre: HardhatRuntimeEnvironment,
 ): Promise<Config> {
   // Token info will only be populated after their deployment
-  const dUSDDeployment = await _hre.deployments.getOrNull(DUSD_TOKEN_ID);
+  const dDeployment = await _hre.deployments.getOrNull(D_TOKEN_ID);
   const USDCDeployment = await _hre.deployments.getOrNull("USDC");
   const USDSDeployment = await _hre.deployments.getOrNull("USDS");
   const sUSDSDeployment = await _hre.deployments.getOrNull("sUSDS");
@@ -44,9 +44,8 @@ export async function getConfig(
   const WSAGADeployment = await _hre.deployments.getOrNull("WSAGA");
 
   // Fetch deployed dLend StaticATokenLM wrapper (optional, may be undefined on testnet)
-  const dLendATokenWrapperDUSDDeployment = await _hre.deployments.getOrNull(
-    DUSD_A_TOKEN_WRAPPER_ID,
-  );
+  const dLendATokenWrapperDDeployment =
+    await _hre.deployments.getOrNull(D_A_TOKEN_WRAPPER_ID);
 
   // Fetch deployed dLend RewardsController (optional)
   const rewardsControllerDeployment =
@@ -117,7 +116,7 @@ export async function getConfig(
     },
     tokenAddresses: {
       WSAGA: emptyStringIfUndefined(WSAGADeployment?.address), // Used by dLEND
-      D: emptyStringIfUndefined(dUSDDeployment?.address),
+      D: emptyStringIfUndefined(dDeployment?.address),
       sfrxUSD: emptyStringIfUndefined(sfrxUSDDeployment?.address), // Used by dLEND
       USDC: emptyStringIfUndefined(USDCDeployment?.address),
       USDS: emptyStringIfUndefined(USDSDeployment?.address),
@@ -248,12 +247,9 @@ export async function getConfig(
         wstkscUSD: strategyWstkscUSD,
       },
     },
-    odos: {
-      router: "", // Odos doesn't work on sonic testnet
-    },
     dStake: {
       stkD: {
-        dStable: emptyStringIfUndefined(dUSDDeployment?.address),
+        dStable: emptyStringIfUndefined(dDeployment?.address),
         name: "Staked Saga Dollar",
         symbol: "stkD",
         initialAdmin: deployer,
@@ -262,19 +258,19 @@ export async function getConfig(
         adapters: [
           {
             vaultAsset: emptyStringIfUndefined(
-              dLendATokenWrapperDUSDDeployment?.address,
+              dLendATokenWrapperDDeployment?.address,
             ),
             adapterContract: "WrappedDLendConversionAdapter",
           },
         ],
         defaultDepositVaultAsset: emptyStringIfUndefined(
-          dLendATokenWrapperDUSDDeployment?.address,
+          dLendATokenWrapperDDeployment?.address,
         ),
         collateralVault: "DStakeCollateralVault_sdUSD",
         collateralExchangers: [deployer],
         dLendRewardManager: {
           managedVaultAsset: emptyStringIfUndefined(
-            dLendATokenWrapperDUSDDeployment?.address,
+            dLendATokenWrapperDDeployment?.address,
           ), // This should be the deployed StaticATokenLM address for dUSD
           dLendAssetToClaimFor: emptyStringIfUndefined(
             aTokenDUSDDeployment?.address,

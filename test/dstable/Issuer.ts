@@ -17,7 +17,7 @@ import {
 } from "../../typescript/token/utils";
 import {
   createDStableFixture,
-  DUSD_CONFIG,
+  D_CONFIG,
   DStableFixtureConfig,
 } from "./fixtures";
 import { USD_ORACLE_AGGREGATOR_ID } from "../../typescript/deploy-ids";
@@ -75,7 +75,7 @@ async function calculateExpectedDstableFromBase(
 }
 
 // Run tests for each dStable configuration
-const dstableConfigs: DStableFixtureConfig[] = [DUSD_CONFIG];
+const dstableConfigs: DStableFixtureConfig[] = [D_CONFIG];
 
 dstableConfigs.forEach((config) => {
   describe(`IssuerV2 for ${config.symbol}`, () => {
