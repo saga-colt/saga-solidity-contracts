@@ -49,7 +49,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     rewardsControllerAddress = rewardsController.address;
   }
 
-  // Get dUSD aToken address
+  // Get D aToken address
   let dAToken;
 
   try {
@@ -91,7 +91,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 func.id = "dStableATokenWrappers";
-func.tags = ["dUSD-aTokenWrapper"];
+func.tags = ["d-aTokenWrapper"];
 func.dependencies = ["dlend-static-wrapper-factory"];
 
 export default func;

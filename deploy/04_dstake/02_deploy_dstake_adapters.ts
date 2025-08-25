@@ -120,6 +120,5 @@ func.dependencies = [
   "dlend-core",
   "dlend-market",
   "dlend-periphery-post",
-  "dUSD-aTokenWrapper",
-  "dS-aTokenWrapper",
+  "d-aTokenWrapper",
 ];

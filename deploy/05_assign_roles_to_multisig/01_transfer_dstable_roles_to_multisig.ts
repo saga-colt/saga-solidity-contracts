@@ -36,7 +36,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     console.log(`\n🔄 Transferring roles for ${dStableName}...`);
 
     // Get token IDs based on the dStable name
-    const tokenId = dStableName; // The token ID is the same as the dStable name (e.g., "dUSD" or "dS")
+    const tokenId = dStableName; // The token ID is the same as the dStable name (e.g., "d")
     const issuerContractId = `${dStableName}_Issuer`;
     const redeemerContractId = `${dStableName}_Redeemer`;
     const collateralVaultContractId = `${dStableName}_CollateralHolderVault`;
@@ -694,6 +694,6 @@ async function transferCollateralVaultRoles(
 
 func.id = "transfer_dstable_roles_to_multisig";
 func.tags = ["governance", "roles"];
-func.dependencies = ["dusd", "ds"];
+func.dependencies = ["d"];
 
 export default func;
