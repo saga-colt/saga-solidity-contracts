@@ -17,13 +17,13 @@ import { Config } from "../types";
  * @returns The configuration for the network
  */
 export async function getConfig(
-  _hre: HardhatRuntimeEnvironment,
+  _hre: HardhatRuntimeEnvironment
 ): Promise<Config> {
   const dDeployment = await _hre.deployments.getOrNull(D_TOKEN_ID);
   const usdtAddress = "0xC8fe3C1de344854f4429bB333AFFAeF97eF88CEa";
   const usdcAddress = "0xfc960C233B8E98e0Cf282e29BDE8d3f105fc24d5";
 
-  const governanceSafeMultisig = "0xE83c188a7BE46B90715C757A06cF917175f30262"; // TODO: review this address on SagaEVM
+  const governanceSafeMultisig = "0xf19cf8881237CA819Fd50C9C22cb258e9DB8644e"; // Safe on Saga
 
   // TODO: will be deployed in a later PR
   // // Fetch deployed dLend StaticATokenLM wrapper, aToken and RewardsController (may be undefined prior to deployment)
@@ -42,7 +42,7 @@ export async function getConfig(
     dDecimals = dTokenInfo.decimals;
 
     if (dDecimals < 1) {
-      throw Error("d token decimals must be greater than 0");
+      throw Error("D token decimals must be greater than 0");
     }
   }
 
@@ -54,25 +54,23 @@ export async function getConfig(
     },
     walletAddresses: {
       governanceMultisig: governanceSafeMultisig, // Created via Safe
-      incentivesVault: "0x4B4B5cC616be4cd1947B93f2304d36b3e80D3ef6", // TODO: Add incentives vault address
+      incentivesVault: "0x9CD17eA5Cf04BEEAa2C65d58F4478c7A230eD816", // Safe on Saga
     },
     dStables: {
       D: {
         collaterals: [usdcAddress, usdtAddress],
-        // TODO: review – set to governance multisig for now
         initialFeeReceiver: governanceSafeMultisig, // governanceMultisig
         initialRedemptionFeeBps: 0.4 * ONE_PERCENT_BPS, // Default for stablecoins
         collateralRedemptionFees: {
-          // Stablecoins: 0.4%
-          [usdcAddress]: 0.4 * ONE_PERCENT_BPS,
-          [usdtAddress]: 0.4 * ONE_PERCENT_BPS,
+          // Stablecoins by default already: 0.4%
+          // Future yield bearing stablecoins should be 0.5%
         },
       },
     },
     oracleAggregators: {
       USD: {
         baseCurrency: ZeroAddress, // Note that USD is represented by the zero address, per Aave's convention
-        hardDStablePeg: 10n ** BigInt(ORACLE_AGGREGATOR_PRICE_DECIMALS),
+        hardDStablePeg: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
         priceDecimals: ORACLE_AGGREGATOR_PRICE_DECIMALS,
         redstoneOracleAssets: {
           plainRedstoneOracleWrappers: {},
@@ -94,20 +92,20 @@ export async function getConfig(
     },
     // TODO: will be deployed in a later PR
     // dLend: {
-      // providerID: 1, // Arbitrary as long as we don't repeat
-      // flashLoanPremium: {
-      //   total: 0.0005e4, // 0.05%
-      //   protocol: 0.0004e4, // 0.04%
-      // },
-      // rateStrategies: [
-      //   rateStrategyHighLiquidityVolatile,
-      //   rateStrategyMediumLiquidityVolatile,
-      //   rateStrategyHighLiquidityStable,
-      //   rateStrategyMediumLiquidityStable,
-      // ],
-      // reservesConfig: {
-      //   D: strategyD,
-      // },
+    // providerID: 1, // Arbitrary as long as we don't repeat
+    // flashLoanPremium: {
+    //   total: 0.0005e4, // 0.05%
+    //   protocol: 0.0004e4, // 0.04%
+    // },
+    // rateStrategies: [
+    //   rateStrategyHighLiquidityVolatile,
+    //   rateStrategyMediumLiquidityVolatile,
+    //   rateStrategyHighLiquidityStable,
+    //   rateStrategyMediumLiquidityStable,
+    // ],
+    // reservesConfig: {
+    //   D: strategyD,
+    // },
     // },
     dStake: {
       // TODO: will be deployed in a later PR
