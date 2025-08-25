@@ -23,7 +23,7 @@ export async function getConfig(
   const usdtAddress = "0xC8fe3C1de344854f4429bB333AFFAeF97eF88CEa";
   const usdcAddress = "0xfc960C233B8E98e0Cf282e29BDE8d3f105fc24d5";
 
-  const governanceSafeMultisig = "0xE83c188a7BE46B90715C757A06cF917175f30262";
+  const governanceSafeMultisig = "0xE83c188a7BE46B90715C757A06cF917175f30262"; // TODO: review this address on SagaEVM
 
   // TODO: will be deployed in a later PR
   // // Fetch deployed dLend StaticATokenLM wrapper, aToken and RewardsController (may be undefined prior to deployment)

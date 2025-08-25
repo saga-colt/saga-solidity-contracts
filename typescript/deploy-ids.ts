@@ -8,11 +8,11 @@ export const USD_REDSTONE_COMPOSITE_WRAPPER_WITH_THRESHOLDING_ID =
 
 // D
 export const D_TOKEN_ID = "D";
-export const D_ISSUER_CONTRACT_ID = "d_Issuer";
-export const D_REDEEMER_CONTRACT_ID = "d_Redeemer";
-export const D_COLLATERAL_VAULT_CONTRACT_ID = "d_CollateralHolderVault";
-export const D_AMO_MANAGER_ID = "d_AmoManager";
-export const D_HARD_PEG_ORACLE_WRAPPER_ID = "d_HardPegOracleWrapper";
+export const D_ISSUER_CONTRACT_ID = "D_Issuer";
+export const D_REDEEMER_CONTRACT_ID = "D_Redeemer";
+export const D_COLLATERAL_VAULT_CONTRACT_ID = "D_CollateralHolderVault";
+export const D_AMO_MANAGER_ID = "D_AmoManager";
+export const D_HARD_PEG_ORACLE_WRAPPER_ID = "D_HardPegOracleWrapper";
 
 // dLEND
 export const TREASURY_PROXY_ID = "TreasuryProxy";
@@ -72,4 +72,4 @@ export const STKD_COLLATERAL_VAULT_ID = `${DSTAKE_COLLATERAL_VAULT_ID_PREFIX}_st
 export const STKD_ROUTER_ID = `${DSTAKE_ROUTER_ID_PREFIX}_stkD`;
 
 // RedeemerWithFees
-export const D_REDEEMER_WITH_FEES_CONTRACT_ID = "d_RedeemerWithFees";
+export const D_REDEEMER_WITH_FEES_CONTRACT_ID = "D_RedeemerWithFees";
