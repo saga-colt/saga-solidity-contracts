@@ -13,6 +13,7 @@ import {
   D_TOKEN_ID,
   EMISSION_MANAGER_ID,
   INCENTIVES_PROXY_ID,
+  POOL_ADDRESSES_PROVIDER_ID,
   POOL_DATA_PROVIDER_ID,
 } from "../../typescript/deploy-ids";
 
@@ -30,6 +31,31 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     console.log(
       "No dSTAKE configuration found for this network. Skipping dLend rewards manager deployment.",
     );
+    return;
+  }
+
+  // Check if dLend is configured and deployed before proceeding with dLend rewards
+  if (!config.dLend) {
+    console.log(
+      "No dLend configuration found for this network. dLend rewards manager requires dLend to be configured. Skipping dLend rewards deployment.",
+    );
+    return;
+  }
+
+  // Verify key dLend contracts are deployed
+  const poolAddressesProvider = await deployments.getOrNull(POOL_ADDRESSES_PROVIDER_ID);
+  const incentivesProxy = await deployments.getOrNull(INCENTIVES_PROXY_ID);
+  const poolDataProvider = await deployments.getOrNull(POOL_DATA_PROVIDER_ID);
+  const emissionManager = await deployments.getOrNull(EMISSION_MANAGER_ID);
+
+  if (!poolAddressesProvider || !incentivesProxy || !poolDataProvider || !emissionManager) {
+    console.log(
+      "dLend contracts not fully deployed. dLend rewards manager requires complete dLend infrastructure. Skipping dLend rewards deployment.",
+    );
+    console.log(`  - PoolAddressesProvider: ${poolAddressesProvider ? '✅' : '❌'}`);
+    console.log(`  - IncentivesProxy: ${incentivesProxy ? '✅' : '❌'}`);
+    console.log(`  - PoolDataProvider: ${poolDataProvider ? '✅' : '❌'}`);
+    console.log(`  - EmissionManager: ${emissionManager ? '✅' : '❌'}`);
     return;
   }
 

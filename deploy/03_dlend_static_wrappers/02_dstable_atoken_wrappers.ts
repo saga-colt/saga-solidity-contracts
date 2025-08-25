@@ -16,19 +16,29 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Get config and token addresses
   const config = await getConfig(hre);
-  const { tokenAddresses } = config;
 
-  // Get dLend contracts
-  const poolAddressesProvider = await deployments.getOrNull(
-    POOL_ADDRESSES_PROVIDER_ID,
-  );
+  // Check if dLend is configured before proceeding with aToken wrappers
+  if (!config.dLend) {
+    console.log(
+      "No dLend configuration found for this network. dStable aToken wrappers require dLend to be configured. Skipping dStable aToken wrapper deployment.",
+    );
+    return true;
+  }
+
+  // Verify key dLend contracts are deployed
+  const poolAddressesProvider = await deployments.getOrNull(POOL_ADDRESSES_PROVIDER_ID);
+  const incentivesProxy = await deployments.getOrNull(INCENTIVES_PROXY_ID);
 
   if (!poolAddressesProvider) {
     console.log(
-      "PoolAddressesProvider not found, skipping aToken wrapper deployment",
+      "dLend contracts not fully deployed. dStable aToken wrappers require dLend infrastructure. Skipping dStable aToken wrapper deployment.",
     );
-    return;
+    console.log(`  - PoolAddressesProvider: ${poolAddressesProvider ? '✅' : '❌'}`);
+    console.log(`  - IncentivesProxy: ${incentivesProxy ? '✅' : '❌'} (optional but recommended)`);
+    return true;
   }
+
+  const { tokenAddresses } = config;
 
   const poolAddressesProviderContract = await ethers.getContractAt(
     "contracts/dlend/core/interfaces/IPoolAddressesProvider.sol:IPoolAddressesProvider",
@@ -41,12 +51,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     poolAddress,
   );
 
-  // Get rewards controller if available
+  // Get rewards controller if available (we already checked this above)
   let rewardsControllerAddress = ethers.ZeroAddress;
-  const rewardsController = await deployments.getOrNull(INCENTIVES_PROXY_ID);
-
-  if (rewardsController) {
-    rewardsControllerAddress = rewardsController.address;
+  if (incentivesProxy) {
+    rewardsControllerAddress = incentivesProxy.address;
   }
 
   // Get D aToken address

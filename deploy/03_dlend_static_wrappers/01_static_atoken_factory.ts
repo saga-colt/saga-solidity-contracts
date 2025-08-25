@@ -1,8 +1,10 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 
+import { getConfig } from "../../config/config";
 import {
   DLEND_STATIC_A_TOKEN_FACTORY_ID,
+  POOL_ADDRESSES_PROVIDER_ID,
   POOL_PROXY_ID,
 } from "../../typescript/deploy-ids";
 import { chunk } from "../../typescript/dlend/helpers";
@@ -11,6 +13,29 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployer } = await hre.getNamedAccounts();
   const { deployments, ethers } = hre;
   const signer = await ethers.getSigner(deployer);
+
+  const config = await getConfig(hre);
+
+  // Check if dLend is configured before proceeding with static wrappers
+  if (!config.dLend) {
+    console.log(
+      "No dLend configuration found for this network. Static aToken wrappers require dLend to be configured. Skipping static aToken factory deployment.",
+    );
+    return true;
+  }
+
+  // Verify key dLend contracts are deployed
+  const poolAddressesProvider = await deployments.getOrNull(POOL_ADDRESSES_PROVIDER_ID);
+  const poolProxy = await deployments.getOrNull(POOL_PROXY_ID);
+
+  if (!poolAddressesProvider || !poolProxy) {
+    console.log(
+      "dLend contracts not fully deployed. Static aToken factory requires dLend infrastructure. Skipping static aToken factory deployment.",
+    );
+    console.log(`  - PoolAddressesProvider: ${poolAddressesProvider ? '✅' : '❌'}`);
+    console.log(`  - PoolProxy: ${poolProxy ? '✅' : '❌'}`);
+    return true;
+  }
 
   // Get deployed Pool proxy address
   const { address: poolAddress } = await deployments.get(POOL_PROXY_ID);

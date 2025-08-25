@@ -135,6 +135,8 @@ const config: HardhatUserConfig = {
       deploy: ["deploy"], // NOTE: DO NOT DEPLOY mocks
       saveDeployments: true,
       accounts: getEnvPrivateKeys("saga_mainnet"),
+      gasPrice: 0,
+      live: true,
     },
   },
   namedAccounts: {
