@@ -6,13 +6,7 @@ export const USD_REDSTONE_WRAPPER_WITH_THRESHOLDING_ID =
 export const USD_REDSTONE_COMPOSITE_WRAPPER_WITH_THRESHOLDING_ID =
   "USD_RedstoneChainlinkCompositeWrapperWithThresholding";
 
-// Decimal Converters
-export const USDC_TO_USD_DECIMAL_CONVERTER_ID =
-  "ChainlinkDecimalConverter_USDC_to_USD";
-export const USDT_TO_USD_DECIMAL_CONVERTER_ID =
-  "ChainlinkDecimalConverter_USDT_to_USD";
-
-// d
+// D
 export const D_TOKEN_ID = "D";
 export const D_ISSUER_CONTRACT_ID = "d_Issuer";
 export const D_REDEEMER_CONTRACT_ID = "d_Redeemer";
@@ -60,8 +54,8 @@ export const ORACLE_AGGREGATOR_WRAPPER_BASE_ID =
   "oracle-aggregator-wrapper-base";
 
 // Wrapped dLEND ATokens
-export const DLEND_STATIC_A_TOKEN_FACTORY_ID = "dLend_StaticATokenFactory";
-export const DLEND_A_TOKEN_WRAPPER_PREFIX = "dLend_ATokenWrapper";
+export const DLEND_STATIC_A_TOKEN_FACTORY_ID = "Palomino_StaticATokenFactory";
+export const DLEND_A_TOKEN_WRAPPER_PREFIX = "Palomino_ATokenWrapper";
 export const D_A_TOKEN_WRAPPER_ID = `${DLEND_A_TOKEN_WRAPPER_PREFIX}_D`;
 
 // dSTAKE deployment tag
