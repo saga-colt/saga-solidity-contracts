@@ -2,7 +2,7 @@ import { ethers, getNamedAccounts } from "hardhat";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 
-import { createDStakeFixture, SD_CONFIG as CONFIG } from "./fixture";
+import { createDStakeFixture, STKD_CONFIG as CONFIG } from "./fixture";
 
 import {
   DStakeToken,
