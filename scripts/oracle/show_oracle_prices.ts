@@ -142,7 +142,6 @@ async function main(): Promise<void> {
   // 1. Load all deployments for the current network via hardhat-deploy
   const deployments = await hre.deployments.all();
   const networkName = hre.network.name;
-  console.log("Chain Id: ", hre.network);
 
   console.log(`\n🔍 Custom Oracle Prices for ${networkName}`);
   console.log("============================================================\n");
