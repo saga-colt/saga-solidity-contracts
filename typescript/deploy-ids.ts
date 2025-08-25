@@ -73,9 +73,9 @@ export const DSTAKE_COLLATERAL_VAULT_ID_PREFIX = "DStakeCollateralVault";
 export const DSTAKE_ROUTER_ID_PREFIX = "DStakeRouter";
 
 // dSTAKE specific instance IDs
-export const SD_DSTAKE_TOKEN_ID = `${DSTAKE_TOKEN_ID_PREFIX}_sD`;
-export const SD_COLLATERAL_VAULT_ID = `${DSTAKE_COLLATERAL_VAULT_ID_PREFIX}_sD`;
-export const SD_ROUTER_ID = `${DSTAKE_ROUTER_ID_PREFIX}_sD`;
+export const STKD_DSTAKE_TOKEN_ID = `${DSTAKE_TOKEN_ID_PREFIX}_stkD`;
+export const STKD_COLLATERAL_VAULT_ID = `${DSTAKE_COLLATERAL_VAULT_ID_PREFIX}_stkD`;
+export const STKD_ROUTER_ID = `${DSTAKE_ROUTER_ID_PREFIX}_stkD`;
 
 // RedeemerWithFees
 export const D_REDEEMER_WITH_FEES_CONTRACT_ID = "d_RedeemerWithFees";
