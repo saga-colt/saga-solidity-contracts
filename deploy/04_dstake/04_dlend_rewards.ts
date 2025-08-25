@@ -43,19 +43,28 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   // Verify key dLend contracts are deployed
-  const poolAddressesProvider = await deployments.getOrNull(POOL_ADDRESSES_PROVIDER_ID);
+  const poolAddressesProvider = await deployments.getOrNull(
+    POOL_ADDRESSES_PROVIDER_ID,
+  );
   const incentivesProxy = await deployments.getOrNull(INCENTIVES_PROXY_ID);
   const poolDataProvider = await deployments.getOrNull(POOL_DATA_PROVIDER_ID);
   const emissionManager = await deployments.getOrNull(EMISSION_MANAGER_ID);
 
-  if (!poolAddressesProvider || !incentivesProxy || !poolDataProvider || !emissionManager) {
+  if (
+    !poolAddressesProvider ||
+    !incentivesProxy ||
+    !poolDataProvider ||
+    !emissionManager
+  ) {
     console.log(
       "dLend contracts not fully deployed. dLend rewards manager requires complete dLend infrastructure. Skipping dLend rewards deployment.",
     );
-    console.log(`  - PoolAddressesProvider: ${poolAddressesProvider ? '✅' : '❌'}`);
-    console.log(`  - IncentivesProxy: ${incentivesProxy ? '✅' : '❌'}`);
-    console.log(`  - PoolDataProvider: ${poolDataProvider ? '✅' : '❌'}`);
-    console.log(`  - EmissionManager: ${emissionManager ? '✅' : '❌'}`);
+    console.log(
+      `  - PoolAddressesProvider: ${poolAddressesProvider ? "✅" : "❌"}`,
+    );
+    console.log(`  - IncentivesProxy: ${incentivesProxy ? "✅" : "❌"}`);
+    console.log(`  - PoolDataProvider: ${poolDataProvider ? "✅" : "❌"}`);
+    console.log(`  - EmissionManager: ${emissionManager ? "✅" : "❌"}`);
     return;
   }
 

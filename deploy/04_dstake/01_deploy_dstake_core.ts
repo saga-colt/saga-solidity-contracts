@@ -5,8 +5,8 @@ import { DeployFunction } from "hardhat-deploy/types";
 import { getConfig } from "../../config/config";
 import { DStakeInstanceConfig } from "../../config/types";
 import {
-  POOL_ADDRESSES_PROVIDER_ID,
   INCENTIVES_PROXY_ID,
+  POOL_ADDRESSES_PROVIDER_ID,
   POOL_DATA_PROVIDER_ID,
 } from "../../typescript/deploy-ids";
 
@@ -33,7 +33,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   // Verify key dLend contracts are deployed
-  const poolAddressesProvider = await deployments.getOrNull(POOL_ADDRESSES_PROVIDER_ID);
+  const poolAddressesProvider = await deployments.getOrNull(
+    POOL_ADDRESSES_PROVIDER_ID,
+  );
   const incentivesProxy = await deployments.getOrNull(INCENTIVES_PROXY_ID);
   const poolDataProvider = await deployments.getOrNull(POOL_DATA_PROVIDER_ID);
 
@@ -41,9 +43,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     console.log(
       "dLend contracts not fully deployed. dStake requires dLend infrastructure. Skipping dStake deployment.",
     );
-    console.log(`  - PoolAddressesProvider: ${poolAddressesProvider ? '✅' : '❌'}`);
-    console.log(`  - IncentivesProxy: ${incentivesProxy ? '✅' : '❌'}`);
-    console.log(`  - PoolDataProvider: ${poolDataProvider ? '✅' : '❌'}`);
+    console.log(
+      `  - PoolAddressesProvider: ${poolAddressesProvider ? "✅" : "❌"}`,
+    );
+    console.log(`  - IncentivesProxy: ${incentivesProxy ? "✅" : "❌"}`);
+    console.log(`  - PoolDataProvider: ${poolDataProvider ? "✅" : "❌"}`);
     return;
   }
 

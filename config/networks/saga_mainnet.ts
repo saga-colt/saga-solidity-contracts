@@ -17,7 +17,7 @@ import { Config } from "../types";
  * @returns The configuration for the network
  */
 export async function getConfig(
-  _hre: HardhatRuntimeEnvironment
+  _hre: HardhatRuntimeEnvironment,
 ): Promise<Config> {
   const dDeployment = await _hre.deployments.getOrNull(D_TOKEN_ID);
   const usdtAddress = "0xC8fe3C1de344854f4429bB333AFFAeF97eF88CEa";
@@ -72,9 +72,9 @@ export async function getConfig(
         baseCurrency: ZeroAddress, // Note that USD is represented by the zero address, per Aave's convention
         hardDStablePeg: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
         priceDecimals: ORACLE_AGGREGATOR_PRICE_DECIMALS,
-        redstoneOracleAssets: {
-          plainRedstoneOracleWrappers: {},
-          redstoneOracleWrappersWithThresholding: {
+        tellorOracleAssets: {
+          plainTellorOracleWrappers: {},
+          tellorOracleWrappersWithThresholding: {
             [usdcAddress]: {
               feed: "0x6c85266a8D3Ce564058667dc5c7E9d58da454ecc", // USDC/USD Tellor price feed
               lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
@@ -86,7 +86,6 @@ export async function getConfig(
               fixedPrice: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
             },
           },
-          compositeRedstoneOracleWrappersWithThresholding: {},
         },
       },
     },

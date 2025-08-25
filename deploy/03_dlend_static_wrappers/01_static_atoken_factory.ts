@@ -25,15 +25,19 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   // Verify key dLend contracts are deployed
-  const poolAddressesProvider = await deployments.getOrNull(POOL_ADDRESSES_PROVIDER_ID);
+  const poolAddressesProvider = await deployments.getOrNull(
+    POOL_ADDRESSES_PROVIDER_ID,
+  );
   const poolProxy = await deployments.getOrNull(POOL_PROXY_ID);
 
   if (!poolAddressesProvider || !poolProxy) {
     console.log(
       "dLend contracts not fully deployed. Static aToken factory requires dLend infrastructure. Skipping static aToken factory deployment.",
     );
-    console.log(`  - PoolAddressesProvider: ${poolAddressesProvider ? '✅' : '❌'}`);
-    console.log(`  - PoolProxy: ${poolProxy ? '✅' : '❌'}`);
+    console.log(
+      `  - PoolAddressesProvider: ${poolAddressesProvider ? "✅" : "❌"}`,
+    );
+    console.log(`  - PoolProxy: ${poolProxy ? "✅" : "❌"}`);
     return true;
   }
 

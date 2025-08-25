@@ -26,15 +26,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   // Verify key dLend contracts are deployed
-  const poolAddressesProvider = await deployments.getOrNull(POOL_ADDRESSES_PROVIDER_ID);
+  const poolAddressesProvider = await deployments.getOrNull(
+    POOL_ADDRESSES_PROVIDER_ID,
+  );
   const incentivesProxy = await deployments.getOrNull(INCENTIVES_PROXY_ID);
 
   if (!poolAddressesProvider) {
     console.log(
       "dLend contracts not fully deployed. dStable aToken wrappers require dLend infrastructure. Skipping dStable aToken wrapper deployment.",
     );
-    console.log(`  - PoolAddressesProvider: ${poolAddressesProvider ? '✅' : '❌'}`);
-    console.log(`  - IncentivesProxy: ${incentivesProxy ? '✅' : '❌'} (optional but recommended)`);
+    console.log(
+      `  - PoolAddressesProvider: ${poolAddressesProvider ? "✅" : "❌"}`,
+    );
+    console.log(
+      `  - IncentivesProxy: ${incentivesProxy ? "✅" : "❌"} (optional but recommended)`,
+    );
     return true;
   }
 
@@ -53,6 +59,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Get rewards controller if available (we already checked this above)
   let rewardsControllerAddress = ethers.ZeroAddress;
+
   if (incentivesProxy) {
     rewardsControllerAddress = incentivesProxy.address;
   }

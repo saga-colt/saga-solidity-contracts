@@ -52,7 +52,7 @@ export interface OracleAggregatorConfig {
   readonly priceDecimals: number;
   readonly hardDStablePeg: bigint;
   readonly baseCurrency: string;
-  readonly redstoneOracleAssets: {
+  readonly redstoneOracleAssets?: {
     plainRedstoneOracleWrappers: {
       [key: string]: string;
     };
@@ -72,6 +72,18 @@ export interface OracleAggregatorConfig {
         fixedPriceInBase1: bigint;
         lowerThresholdInBase2: bigint;
         fixedPriceInBase2: bigint;
+      };
+    };
+  };
+  readonly tellorOracleAssets?: {
+    plainTellorOracleWrappers: {
+      [key: string]: string;
+    };
+    tellorOracleWrappersWithThresholding: {
+      [key: string]: {
+        feed: string;
+        lowerThreshold: bigint;
+        fixedPrice: bigint;
       };
     };
   };

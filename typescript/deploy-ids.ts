@@ -1,5 +1,10 @@
 // USD Oracles
 export const USD_ORACLE_AGGREGATOR_ID = "USD_OracleAggregator";
+export const USD_TELLOR_ORACLE_WRAPPER_ID = "USD_TellorWrapper";
+export const USD_TELLOR_WRAPPER_WITH_THRESHOLDING_ID =
+  "USD_TellorWrapperWithThresholding";
+
+// Legacy Redstone IDs (deprecated, use Tellor instead)
 export const USD_REDSTONE_ORACLE_WRAPPER_ID = "USD_RedstoneChainlinkWrapper";
 export const USD_REDSTONE_WRAPPER_WITH_THRESHOLDING_ID =
   "USD_RedstoneChainlinkWrapperWithThresholding";
