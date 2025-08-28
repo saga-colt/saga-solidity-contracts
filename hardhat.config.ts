@@ -3,7 +3,6 @@ import "@typechain/hardhat";
 import "@nomicfoundation/hardhat-ethers";
 import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomicfoundation/hardhat-toolbox";
-import "@nomicfoundation/hardhat-verify";
 import "hardhat-deploy";
 import "dotenv/config";
 
@@ -27,7 +26,7 @@ const wrapSigner = (signer: any, hre: HardhatRuntimeEnvironment) => {
       console.log(
         `\n>>> Waiting ${sleepTime}ms after transaction to ${
           result.to || "a new contract"
-        }`,
+        }`
       );
       await sleep(sleepTime);
     }
@@ -137,6 +136,7 @@ const config: HardhatUserConfig = {
       accounts: getEnvPrivateKeys("saga_mainnet"),
       gasPrice: 0,
       live: true,
+      chainId: 5464,
     },
   },
   namedAccounts: {
@@ -157,26 +157,6 @@ const config: HardhatUserConfig = {
   },
   gasReporter: {
     enabled: false, // Enable this when testing new complex functions
-  },
-  etherscan: {
-    // Used for verifying single contracts when hardhat-deploy auto verify doesn't work
-    apiKey: {
-      saga_mainnet: "PLACEHOLDER_SAGA_API_KEY_UNIQUE_001",
-    },
-    customChains: [
-      {
-        network: "saga_mainnet",
-        chainId: 5464,
-        urls: {
-          apiURL: "PLACEHOLDER_SAGA_EXPLORER_API_UNIQUE_002",
-          browserURL: "PLACEHOLDER_SAGA_EXPLORER_URL_UNIQUE_003",
-        },
-      },
-    ],
-  },
-  sourcify: {
-    // Just here to mute warning
-    enabled: false,
   },
 };
 /* eslint-enable camelcase -- Re-enabling camelcase rule after network definitions */
