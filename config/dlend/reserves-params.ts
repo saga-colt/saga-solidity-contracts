@@ -26,9 +26,9 @@ const baseDStableConfig: IReserveParams = {
   borrowableIsolation: false,
 };
 
-export const strategyDUSD: IReserveParams = {
+export const strategyD: IReserveParams = {
   ...baseDStableConfig,
-  supplyCap: "2500000", // Specific to dUSD
+  supplyCap: "2500000", // Specific to D
 };
 
 export const strategyWETH: IReserveParams = {

@@ -18,8 +18,8 @@ import {
 import {
   POOL_PROXY_ID,
   POOL_DATA_PROVIDER_ID,
-  DUSD_TOKEN_ID,
-  DUSD_ISSUER_CONTRACT_ID,
+  D_TOKEN_ID,
+  D_ISSUER_CONTRACT_ID,
   USD_ORACLE_AGGREGATOR_ID,
 } from "../../typescript/deploy-ids";
 import { ORACLE_AGGREGATOR_PRICE_DECIMALS } from "../../typescript/oracle_aggregator/constants";
@@ -69,7 +69,7 @@ async function setupDLendFixture(): Promise<DLendFixtureResult> {
   const { deployer } = await hre.getNamedAccounts();
 
   // Get dStable token addresses first
-  const { address: dUsdAddress } = await deployments.get(DUSD_TOKEN_ID);
+  const { address: dAddress } = await deployments.get(D_TOKEN_ID);
 
   // Get the Pool contract
   const { address: poolAddress } = await deployments.get(POOL_PROXY_ID);
@@ -153,23 +153,23 @@ async function setupDLendFixture(): Promise<DLendFixtureResult> {
       ltv: config.ltv,
       liquidationThreshold: config.liquidationThreshold,
       symbol,
-      isDStable: asset === dUsdAddress,
+      isDStable: asset === dAddress,
     };
   }
 
   // Ensure dStables are in the reserves
-  if (!reservesList.includes(dUsdAddress)) {
+  if (!reservesList.includes(dAddress)) {
     throw new Error(
-      `D (${dUsdAddress}) not found in reserves: ${reservesList}`
+      `D (${dAddress}) not found in reserves: ${reservesList}`
     );
   }
 
   // Mint D
-  const dusdIssuerAddress = (await hre.deployments.get(DUSD_ISSUER_CONTRACT_ID))
+  const dIssuerAddress = (await hre.deployments.get(D_ISSUER_CONTRACT_ID))
     .address;
-  const dusdIssuer = await hre.ethers.getContractAt(
+  const dIssuer = await hre.ethers.getContractAt(
     "IssuerV2",
-    dusdIssuerAddress
+    dIssuerAddress
   );
   const usdOracleAddress = (await hre.deployments.get(USD_ORACLE_AGGREGATOR_ID))
     .address;
@@ -181,10 +181,10 @@ async function setupDLendFixture(): Promise<DLendFixtureResult> {
   // Get collateral token (sfrxUSD) for D
   const { contract: usdCollateralToken, tokenInfo: usdCollateralInfo } =
     await getTokenContractForSymbol(hre, deployer, "sfrxUSD");
-  const { contract: dUsdToken, tokenInfo: dUsdInfo } =
+  const { contract: dToken, tokenInfo: dInfo } =
     await getTokenContractForSymbol(hre, deployer, "D");
 
-  // Mint dUSD
+  // Mint d
   const usdCollateralAmount = ethers.parseUnits(
     "1000000",
     usdCollateralInfo.decimals
@@ -192,23 +192,23 @@ async function setupDLendFixture(): Promise<DLendFixtureResult> {
   const usdCollateralPrice = await usdOracle.getAssetPrice(
     usdCollateralInfo.address
   );
-  const dUsdPrice = await usdOracle.getAssetPrice(dUsdInfo.address);
+  const dPrice = await usdOracle.getAssetPrice(dInfo.address);
   const usdBaseValue =
     (usdCollateralAmount * usdCollateralPrice) /
     BigInt(10 ** usdCollateralInfo.decimals);
-  const expectedDusdAmount =
-    (usdBaseValue * BigInt(10 ** dUsdInfo.decimals)) / dUsdPrice;
+  const expectedDAmount =
+    (usdBaseValue * BigInt(10 ** dInfo.decimals)) / dPrice;
 
   // Mint D - deployer now holds this
   // Note: Approval is for the Issuer, not the Pool
   await usdCollateralToken.approve(
-    await dusdIssuer.getAddress(),
+    await dIssuer.getAddress(),
     usdCollateralAmount
   );
-  await dusdIssuer.issue(
+  await dIssuer.issue(
     usdCollateralAmount,
     usdCollateralInfo.address,
-    expectedDusdAmount
+    expectedDAmount
   );
 
   return {
@@ -224,7 +224,7 @@ async function setupDLendFixture(): Promise<DLendFixtureResult> {
     },
     assets,
     dStables: {
-      D: dUsdAddress,
+      D: dAddress,
     },
   };
 }

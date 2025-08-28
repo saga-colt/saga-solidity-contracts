@@ -3,7 +3,7 @@ import hre, { getNamedAccounts } from "hardhat";
 import { Address } from "hardhat-deploy/types";
 
 import { ERC20StablecoinUpgradeable } from "../../typechain-types";
-import { createDStableFixture, DUSD_CONFIG } from "./fixtures";
+import { createDStableFixture, D_CONFIG } from "./fixtures";
 
 describe("ERC20StablecoinUpgradeable", () => {
   let stablecoinContract: ERC20StablecoinUpgradeable;
@@ -12,7 +12,7 @@ describe("ERC20StablecoinUpgradeable", () => {
   let user2: Address;
 
   // Set up fixture for dUSD configuration only
-  const fixture = createDStableFixture(DUSD_CONFIG);
+  const fixture = createDStableFixture(D_CONFIG);
 
   beforeEach(async function () {
     await fixture();
@@ -20,10 +20,10 @@ describe("ERC20StablecoinUpgradeable", () => {
     ({ deployer, user1, user2 } = await getNamedAccounts());
 
     // Get the deployed dUSD contract
-    const dUSDAddress = (await hre.deployments.get(DUSD_CONFIG.symbol)).address;
+    const dAddress = (await hre.deployments.get(D_CONFIG.symbol)).address;
     stablecoinContract = await hre.ethers.getContractAt(
       "ERC20StablecoinUpgradeable",
-      dUSDAddress,
+      dAddress,
       await hre.ethers.getSigner(deployer)
     );
   });

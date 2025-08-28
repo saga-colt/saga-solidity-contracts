@@ -105,8 +105,26 @@ async function dumpAggregatorPrices(): Promise<void> {
         ?.compositeRedstoneOracleWrappersWithThresholding
     );
 
+    // Tellor
+    addKeys(aggConfig.tellorOracleAssets?.plainTellorOracleWrappers);
+    addKeys(
+      aggConfig.tellorOracleAssets?.tellorOracleWrappersWithThresholding
+    );
+
     // Chainlink composite wrappers (simple map asset->config)
     addKeys(aggConfig.chainlinkCompositeWrapperAggregator);
+
+    // Add all tokens from tokenAddresses config (D token, USDC, USDT, etc.)
+    // These may have hard peg oracles or other oracle configurations
+    if (config.tokenAddresses) {
+      for (const [symbol, address] of Object.entries(config.tokenAddresses)) {
+        if (address && 
+            address !== "" && 
+            address !== ethers.ZeroAddress) {
+          assetSet.add((address as string).toLowerCase());
+        }
+      }
+    }
 
     const tokenAddressMap: Record<string, string> = Object.entries(
       (config.tokenAddresses ?? {}) as Record<string, any>
@@ -121,6 +139,10 @@ async function dumpAggregatorPrices(): Promise<void> {
     const decimals = aggConfig.priceDecimals ?? 18;
 
     console.log(`▶ Aggregator: ${aggKey}`);
+    
+    if (assetSet.size === 0) {
+      console.log("  No assets configured for this aggregator");
+    }
 
     for (const assetAddrLower of assetSet) {
       try {
@@ -129,8 +151,9 @@ async function dumpAggregatorPrices(): Promise<void> {
         const symbol = tokenAddressMap[assetAddrLower] || assetAddrLower;
         console.log(`  ${symbol.padEnd(15)} : ${priceHuman}`);
       } catch (err) {
+        const symbol = tokenAddressMap[assetAddrLower] || assetAddrLower;
         console.warn(
-          `  ⚠️  Could not fetch price for ${assetAddrLower}: ${(err as Error).message}`
+          `  ⚠️  Could not fetch price for ${symbol} (${assetAddrLower}): ${(err as Error).message}`
         );
       }
     }

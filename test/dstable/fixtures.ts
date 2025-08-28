@@ -4,10 +4,10 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import {
   USD_ORACLE_AGGREGATOR_ID,
-  DUSD_ISSUER_CONTRACT_ID,
-  DUSD_REDEEMER_CONTRACT_ID,
-  DUSD_COLLATERAL_VAULT_CONTRACT_ID,
-  DUSD_AMO_MANAGER_ID,
+  D_ISSUER_CONTRACT_ID,
+  D_REDEEMER_CONTRACT_ID,
+  D_COLLATERAL_VAULT_CONTRACT_ID,
+  D_AMO_MANAGER_ID,
 } from "../../typescript/deploy-ids";
 import { getTokenContractForSymbol } from "../../typescript/token/utils";
 
@@ -70,13 +70,13 @@ export const createDStableAmoFixture = (config: DStableFixtureConfig) => {
 };
 
 // Predefined configurations
-export const DUSD_CONFIG: DStableFixtureConfig = {
+export const D_CONFIG: DStableFixtureConfig = {
   symbol: "D",
   deploymentTag: "dusd",
-  issuerContractId: DUSD_ISSUER_CONTRACT_ID,
-  redeemerContractId: DUSD_REDEEMER_CONTRACT_ID,
-  collateralVaultContractId: DUSD_COLLATERAL_VAULT_CONTRACT_ID,
-  amoManagerId: DUSD_AMO_MANAGER_ID,
+  issuerContractId: D_ISSUER_CONTRACT_ID,
+  redeemerContractId: D_REDEEMER_CONTRACT_ID,
+  collateralVaultContractId: D_COLLATERAL_VAULT_CONTRACT_ID,
+  amoManagerId: D_AMO_MANAGER_ID,
   oracleAggregatorId: USD_ORACLE_AGGREGATOR_ID,
   peggedCollaterals: ["frxUSD", "USDC", "USDS"], // USDC is interesting due to 6 decimals
   yieldBearingCollaterals: ["sfrxUSD", "sUSDS"],

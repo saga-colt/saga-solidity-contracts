@@ -18,13 +18,13 @@ import {
 } from "../../typescript/token/utils";
 import {
   createDStableAmoFixture,
-  DUSD_CONFIG,
+  D_CONFIG,
   DStableFixtureConfig,
 } from "./fixtures";
 import { getConfig } from "../../config/config";
 
 // Run tests for each dStable configuration
-const dstableConfigs: DStableFixtureConfig[] = [DUSD_CONFIG];
+const dstableConfigs: DStableFixtureConfig[] = [D_CONFIG];
 
 describe("AmoManager", () => {
   let deployer: Address;

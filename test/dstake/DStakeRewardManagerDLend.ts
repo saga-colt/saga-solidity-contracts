@@ -8,7 +8,7 @@ import {
 import { IDStableConversionAdapter } from "../../typechain-types";
 import { IERC20 } from "../../typechain-types";
 import { deployments } from "hardhat";
-import { DUSD_TOKEN_ID } from "../../typescript/deploy-ids";
+import { D_TOKEN_ID } from "../../typescript/deploy-ids";
 
 DSTAKE_CONFIGS.forEach((config: DStakeFixtureConfig) => {
   describe(`DStakeRewardManagerDLend for ${config.DStakeTokenSymbol}`, function () {
@@ -47,7 +47,7 @@ DSTAKE_CONFIGS.forEach((config: DStakeFixtureConfig) => {
 
     // Determine reward token symbol and dStable token ID based on config
     const rewardTokenSymbol = "sfrxUSD";
-    const dStableTokenId = DUSD_TOKEN_ID;
+    const dStableTokenId = D_TOKEN_ID;
     const rewardAmount = ethers.parseUnits("100", 18);
     const emissionPerSecond = ethers.parseUnits("1", 6);
 

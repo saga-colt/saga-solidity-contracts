@@ -11,13 +11,13 @@ import {
 } from "../../typechain-types";
 import {
   createDStakeFixture,
-  SDUSD_CONFIG,
+  STKD_CONFIG,
   DStakeFixtureConfig,
 } from "./fixture";
 import { ERC20StablecoinUpgradeable } from "../../typechain-types/contracts/dstable/ERC20StablecoinUpgradeable";
 import { IStaticATokenLM } from "../../typechain-types/contracts/vaults/atoken_wrapper/interfaces/IStaticATokenLM";
 
-const STAKE_CONFIGS: DStakeFixtureConfig[] = [SDUSD_CONFIG];
+const STAKE_CONFIGS: DStakeFixtureConfig[] = [STKD_CONFIG];
 
 STAKE_CONFIGS.forEach((cfg) => {
   describe(`dStake Ecosystem - ${cfg.DStakeTokenSymbol} - Basic Deposit and dLEND Interaction Verification`, function () {

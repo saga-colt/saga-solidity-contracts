@@ -13,14 +13,14 @@ import { StaticATokenLM } from "../../typechain-types/contracts/vaults/atoken_wr
 import { IPool } from "../../typechain-types/contracts/dlend/core/interfaces/IPool";
 import {
   createDStakeFixture,
-  SDUSD_CONFIG,
+  STKD_CONFIG,
   DStakeFixtureConfig,
 } from "./fixture";
 import { ERC20StablecoinUpgradeable } from "../../typechain-types/contracts/dstable/ERC20StablecoinUpgradeable";
 import { getConfig } from "../../config/config";
 import { TestERC20 } from "../../typechain-types/contracts/testing/token/TestERC20";
 
-const STAKE_CONFIGS: DStakeFixtureConfig[] = [SDUSD_CONFIG];
+const STAKE_CONFIGS: DStakeFixtureConfig[] = [STKD_CONFIG];
 
 STAKE_CONFIGS.forEach((cfg) => {
   describe(`dSTAKE Ecosystem - ${cfg.DStakeTokenSymbol} - Yield Accrual and Exchange Rate Update`, function () {

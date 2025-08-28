@@ -1,6 +1,6 @@
 import hre from "hardhat";
 import {
-  DUSD_TOKEN_ID,
+  D_TOKEN_ID,
   POOL_ADDRESSES_PROVIDER_ID,
   POOL_DATA_PROVIDER_ID,
   POOL_PROXY_ID,
@@ -17,12 +17,12 @@ async function main() {
 
   // Resolve dUSD token address
   const config = await getConfig(hre);
-  let dUSDAddress = config.tokenAddresses.D;
-  if (!dUSDAddress) {
-    const dusdDeployment = await deployments.get(DUSD_TOKEN_ID);
-    dUSDAddress = dusdDeployment.address;
+  let dAddress = config.tokenAddresses.D;
+  if (!dAddress) {
+    const dDeployment = await deployments.get(D_TOKEN_ID);
+    dAddress = dDeployment.address;
   }
-  if (!dUSDAddress) throw new Error("dUSD token address not found");
+  if (!dAddress) throw new Error("d token address not found");
 
   // Resolve Pool address (prefer saved proxy, fallback to AddressesProvider)
   let poolAddress: string;
@@ -41,39 +41,39 @@ async function main() {
   }
   if (!poolAddress) throw new Error("Pool address not found");
 
-  console.log(`dUSD: ${dUSDAddress}`);
+  console.log(`d: ${dAddress}`);
   console.log(`Pool: ${poolAddress}`);
 
   // Signers
   const deployerSigner = await ethers.getSigner(deployer);
 
   // Contracts
-  const dUSDContract = await ethers.getContractAt(
+  const dContract = await ethers.getContractAt(
     "ERC20StablecoinUpgradeable",
-    dUSDAddress,
+    dAddress,
     deployerSigner
   );
 
-  const decimals = Number(await dUSDContract.decimals());
+  const decimals = Number(await dContract.decimals());
   const amount = ethers.parseUnits("420", decimals);
 
-  // Step 1: Check deployer dUSD balance
-  const deployerBalance = await dUSDContract.balanceOf(deployer);
+  // Step 1: Check deployer d balance
+  const deployerBalance = await dContract.balanceOf(deployer);
   console.log(
-    `Deployer dUSD balance: ${ethers.formatUnits(deployerBalance, decimals)} D`
+    `Deployer d balance: ${ethers.formatUnits(deployerBalance, decimals)} D`
   );
   if (deployerBalance < amount) {
     throw new Error(
-      `Insufficient dUSD balance in deployer. Need ${ethers.formatUnits(
+      `Insufficient d balance in deployer. Need ${ethers.formatUnits(
         amount,
         decimals
       )} D`
     );
   }
 
-  // Step 2: Deployer lends 420 dUSD on dLEND
-  console.log(`Approving Pool to spend 420 dUSD from deployer...`);
-  const approveTx = await dUSDContract.approve(poolAddress, amount);
+  // Step 2: Deployer lends 420 d on dLEND
+  console.log(`Approving Pool to spend 420 d from deployer...`);
+  const approveTx = await dContract.approve(poolAddress, amount);
   console.log(`approve tx: ${approveTx.hash}`);
   await approveTx.wait();
 
@@ -82,9 +82,9 @@ async function main() {
     poolAddress,
     deployerSigner
   );
-  console.log(`Supplying 420 dUSD as deployer...`);
+  console.log(`Supplying 420 d as deployer...`);
   const supplyTx = await poolAsDeployer.supply(
-    dUSDAddress,
+    dAddress,
     amount,
     deployer,
     0
@@ -99,7 +99,7 @@ async function main() {
       "AaveProtocolDataProvider",
       dataProviderDeployment.address
     );
-    const tokens = await dataProvider.getReserveTokensAddresses(dUSDAddress);
+    const tokens = await dataProvider.getReserveTokensAddresses(dAddress);
     const aTokenAddress = tokens.aTokenAddress || tokens[0];
     const aToken = await ethers.getContractAt("IERC20Detailed", aTokenAddress);
     const aBal = await aToken.balanceOf(deployer);

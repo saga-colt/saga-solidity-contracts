@@ -2,7 +2,7 @@ import { deployments } from "hardhat";
 import hre from "hardhat";
 import {
   USD_ORACLE_AGGREGATOR_ID,
-  DUSD_HARD_PEG_ORACLE_WRAPPER_ID,
+  D_HARD_PEG_ORACLE_WRAPPER_ID,
   USD_REDSTONE_ORACLE_WRAPPER_ID,
   USD_REDSTONE_WRAPPER_WITH_THRESHOLDING_ID,
   USD_REDSTONE_COMPOSITE_WRAPPER_WITH_THRESHOLDING_ID,
@@ -276,7 +276,7 @@ export const getOracleAggregatorFixture = async (currency: string) => {
     deploymentTag: "usd-oracle",
     oracleAggregatorId: USD_ORACLE_AGGREGATOR_ID,
     wrapperIds: {
-      hardPegWrapper: DUSD_HARD_PEG_ORACLE_WRAPPER_ID,
+      hardPegWrapper: D_HARD_PEG_ORACLE_WRAPPER_ID,
       redstoneChainlinkWrapper: USD_REDSTONE_ORACLE_WRAPPER_ID,
       redstoneChainlinkWrapperWithThresholding:
         USD_REDSTONE_WRAPPER_WITH_THRESHOLDING_ID,
