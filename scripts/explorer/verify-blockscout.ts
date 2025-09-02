@@ -11,6 +11,7 @@ import path from "path";
 import { URLSearchParams } from "url";
 import https from "https";
 import { Interface, Fragment, AbiCoder } from "ethers";
+import { spawnSync } from "child_process";
 
 type DeploymentFile = {
   address: string;
@@ -232,6 +233,40 @@ function summarizeTimeoutNote(lastNote: string, maxLen = 140): string {
   return `timeout waiting for verification - last status: ${truncateMiddle(lastNote, maxLen)}`;
 }
 
+function runHardhatVerify(
+  network: string,
+  address: string,
+  ctorArgs: any[] | undefined,
+  contractFqn?: string
+): { ok: boolean; note: string } {
+  const args: string[] = ["hardhat", "verify", "--network", network];
+  if (contractFqn) {
+    args.push("--contract", contractFqn);
+  }
+  args.push(address);
+  for (const a of ctorArgs || []) {
+    args.push(String(a));
+  }
+  // Ensure we have fresh artifacts compiled at least once
+  // Compile only once per process to reduce overhead
+  if (!(global as any).__compiled_once) {
+    spawnSync("npx", ["hardhat", "compile", "--force"], { stdio: "ignore" });
+    (global as any).__compiled_once = true;
+  }
+  const res = spawnSync("npx", args, { encoding: "utf8" });
+  const out = `${res.stdout || ""}\n${res.stderr || ""}`;
+  const lower = out.toLowerCase();
+  const success =
+    lower.includes("successfully verified") ||
+    lower.includes("already verified") ||
+    lower.includes("pass - verified");
+  const note = success
+    ? out.match(/Successfully verified contract[^\n]*/)?.[0] ||
+      "verified via hardhat-verify"
+    : truncateMiddle(out.trim() || "hardhat-verify failed", 200);
+  return { ok: success, note };
+}
+
 async function main() {
   const network = process.argv.includes("--network")
     ? process.argv[process.argv.indexOf("--network") + 1]
@@ -395,25 +430,45 @@ async function main() {
         if (finalMsg) break;
       }
 
+      let current: VerifyResult | undefined;
       if (!submitted) {
-        const note = summarizeSubmitErrors(submitErrors);
-        const r: VerifyResult = { name, address, ok: false, note };
-        results.push(r);
-        printResultLine(r);
+        current = {
+          name,
+          address,
+          ok: false,
+          note: summarizeSubmitErrors(submitErrors),
+        };
       } else if (!finalMsg) {
-        const r: VerifyResult = {
+        current = {
           name,
           address,
           ok: false,
           note: summarizeTimeoutNote(lastCheckNote),
         };
-        results.push(r);
-        printResultLine(r);
       } else {
-        const r: VerifyResult = { name, address, ok: true, note: finalMsg };
-        results.push(r);
-        printResultLine(r);
+        current = { name, address, ok: true, note: finalMsg };
       }
+
+      // Fallback: try Hardhat verify for failures
+      if (!current.ok) {
+        const fqnCandidates = candidateNames;
+        // Try without FQN first, then with candidates to help disambiguate
+        let hh = runHardhatVerify(network, address, deployment.args);
+        if (!hh.ok) {
+          for (const fqn of fqnCandidates) {
+            hh = runHardhatVerify(network, address, deployment.args, fqn);
+            if (hh.ok) break;
+          }
+        }
+        if (hh.ok) {
+          current = { name, address, ok: true, note: hh.note };
+        } else {
+          current.note = `${current.note} | hardhat-verify fallback failed: ${hh.note}`;
+        }
+      }
+
+      results.push(current);
+      printResultLine(current);
     } catch (err: any) {
       const r: VerifyResult = {
         name,

@@ -65,6 +65,16 @@ const config: HardhatUserConfig = {
   solidity: {
     compilers: [
       {
+        version: "0.8.10",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 999999,
+          },
+          ...(process.env.VIA_IR === "true" ? { viaIR: true } : {}),
+        },
+      },
+      {
         version: "0.8.20",
         settings: {
           optimizer: {
@@ -157,6 +167,24 @@ const config: HardhatUserConfig = {
   },
   gasReporter: {
     enabled: false, // Enable this when testing new complex functions
+  },
+  etherscan: {
+    apiKey: {
+      saga_mainnet: "empty",
+    },
+    customChains: [
+      {
+        network: "saga_mainnet",
+        chainId: 5464,
+        urls: {
+          apiURL: "https://api-sagaevm.sagaexplorer.io/api",
+          browserURL: "https://sagaevm.sagaexplorer.io",
+        },
+      },
+    ],
+  },
+  sourcify: {
+    enabled: false,
   },
 };
 /* eslint-enable camelcase -- Re-enabling camelcase rule after network definitions */
