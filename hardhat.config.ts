@@ -3,7 +3,6 @@ import "@typechain/hardhat";
 import "@nomicfoundation/hardhat-ethers";
 import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomicfoundation/hardhat-toolbox";
-import "@nomicfoundation/hardhat-verify";
 import "hardhat-deploy";
 import "dotenv/config";
 
@@ -27,7 +26,7 @@ const wrapSigner = (signer: any, hre: HardhatRuntimeEnvironment) => {
       console.log(
         `\n>>> Waiting ${sleepTime}ms after transaction to ${
           result.to || "a new contract"
-        }`,
+        }`
       );
       await sleep(sleepTime);
     }
@@ -65,6 +64,16 @@ const config: HardhatUserConfig = {
   // -----------------------------------------------------------------------
   solidity: {
     compilers: [
+      {
+        version: "0.8.10",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 999999,
+          },
+          ...(process.env.VIA_IR === "true" ? { viaIR: true } : {}),
+        },
+      },
       {
         version: "0.8.20",
         settings: {
@@ -137,6 +146,7 @@ const config: HardhatUserConfig = {
       accounts: getEnvPrivateKeys("saga_mainnet"),
       gasPrice: 0,
       live: true,
+      chainId: 5464,
     },
   },
   namedAccounts: {
@@ -159,23 +169,21 @@ const config: HardhatUserConfig = {
     enabled: false, // Enable this when testing new complex functions
   },
   etherscan: {
-    // Used for verifying single contracts when hardhat-deploy auto verify doesn't work
     apiKey: {
-      saga_mainnet: "PLACEHOLDER_SAGA_API_KEY_UNIQUE_001",
+      saga_mainnet: "empty",
     },
     customChains: [
       {
         network: "saga_mainnet",
         chainId: 5464,
         urls: {
-          apiURL: "PLACEHOLDER_SAGA_EXPLORER_API_UNIQUE_002",
-          browserURL: "PLACEHOLDER_SAGA_EXPLORER_URL_UNIQUE_003",
+          apiURL: "https://api-sagaevm.sagaexplorer.io/api",
+          browserURL: "https://sagaevm.sagaexplorer.io",
         },
       },
     ],
   },
   sourcify: {
-    // Just here to mute warning
     enabled: false,
   },
 };
