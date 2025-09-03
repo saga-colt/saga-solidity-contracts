@@ -1,111 +1,111 @@
 # dTRINITY → Saga Fork Replacement Guide
 
-This document outlines all the Sonic-specific and dTRINITY-specific values that need to be replaced when forking the protocol for the Saga blockchain.
+This document outlines all the Saga-specific and dTRINITY-specific values that need to be replaced when forking the protocol for the Saga blockchain.
 
 ## 🔍 Search Reference Tags
 Use these tags when doing replacements:
-- `#SONIC_NETWORK_CONFIG` - Network configuration replacements
-- `#SONIC_CHAIN_DATA` - Chain IDs, URLs, and addresses  
+- `#SAGA_NETWORK_CONFIG` - Network configuration replacements
+- `#SAGA_CHAIN_DATA` - Chain IDs, URLs, and addresses  
 - `#DTRINITY_USER_FACING` - User-facing branding and display names
 - `#DTRINITY_KEEP_INTERNAL` - Internal references to keep for compatibility
 
 ---
 
-## 1. SONIC BLOCKCHAIN REPLACEMENTS
+## 1. SAGA BLOCKCHAIN REPLACEMENTS
 
-### Network Configuration Files `#SONIC_NETWORK_CONFIG`
+### Network Configuration Files `#SAGA_NETWORK_CONFIG`
 
 **Primary Configuration:**
 - **File:** `hardhat.config.ts:166-178`
-  - Network names: `sonic_testnet` → `saga_testnet`
-  - Network names: `sonic_mainnet` → `saga_mainnet`
+  - Network names: `saga_testnet` → `saga_testnet`
+  - Network names: `saga_mainnet` → `saga_mainnet`
   - RPC URLs: 
-    - Testnet: `https://rpc.blaze.soniclabs.com` → `https://sagaevm.jsonrpc.sagarpc.io/`
-    - Mainnet: `https://rpc.soniclabs.com` → `https://sagaevm.jsonrpc.sagarpc.io/`
-  - Documentation URL: `https://docs.soniclabs.com/sonic/build-on-sonic/getting-started` → **REMOVE** (delete documentation references)
-  - Environment variables: `sonic_testnet`, `sonic_mainnet` → `saga_testnet`, `saga_mainnet`
+    - Testnet: `https://rpc.blaze.sagalabs.com` → `https://sagaevm.jsonrpc.sagarpc.io/`
+    - Mainnet: `https://rpc.sagalabs.com` → `https://sagaevm.jsonrpc.sagarpc.io/`
+  - Documentation URL: `https://docs.sagalabs.com/saga/build-on-saga/getting-started` → **REMOVE** (delete documentation references)
+  - Environment variables: `saga_testnet`, `saga_mainnet` → `saga_testnet`, `saga_mainnet`
   - **NOTE:** Both testnet and mainnet use same RPC as Saga has no testnet - staging deployed to mainnet with isolation
 
 **Bot Configuration:**
 - **File:** `bot/dlend-liquidator/hardhat.config.ts:25-34`
   - Same network name and RPC URL replacements as above
-  - Environment variables: `SONIC_TESTNET_PRIVATE_KEY`, `SONIC_MAINNET_PRIVATE_KEY` → `SAGA_TESTNET_PRIVATE_KEY`, `SAGA_MAINNET_PRIVATE_KEY`
+  - Environment variables: `SAGA_TESTNET_PRIVATE_KEY`, `SAGA_MAINNET_PRIVATE_KEY` → `SAGA_TESTNET_PRIVATE_KEY`, `SAGA_MAINNET_PRIVATE_KEY`
 
-### Chain Data & Explorers `#SONIC_CHAIN_DATA`
+### Chain Data & Explorers `#SAGA_CHAIN_DATA`
 
 **Etherscan Configuration:**
 - **File:** `hardhat.config.ts:202-210`
   - API key: `4EJCRRD3JKIE6TKF6ME7AKVYWFEJI79A26` → `PLACEHOLDER_SAGA_API_KEY_UNIQUE_001` (remove and leave placeholder)
   - Chain ID: `146` → `5464`
-  - API URL: `https://api.sonicscan.org/api` → `PLACEHOLDER_SAGA_EXPLORER_API_UNIQUE_002`
-  - Browser URL: `https://sonicscan.org` → `PLACEHOLDER_SAGA_EXPLORER_URL_UNIQUE_003`
+  - API URL: `https://api.sagascan.org/api` → `PLACEHOLDER_SAGA_EXPLORER_API_UNIQUE_002`
+  - Browser URL: `https://sagascan.org` → `PLACEHOLDER_SAGA_EXPLORER_URL_UNIQUE_003`
 
 **Makefile Explorer URLs:**
 - **File:** `Makefile:135-141`
-  - Testnet API: `https://api-testnet.sonicscan.org` → `PLACEHOLDER_SAGA_TESTNET_EXPLORER_API_UNIQUE_004`
-  - Mainnet API: `https://api.sonicscan.org` → `PLACEHOLDER_SAGA_MAINNET_EXPLORER_API_UNIQUE_005`
+  - Testnet API: `https://api-testnet.sagascan.org` → `PLACEHOLDER_SAGA_TESTNET_EXPLORER_API_UNIQUE_004`
+  - Mainnet API: `https://api.sagascan.org` → `PLACEHOLDER_SAGA_MAINNET_EXPLORER_API_UNIQUE_005`
 
-### Network-Specific Configuration Files `#SONIC_NETWORK_CONFIG`
+### Network-Specific Configuration Files `#SAGA_NETWORK_CONFIG`
 
 **🚨 ENTIRE FILES TO REPLACE:**
-- `config/networks/sonic_mainnet.ts` → `config/networks/saga_mainnet.ts`
-- `config/networks/sonic_testnet.ts` → `config/networks/saga_testnet.ts`
-- `bot/dlend-liquidator/config/networks/sonic_mainnet.ts` → `bot/dlend-liquidator/config/networks/saga_mainnet.ts`
+- `config/networks/saga_mainnet.ts` → `config/networks/saga_mainnet.ts`
+- `config/networks/saga_testnet.ts` → `config/networks/saga_testnet.ts`
+- `bot/dlend-liquidator/config/networks/saga_mainnet.ts` → `bot/dlend-liquidator/config/networks/saga_mainnet.ts`
 
 **Key values within these files:**
-- Token addresses (all Sonic-specific addresses)
+- Token addresses (all Saga-specific addresses)
 - Oracle feed addresses  
 - Governance multisig addresses
-- Subgraph URL: `https://graph-node-sonic.dtrinity.org/subgraphs/name/dtrinity-aave-sonic` → `PLACEHOLDER_SAGA_SUBGRAPH_URL_UNIQUE_006`
-- Special token name: `"Wrapped Staked Sonic USD"` → `"Wrapped Staked Saga Dollar"`
+- Subgraph URL: `https://graph-node-saga.dtrinity.org/subgraphs/name/dtrinity-aave-saga` → `PLACEHOLDER_SAGA_SUBGRAPH_URL_UNIQUE_006`
+- Special token name: `"Wrapped Staked Saga USD"` → `"Wrapped Staked Saga Dollar"`
 
-### Code References `#SONIC_NETWORK_CONFIG`
+### Code References `#SAGA_NETWORK_CONFIG`
 
 **Configuration Imports:**
 - **File:** `config/config.ts:4-21`
-  - Import paths and network switching logic for sonic networks
+  - Import paths and network switching logic for saga networks
 
 **Helper Functions:**
 - **File:** `typescript/hardhat/deploy.ts:12-28`
-  - Function `isSonicTestnet()` → `isSagaTestnet()`
+  - Function `isSagaTestnet()` → `isSagaTestnet()`
   - Network references throughout
 
 **Named Accounts:**
 - **File:** `typescript/hardhat/named-accounts.ts:13,19,109-110`
   - Network name references in account configurations
 
-### Test Files `#SONIC_NETWORK_CONFIG`
+### Test Files `#SAGA_NETWORK_CONFIG`
 
 **Test Fixtures:**
 - **File:** `test/pendle/fixture.ts:1-23`
-  - Export names: `SONIC_MAINNET_PT_TOKENS` → `SAGA_MAINNET_PT_TOKENS`
-  - Export names: `SONIC_PY_FACTORY` → `SAGA_PY_FACTORY`
+  - Export names: `SAGA_MAINNET_PT_TOKENS` → `SAGA_MAINNET_PT_TOKENS`
+  - Export names: `SAGA_PY_FACTORY` → `SAGA_PY_FACTORY`
 
 **Test Logic:**
 - **Files:** `test/pendle/PendleSwapPOC.ts`, `test/pendle/sdk.ts`
   - Network checks and token usage references
 
-### Infrastructure `#SONIC_CHAIN_DATA`
+### Infrastructure `#SAGA_CHAIN_DATA`
 
 **Deployment Artifacts:**
-- **Directory:** `bot/dlend-liquidator/deployments/sonic_mainnet/` → `bot/dlend-liquidator/deployments/saga_mainnet/`
+- **Directory:** `bot/dlend-liquidator/deployments/saga_mainnet/` → `bot/dlend-liquidator/deployments/saga_mainnet/`
 
 **Slack Integration:**
 - **File:** `bot/dlend-liquidator/typescript/odos_bot/notification.ts:23-28`
-  - Environment variables: `SONIC_MAINNET_SLACK_BOT_TOKEN`, `SONIC_MAINNET_SLACK_CHANNEL_ID` → `SAGA_MAINNET_SLACK_BOT_TOKEN`, `SAGA_MAINNET_SLACK_CHANNEL_ID`
+  - Environment variables: `SAGA_MAINNET_SLACK_BOT_TOKEN`, `SAGA_MAINNET_SLACK_CHANNEL_ID` → `SAGA_MAINNET_SLACK_BOT_TOKEN`, `SAGA_MAINNET_SLACK_CHANNEL_ID`
 
 **Shell Scripts:**
-- All script names: `deploy-sonic-*.sh` → `deploy-saga-*.sh`
+- All script names: `deploy-saga-*.sh` → `deploy-saga-*.sh`
 - Script references and network parameters within
 
 **Docker & Build:**
 - **File:** `bot/dlend-liquidator/Makefile:3`
-  - Docker image: `liquidator-bot-sonic` → `liquidator-bot-saga`
+  - Docker image: `liquidator-bot-saga` → `liquidator-bot-saga`
 
-### Documentation `#SONIC_NETWORK_CONFIG`
+### Documentation `#SAGA_NETWORK_CONFIG`
 
-- **File:** `contracts/dstable/dstable-design.md:5` - "Sonic blockchain" → "Saga blockchain"
-- **File:** `scripts/dloop/README.md` - Multiple Sonic network references
+- **File:** `contracts/dstable/dstable-design.md:5` - "Saga blockchain" → "Saga blockchain"
+- **File:** `scripts/dloop/README.md` - Multiple Saga network references
 - **File:** `scripts/oracle/show_oracle_prices.ts:10-22` - Example usage comments
 
 ---
@@ -119,7 +119,7 @@ Use these tags when doing replacements:
   - `"dTRINITY USD"` → `"Saga Dollar"`
 
 **Staking Token Names:**
-- **Files:** Multiple config files (sonic_mainnet.ts:391, sonic_testnet.ts:429, localhost.ts:475)
+- **Files:** Multiple config files (saga_mainnet.ts:391, saga_testnet.ts:429, localhost.ts:475)
   - `"Staked dUSD"` → `"Staked Saga Dollar"`
 
 **Vault Names:**
@@ -128,7 +128,7 @@ Use these tags when doing replacements:
   - `"FRAX-dUSD-3x"` → `"FRAX-D-3x"`
 
 **Boost/Vesting Names:**
-- **Files:** Multiple config files (sonic_mainnet.ts:427, localhost.ts:549, sonic_testnet.ts:467)
+- **Files:** Multiple config files (saga_mainnet.ts:427, localhost.ts:549, saga_testnet.ts:467)
   - `"dBOOST sdUSD Season 1"` → **REMOVE** (dBOOST system will be deleted entirely)
   - `"sdUSD-S1"` → **REMOVE** (vesting system will be deleted entirely)
 
@@ -149,11 +149,11 @@ Use these tags when doing replacements:
   - `"dUSD"` → `"D"`
 
 **Staking Token Symbols:**
-- **Files:** Multiple config files (sonic_mainnet.ts:391, sonic_testnet.ts:429, localhost.ts:475)
+- **Files:** Multiple config files (saga_mainnet.ts:391, saga_testnet.ts:429, localhost.ts:475)
   - `"sdUSD"` → `"sD"`
 
 **Vesting Token Symbols:**
-- **Files:** Multiple config files (sonic_mainnet.ts:427, localhost.ts:549, sonic_testnet.ts:467)
+- **Files:** Multiple config files (saga_mainnet.ts:427, localhost.ts:549, saga_testnet.ts:467)
   - `"sdUSD-S1"` → **REMOVE** (entire vesting system will be deleted)
 
 **Static AToken Wrapper Symbols:**
@@ -193,8 +193,8 @@ Use these tags when doing replacements:
 
 **Liquidator Bot Artifacts:**
 - **Files:** 
-  - `bot/dlend-liquidator/deployments/sonic_mainnet/FlashMintDstableLiquidatorOdos-dS.json`
-  - `bot/dlend-liquidator/deployments/sonic_mainnet/FlashMintDstableLiquidatorPTOdos-dS.json`
+  - `bot/dlend-liquidator/deployments/saga_mainnet/FlashMintDstableLiquidatorOdos-dS.json`
+  - `bot/dlend-liquidator/deployments/saga_mainnet/FlashMintDstableLiquidatorPTOdos-dS.json`
   - **Action:** Delete these deployment artifacts
   - **Reason:** dS-specific liquidator contracts
 
@@ -211,7 +211,7 @@ Use these tags when doing replacements:
   - **Remove:** dS case from conditional logic
 
 **Network Configuration Files:**
-- **Files:** `config/networks/sonic_mainnet.ts`, `config/networks/localhost.ts`
+- **Files:** `config/networks/saga_mainnet.ts`, `config/networks/localhost.ts`
   - **Remove:** All dS imports, configuration blocks, and token addresses
   - **Remove:** dS from dLend reserves configuration
 
@@ -284,7 +284,7 @@ Use these tags when doing replacements:
 - **File:** `config/types.ts:20-35`
   - **Remove:** Entire dLoop configuration interface
 
-- **Files:** Network configs (sonic_mainnet.ts:169-210, sonic_testnet.ts:192-233, localhost.ts:427-470)
+- **Files:** Network configs (saga_mainnet.ts:169-210, saga_testnet.ts:192-233, localhost.ts:427-470)
   - **Remove:** All dLoop configuration blocks including "3x_sFRAX_dUSD" vault configs
 
 ### 🗑️ dPOOL (Pool Vault System) - REMOVE ENTIRELY
@@ -336,7 +336,7 @@ Use these tags when doing replacements:
 - **File:** `config/types.ts:39,242-250`
   - **Remove:** vesting interface property and VestingConfig interface
 
-- **Files:** Network configs (sonic_mainnet.ts:425-433, sonic_testnet.ts:465-473, localhost.ts:546-555)
+- **Files:** Network configs (saga_mainnet.ts:425-433, saga_testnet.ts:465-473, localhost.ts:546-555)
   - **Remove:** All "dBOOST sdUSD Season 1" and "sdUSD-S1" configurations
 
 ---
@@ -345,14 +345,14 @@ Use these tags when doing replacements:
 
 ### Phase 1: Network Infrastructure
 - [ ] Update hardhat.config.ts network configurations
-- [ ] Replace network-specific config files (sonic_mainnet.ts, sonic_testnet.ts)
+- [ ] Replace network-specific config files (saga_mainnet.ts, saga_testnet.ts)
 - [ ] Update bot configuration files
 - [ ] Replace chain IDs, RPC URLs, and explorer URLs
 - [ ] Update environment variable names
 - [ ] Replace subgraph URLs
 
 ### Phase 2: Code References  
-- [ ] Update helper functions (isSonicTestnet → isSagaTestnet)
+- [ ] Update helper functions (isSagaTestnet → isSagaTestnet)
 - [ ] Replace network name references in TypeScript files
 - [ ] Update test files and fixtures
 - [ ] Replace deployment script names and references
@@ -407,17 +407,17 @@ Use these tags when doing replacements:
 
 | Category | Current Value | Replacement Needed |
 |----------|---------------|-------------------|
-| **Network Names** | sonic_testnet, sonic_mainnet | saga_testnet, saga_mainnet |
+| **Network Names** | saga_testnet, saga_mainnet | saga_testnet, saga_mainnet |
 | **Chain ID** | 146 | 5464 |
-| **RPC URLs** | https://rpc.soniclabs.com | https://sagaevm.jsonrpc.sagarpc.io/ |
-| **Explorer API** | https://api.sonicscan.org | PLACEHOLDER_SAGA_EXPLORER_API_UNIQUE_002 |
-| **Explorer URL** | https://sonicscan.org | PLACEHOLDER_SAGA_EXPLORER_URL_UNIQUE_003 |
+| **RPC URLs** | https://rpc.sagalabs.com | https://sagaevm.jsonrpc.sagarpc.io/ |
+| **Explorer API** | https://api.sagascan.org | PLACEHOLDER_SAGA_EXPLORER_API_UNIQUE_002 |
+| **Explorer URL** | https://sagascan.org | PLACEHOLDER_SAGA_EXPLORER_URL_UNIQUE_003 |
 | **USD Token Name** | "dTRINITY USD" | "Saga Dollar" |
 | **USD Token Symbol** | "dUSD" | "D" |
 | **Staked USD Symbol** | "sdUSD" | "sD" |
 | **Boost Name** | "dBOOST" | **REMOVE ENTIRELY** |
 | **Project Name** | "dTrinity" | "Colt" |
-| **Subgraph URL** | graph-node-sonic.dtrinity.org | PLACEHOLDER_SAGA_SUBGRAPH_URL_UNIQUE_006 |
+| **Subgraph URL** | graph-node-saga.dtrinity.org | PLACEHOLDER_SAGA_SUBGRAPH_URL_UNIQUE_006 |
 
 ---
 

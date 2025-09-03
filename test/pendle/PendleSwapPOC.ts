@@ -1,12 +1,12 @@
 import { ethers, network } from "hardhat";
 import { swapExactPToToken } from "../../typescript/pendle/sdk";
-import { SONIC_MAINNET_PT_TOKENS } from "./fixture";
+import { SAGA_MAINNET_PT_TOKENS } from "./fixture";
 
 describe("PendleSwapPOC - Mainnet Integration", function () {
-    // Skip if not on Sonic mainnet
+    // Skip if not on Saga mainnet
     before(function () {
-        if (network.name !== "sonic_mainnet") {
-            console.log(`Skipping Pendle POC tests - not on Sonic mainnet`);
+        if (network.name !== "saga_mainnet") {
+            console.log(`Skipping Pendle POC tests - not on Saga mainnet`);
             this.skip();
         }
     });
@@ -52,7 +52,7 @@ describe("PendleSwapPOC - Mainnet Integration", function () {
     describe("Full POC flow simulation", function () {
         it("Should demonstrate complete off-chain → on-chain flow", async function () {
             const { pocContract, deployer } = await deployPendleSwapPOCForMainnet();
-            const ptToken = SONIC_MAINNET_PT_TOKENS.PTwstkscUSD;
+            const ptToken = SAGA_MAINNET_PT_TOKENS.PTwstkscUSD;
             const testAmount = ethers.parseUnits("0.1", ptToken.decimals);
             const contractAddress = await pocContract.getAddress();
             const network = await ethers.provider.getNetwork();

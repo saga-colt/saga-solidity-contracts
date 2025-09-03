@@ -2,7 +2,7 @@
 
 ## Overview
 
-dStable is a decentralized stablecoin system built on the Sonic blockchain that maintains price stability through a combination of overcollateralization, algorithmic market operations (AMOs), and dynamic fee mechanisms. The system allows users to mint stablecoins by depositing collateral and redeem stablecoins for collateral, while maintaining protocol stability through automated market operations.
+dStable is a decentralized stablecoin system built on the Saga blockchain that maintains price stability through a combination of overcollateralization, algorithmic market operations (AMOs), and dynamic fee mechanisms. The system allows users to mint stablecoins by depositing collateral and redeem stablecoins for collateral, while maintaining protocol stability through automated market operations.
 
 ## System Goals
 

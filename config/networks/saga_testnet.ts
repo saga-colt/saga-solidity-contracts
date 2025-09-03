@@ -3,8 +3,8 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { ONE_PERCENT_BPS } from "../../typescript/common/bps_constants";
 import {
-  DUSD_TOKEN_ID,
   DUSD_A_TOKEN_WRAPPER_ID,
+  DUSD_TOKEN_ID,
   INCENTIVES_PROXY_ID,
 } from "../../typescript/deploy-ids";
 import {
@@ -32,7 +32,7 @@ import { Config } from "../types";
  * @returns The configuration for the network
  */
 export async function getConfig(
-  _hre: HardhatRuntimeEnvironment
+  _hre: HardhatRuntimeEnvironment,
 ): Promise<Config> {
   // Token info will only be populated after their deployment
   const dUSDDeployment = await _hre.deployments.getOrNull(DUSD_TOKEN_ID);
@@ -45,7 +45,7 @@ export async function getConfig(
 
   // Fetch deployed dLend StaticATokenLM wrapper (optional, may be undefined on testnet)
   const dLendATokenWrapperDUSDDeployment = await _hre.deployments.getOrNull(
-    DUSD_A_TOKEN_WRAPPER_ID
+    DUSD_A_TOKEN_WRAPPER_ID,
   );
 
   // Fetch deployed dLend RewardsController (optional)
@@ -58,17 +58,17 @@ export async function getConfig(
   // Get mock oracle deployments
   const mockOracleNameToAddress: Record<string, string> = {};
   const mockOracleAddressesDeployment = await _hre.deployments.getOrNull(
-    "MockOracleNameToAddress"
+    "MockOracleNameToAddress",
   );
 
   if (mockOracleAddressesDeployment?.linkedData) {
     Object.assign(
       mockOracleNameToAddress,
-      mockOracleAddressesDeployment.linkedData
+      mockOracleAddressesDeployment.linkedData,
     );
   } else {
     console.warn(
-      "WARN: MockOracleNameToAddress deployment not found or has no linkedData. Oracle configuration might be incomplete."
+      "WARN: MockOracleNameToAddress deployment not found or has no linkedData. Oracle configuration might be incomplete.",
     );
   }
 
@@ -249,7 +249,7 @@ export async function getConfig(
       },
     },
     odos: {
-      router: "", // Odos doesn't work on sonic testnet
+      router: "", // Odos doesn't work on saga testnet
     },
     dStake: {
       stkD: {
@@ -262,25 +262,25 @@ export async function getConfig(
         adapters: [
           {
             vaultAsset: emptyStringIfUndefined(
-              dLendATokenWrapperDUSDDeployment?.address
+              dLendATokenWrapperDUSDDeployment?.address,
             ),
             adapterContract: "WrappedDLendConversionAdapter",
           },
         ],
         defaultDepositVaultAsset: emptyStringIfUndefined(
-          dLendATokenWrapperDUSDDeployment?.address
+          dLendATokenWrapperDUSDDeployment?.address,
         ),
         collateralVault: "DStakeCollateralVault_sdUSD",
         collateralExchangers: [deployer],
         dLendRewardManager: {
           managedVaultAsset: emptyStringIfUndefined(
-            dLendATokenWrapperDUSDDeployment?.address
+            dLendATokenWrapperDUSDDeployment?.address,
           ), // This should be the deployed StaticATokenLM address for dUSD
           dLendAssetToClaimFor: emptyStringIfUndefined(
-            aTokenDUSDDeployment?.address
+            aTokenDUSDDeployment?.address,
           ), // Use the deployed dLEND-D aToken address
           dLendRewardsController: emptyStringIfUndefined(
-            rewardsControllerDeployment?.address
+            rewardsControllerDeployment?.address,
           ), // This will be fetched after dLend incentives deployment
           treasury: deployer, // Or a dedicated treasury address
           maxTreasuryFeeBps: 5 * ONE_PERCENT_BPS, // Example: 5%

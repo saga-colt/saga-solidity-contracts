@@ -31,7 +31,6 @@ export const strategyDUSD: IReserveParams = {
   supplyCap: "2500000", // Specific to dUSD
 };
 
-
 export const strategyWETH: IReserveParams = {
   strategy: rateStrategyHighLiquidityVolatile,
   baseLTVAsCollateral: "8000",

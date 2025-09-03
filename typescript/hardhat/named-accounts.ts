@@ -30,7 +30,7 @@ export function getEnvPrivateKeys(network: string): string[] {
   pks = pks.filter(
     (pk) =>
       pk !==
-      "0x0000000000000000000000000000000000000000000000000000000000000000"
+      "0x0000000000000000000000000000000000000000000000000000000000000000",
   );
 
   if (pks.length === 0) {
@@ -106,8 +106,8 @@ export function getStandardNamedAccounts(): {
     deployer: {
       hardhat: 0,
       localhost: 0,
-      sonic_testnet: 0,
-      sonic_mainnet: 0,
+      saga_testnet: 0,
+      saga_mainnet: 0,
     },
     // For testing ONLY
     user1: {
