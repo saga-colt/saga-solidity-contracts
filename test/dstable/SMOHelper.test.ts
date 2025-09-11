@@ -252,7 +252,7 @@ describe("SMOHelper", function () {
 
       await expect(
         smoHelper.connect(operator).executeSMO(ethers.parseEther("1"), params)
-      ).to.be.revertedWith("SMOHelper: Transaction deadline exceeded");
+      ).to.be.revertedWithCustomError(smoHelper, "DeadlineExceeded");
     });
 
     it("Should revert when dSTABLE amount is zero", async function () {
@@ -269,7 +269,7 @@ describe("SMOHelper", function () {
 
       await expect(
         smoHelper.connect(operator).executeSMO(0, params)
-      ).to.be.revertedWith("SMOHelper: dSTABLE amount cannot be zero");
+      ).to.be.revertedWithCustomError(smoHelper, "ZeroDStableAmount");
     });
 
     it("Should revert when flash loan amount exceeds maximum", async function () {
@@ -484,4 +484,3 @@ describe("SMOHelper", function () {
     });
   });
 });
-

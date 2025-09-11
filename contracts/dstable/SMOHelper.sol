@@ -7,7 +7,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
-import "contracts/common/IMintableERC20.sol";
 import "contracts/dstable/ERC20StablecoinUpgradeable.sol";
 import "contracts/dstable/RedeemerV2.sol";
 import "../Uniswap/Uniswapv3/interfaces/ISwapRouter.sol";
@@ -49,19 +48,15 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
     error InsufficientCollateralReceived(uint256 expected, uint256 actual);
     error FlashLoanAmountExceedsMaximum(uint256 requested, uint256 maximum);
     error InvalidPathLength();
+    error DeadlineExceeded();
+    error ZeroDStableAmount();
+    error NoSwapPathProvided();
+    error InvalidSwapPathTokens();
 
     /* Roles */
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
 
     /* Constants */
-    // Uniswap V3 addresses
-    address public constant UNISWAP_V3_FACTORY =
-        0x1F98431c8aD98523631AE4a59f267346ea31F984;
-
-    // Token addresses
-    address public constant WETH = 0x4200000000000000000000000000000000000006;
-    address public constant USDC = 0xfc960C233B8E98e0Cf282e29BDE8d3f105fc24d5;
-
     // Basis points
     uint256 public constant BPS = 10_000;
 
@@ -119,12 +114,17 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
     ) external onlyRole(OPERATOR_ROLE) whenNotPaused nonReentrant {
         // Validate deadline
         if (block.timestamp > params.deadline) {
-            revert("SMOHelper: Transaction deadline exceeded");
+            revert DeadlineExceeded();
         }
-
+        
         // Validate dSTABLE amount
         if (dstableAmount == 0) {
-            revert("SMOHelper: dSTABLE amount cannot be zero");
+            revert ZeroDStableAmount();
+        }
+
+        // Validate inputs
+        if (params.collateralAsset == address(0)) {
+            revert ZeroAddress();
         }
 
         // Check if flash loan is supported
@@ -156,7 +156,7 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
         address initiator,
         address /* token */,
         uint256 amount,
-        uint256 /* fee */,
+        uint256 fee,
         bytes calldata data
     ) external returns (bytes32) {
         // Validate flash loan
@@ -172,18 +172,23 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
 
         // Validate deadline
         if (block.timestamp > params.deadline) {
-            revert("SMOHelper: Transaction deadline exceeded");
+            revert DeadlineExceeded();
         }
 
         // Step 1: Redeem dSTABLE for collateral (NO FEES - using redeemAsProtocol)
         uint256 collateralBalanceBefore = IERC20(params.collateralAsset)
             .balanceOf(address(this));
 
+        // Approve Redeemer to pull and burn dSTABLE
+        IERC20(address(dstable)).forceApprove(address(redeemer), 0);
+        IERC20(address(dstable)).forceApprove(address(redeemer), amount);
         redeemer.redeemAsProtocol(
             amount,
             params.collateralAsset,
             params.minCollateralAmount
         );
+        // Reset approval to avoid lingering allowance
+        IERC20(address(dstable)).forceApprove(address(redeemer), 0);
 
         uint256 collateralReceived = IERC20(params.collateralAsset).balanceOf(
             address(this)
@@ -202,14 +207,23 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
         string memory routingMethod;
 
         // Approve router to spend collateral tokens
-        IERC20(params.collateralAsset).approve(
+        IERC20(params.collateralAsset).forceApprove(uniswapRouter, 0);
+        IERC20(params.collateralAsset).forceApprove(
             uniswapRouter,
             collateralReceived
         );
 
         // Validate swap path is provided
         if (params.swapPath.length == 0) {
-            revert("SMOHelper: No swap path provided");
+            revert NoSwapPathProvided();
+        }
+        // Basic path structure validation: len >= 43 and (len - 20) % 23 == 0
+        if (params.swapPath.length < 43 || ((params.swapPath.length - 20) % 23) != 0) {
+            revert InvalidPathLength();
+        }
+        // Ensure path starts with collateral and ends with dstable
+        if (_pathFirstToken(params.swapPath) != params.collateralAsset || _pathLastToken(params.swapPath) != address(dstable)) {
+            revert InvalidSwapPathTokens();
         }
 
         // Calculate amount limit with slippage protection
@@ -243,19 +257,19 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
         }
 
         // Step 3: Repay flash loan
-        if (dstableReceived < amount) {
+        if (dstableReceived < amount + fee) {
             revert FlashLoanRepaymentFailed();
         }
-
-        // Transfer dSTABLE back to repay flash loan
-        dstable.transfer(address(dstable), amount);
+        // Approve lender to pull repayment
+        IERC20(address(dstable)).forceApprove(address(dstable), 0);
+        IERC20(address(dstable)).forceApprove(address(dstable), amount + fee);
 
         // Step 4: Calculate and distribute profit
-        uint256 profit = dstableReceived - amount;
+        uint256 profit = dstableReceived - amount - fee;
         if (profit > 0) {
-            dstable.transfer(operator, profit);
+            IERC20(address(dstable)).safeTransfer(operator, profit);
         }
-        IERC20(params.collateralAsset).approve(uniswapRouter, 0);
+        IERC20(params.collateralAsset).forceApprove(uniswapRouter, 0);
         // Emit event with routing method
         emit SMOExecuted(
             params.collateralAsset,
@@ -316,7 +330,8 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
         if (to == address(0)) {
             revert ZeroAddress();
         }
-        payable(to).transfer(amount);
+        (bool ok, ) = payable(to).call{value: amount}("");
+        require(ok, "ETH_TRANSFER_FAILED");
     }
 
     /**
@@ -398,38 +413,22 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
     }
 
     /**
-     * @notice Converts uint256 to string
+     * @dev Returns first token (address) in a Uniswap V3 path
      */
-    function _uint2str(uint256 _i) internal pure returns (string memory) {
-        if (_i == 0) {
-            return "0";
+    function _pathFirstToken(bytes memory path) internal pure returns (address token) {
+        assembly {
+            token := shr(96, mload(add(path, 32)))
         }
-        uint256 j = _i;
-        uint256 len;
-        while (j != 0) {
-            len++;
-            j /= 10;
-        }
-        bytes memory bstr = new bytes(len);
-        uint256 k = len;
-        while (_i != 0) {
-            k = k - 1;
-            uint8 temp = (48 + uint8(_i - (_i / 10) * 10));
-            bytes1 b1 = bytes1(temp);
-            bstr[k] = b1;
-            _i /= 10;
-        }
-        return string(bstr);
     }
 
     /**
-     * @notice Sweeps dust tokens to refund address
+     * @dev Returns last token (address) in a Uniswap V3 path
      */
-    function _sweepDust(address refundTo) internal {
-        // Sweep any remaining dSTABLE dust
-        uint256 dustAmount = dstable.balanceOf(address(this));
-        if (dustAmount > 0) {
-            dstable.transfer(refundTo, dustAmount);
+    function _pathLastToken(bytes memory path) internal pure returns (address token) {
+        uint256 len = path.length;
+        assembly {
+            let ptr := add(path, add(32, sub(len, 20)))
+            token := shr(96, mload(ptr))
         }
     }
 }
