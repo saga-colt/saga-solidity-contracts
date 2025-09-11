@@ -3,16 +3,14 @@ import hre from "hardhat";
 import {
   USD_ORACLE_AGGREGATOR_ID,
   D_HARD_PEG_ORACLE_WRAPPER_ID,
-  USD_REDSTONE_ORACLE_WRAPPER_ID,
-  USD_REDSTONE_WRAPPER_WITH_THRESHOLDING_ID,
-  USD_REDSTONE_COMPOSITE_WRAPPER_WITH_THRESHOLDING_ID,
+  USD_TELLOR_ORACLE_WRAPPER_ID,
+  USD_TELLOR_WRAPPER_WITH_THRESHOLDING_ID,
 } from "../../typescript/deploy-ids";
 import {
   OracleAggregator,
   HardPegOracleWrapper,
-  RedstoneChainlinkWrapper,
-  RedstoneChainlinkWrapperWithThresholding,
-  RedstoneChainlinkCompositeWrapperWithThresholding,
+  TellorWrapper,
+  TellorWrapperWithThresholding,
 } from "../../typechain-types";
 import { getConfig } from "../../config/config";
 import { OracleAggregatorConfig } from "../../config/types";
@@ -26,9 +24,8 @@ export interface OracleAggregatorFixtureConfig extends OracleAggregatorConfig {
   oracleAggregatorId: string;
   wrapperIds: {
     hardPegWrapper: string;
-    redstoneChainlinkWrapper: string;
-    redstoneChainlinkWrapperWithThresholding: string;
-    redstoneChainlinkCompositeWrapperWithThresholding: string;
+    tellorWrapper: string;
+    tellorWrapperWithThresholding: string;
   };
 }
 
@@ -40,34 +37,21 @@ export interface OracleAggregatorFixtureResult {
   contracts: {
     oracleAggregator: OracleAggregator;
     hardPegWrapper?: HardPegOracleWrapper;
-    redstoneChainlinkWrapper: RedstoneChainlinkWrapper;
-    redstoneChainlinkWrapperWithThresholding: RedstoneChainlinkWrapperWithThresholding;
-    redstoneChainlinkCompositeWrapperWithThresholding: RedstoneChainlinkCompositeWrapperWithThresholding;
+    tellorWrapper: TellorWrapper;
+    tellorWrapperWithThresholding: TellorWrapperWithThresholding;
   };
   assets: {
     allAssets: string[];
-    // Redstone Assets
-    redstonePlainAssets: {
+    // Tellor Assets
+    tellorPlainAssets: {
       [address: string]: { address: string; feed: string };
     };
-    redstoneThresholdAssets: {
+    tellorThresholdAssets: {
       [address: string]: {
         address: string;
         feed: string;
         lowerThreshold: bigint;
         fixedPrice: bigint;
-      };
-    };
-    redstoneCompositeAssets: {
-      [address: string]: {
-        address: string;
-        feedAsset: string;
-        feed1: string;
-        feed2: string;
-        lowerThresholdInBase1: bigint;
-        fixedPriceInBase1: bigint;
-        lowerThresholdInBase2: bigint;
-        fixedPriceInBase2: bigint;
       };
     };
   };
@@ -95,7 +79,7 @@ export const createOracleAggregatorFixture = (
         await deployments.fixture([
           "deploy-mocks",
           "usd-oracle",
-          "dusd",
+          "d",
           "local-setup",
         ]);
       } else {
@@ -125,44 +109,33 @@ export const createOracleAggregatorFixture = (
         );
       }
 
-      // Get Redstone wrapper instances
-      const { address: redstoneChainlinkWrapperAddress } =
-        await deployments.get(config.wrapperIds.redstoneChainlinkWrapper);
-      const redstoneChainlinkWrapper = await ethers.getContractAt(
-        "RedstoneChainlinkWrapper",
-        redstoneChainlinkWrapperAddress
+      // Get Tellor wrapper instances
+      const { address: tellorWrapperAddress } =
+        await deployments.get(config.wrapperIds.tellorWrapper);
+      const tellorWrapper = await ethers.getContractAt(
+        "TellorWrapper",
+        tellorWrapperAddress
       );
 
-      const { address: redstoneChainlinkWrapperWithThresholdingAddress } =
+      const { address: tellorWrapperWithThresholdingAddress } =
         await deployments.get(
-          config.wrapperIds.redstoneChainlinkWrapperWithThresholding
+          config.wrapperIds.tellorWrapperWithThresholding
         );
-      const redstoneChainlinkWrapperWithThresholding =
+      const tellorWrapperWithThresholding =
         await ethers.getContractAt(
-          "RedstoneChainlinkWrapperWithThresholding",
-          redstoneChainlinkWrapperWithThresholdingAddress
-        );
-
-      const {
-        address: redstoneChainlinkCompositeWrapperWithThresholdingAddress,
-      } = await deployments.get(
-        config.wrapperIds.redstoneChainlinkCompositeWrapperWithThresholding
-      );
-      const redstoneChainlinkCompositeWrapperWithThresholding =
-        await ethers.getContractAt(
-          "RedstoneChainlinkCompositeWrapperWithThresholding",
-          redstoneChainlinkCompositeWrapperWithThresholdingAddress
+          "TellorWrapperWithThresholding",
+          tellorWrapperWithThresholdingAddress
         );
 
       // Find the mock oracle deployments
       const mockOracles: { [feedName: string]: string } = {};
       const allDeployments = await deployments.all();
 
-      // Group Redstone assets by their oracle type
-      const redstonePlainAssets: {
+      // Group Tellor assets by their oracle type
+      const tellorPlainAssets: {
         [address: string]: { address: string; feed: string };
       } = {};
-      const redstoneThresholdAssets: {
+      const tellorThresholdAssets: {
         [address: string]: {
           address: string;
           feed: string;
@@ -170,34 +143,22 @@ export const createOracleAggregatorFixture = (
           fixedPrice: bigint;
         };
       } = {};
-      const redstoneCompositeAssets: {
-        [address: string]: {
-          address: string;
-          feedAsset: string;
-          feed1: string;
-          feed2: string;
-          lowerThresholdInBase1: bigint;
-          fixedPriceInBase1: bigint;
-          lowerThresholdInBase2: bigint;
-          fixedPriceInBase2: bigint;
-        };
-      } = {};
 
-      // Populate Redstone plain assets
+      // Populate Tellor plain assets
       for (const [address, feed] of Object.entries(
-        config.redstoneOracleAssets.plainRedstoneOracleWrappers
+        config.tellorOracleAssets?.plainTellorOracleWrappers || {}
       )) {
-        redstonePlainAssets[address] = {
+        tellorPlainAssets[address] = {
           address,
           feed,
         };
       }
 
-      // Populate Redstone threshold assets
+      // Populate Tellor threshold assets
       for (const [address, data] of Object.entries(
-        config.redstoneOracleAssets.redstoneOracleWrappersWithThresholding
+        config.tellorOracleAssets?.tellorOracleWrappersWithThresholding || {}
       )) {
-        redstoneThresholdAssets[address] = {
+        tellorThresholdAssets[address] = {
           address,
           feed: data.feed,
           lowerThreshold: data.lowerThreshold,
@@ -205,26 +166,8 @@ export const createOracleAggregatorFixture = (
         };
       }
 
-      // Populate Redstone composite assets
-      for (const [address, data] of Object.entries(
-        config.redstoneOracleAssets
-          .compositeRedstoneOracleWrappersWithThresholding
-      )) {
-        redstoneCompositeAssets[address] = {
-          address,
-          feedAsset: data.feedAsset,
-          feed1: data.feed1,
-          feed2: data.feed2,
-          lowerThresholdInBase1: data.lowerThresholdInBase1,
-          fixedPriceInBase1: data.fixedPriceInBase1,
-          lowerThresholdInBase2: data.lowerThresholdInBase2,
-          fixedPriceInBase2: data.fixedPriceInBase2,
-        };
-      }
-
-      const allAssets = Object.keys(redstonePlainAssets).concat(
-        Object.keys(redstoneThresholdAssets),
-        Object.keys(redstoneCompositeAssets)
+      const allAssets = Object.keys(tellorPlainAssets).concat(
+        Object.keys(tellorThresholdAssets)
       );
 
       return {
@@ -232,16 +175,14 @@ export const createOracleAggregatorFixture = (
         contracts: {
           oracleAggregator,
           hardPegWrapper,
-          redstoneChainlinkWrapper,
-          redstoneChainlinkWrapperWithThresholding,
-          redstoneChainlinkCompositeWrapperWithThresholding,
+          tellorWrapper,
+          tellorWrapperWithThresholding,
         },
         assets: {
           allAssets,
-          // Redstone Assets
-          redstonePlainAssets,
-          redstoneThresholdAssets,
-          redstoneCompositeAssets,
+          // Tellor Assets
+          tellorPlainAssets,
+          tellorThresholdAssets,
         },
         mockOracles,
       };
@@ -277,11 +218,9 @@ export const getOracleAggregatorFixture = async (currency: string) => {
     oracleAggregatorId: USD_ORACLE_AGGREGATOR_ID,
     wrapperIds: {
       hardPegWrapper: D_HARD_PEG_ORACLE_WRAPPER_ID,
-      redstoneChainlinkWrapper: USD_REDSTONE_ORACLE_WRAPPER_ID,
-      redstoneChainlinkWrapperWithThresholding:
-        USD_REDSTONE_WRAPPER_WITH_THRESHOLDING_ID,
-      redstoneChainlinkCompositeWrapperWithThresholding:
-        USD_REDSTONE_COMPOSITE_WRAPPER_WITH_THRESHOLDING_ID,
+      tellorWrapper: USD_TELLOR_ORACLE_WRAPPER_ID,
+      tellorWrapperWithThresholding:
+        USD_TELLOR_WRAPPER_WITH_THRESHOLDING_ID,
     },
   };
 
