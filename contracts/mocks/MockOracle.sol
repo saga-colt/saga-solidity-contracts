@@ -7,7 +7,7 @@ pragma solidity ^0.8.20;
  */
 contract MockOracle {
     uint256 public constant BASE_CURRENCY_UNIT = 1e18;
-    
+
     mapping(address => uint256) public assetPrices;
 
     constructor() {

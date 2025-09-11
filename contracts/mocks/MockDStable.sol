@@ -10,21 +10,25 @@ import "@openzeppelin/contracts/interfaces/IERC3156FlashLender.sol";
  * @dev Mock implementation of dSTABLE token with flash mint functionality for testing
  */
 contract MockDStable is ERC20, IERC3156FlashLender {
-    bytes32 private constant RETURN_VALUE = keccak256("ERC3156FlashBorrower.onFlashLoan");
+    bytes32 private constant RETURN_VALUE =
+        keccak256("ERC3156FlashBorrower.onFlashLoan");
 
     error ERC3156UnsupportedToken(address token);
     error ERC3156ExceededMaxLoan(uint256 maxLoan);
     error ERC3156InvalidReceiver(address receiver);
 
     constructor() ERC20("Mock dSTABLE", "mdSTABLE") {
-        _mint(msg.sender, 1000000 * 10**18); // Mint 1M tokens
+        _mint(msg.sender, 1000000 * 10 ** 18); // Mint 1M tokens
     }
 
     function maxFlashLoan(address token) public view virtual returns (uint256) {
         return token == address(this) ? type(uint256).max - totalSupply() : 0;
     }
 
-    function flashFee(address token, uint256 value) public view virtual returns (uint256) {
+    function flashFee(
+        address token,
+        uint256 value
+    ) public view virtual returns (uint256) {
         if (token != address(this)) {
             revert ERC3156UnsupportedToken(token);
         }
@@ -43,7 +47,10 @@ contract MockDStable is ERC20, IERC3156FlashLender {
         }
         uint256 fee = flashFee(token, value);
         _mint(address(receiver), value);
-        if (receiver.onFlashLoan(_msgSender(), token, value, fee, data) != RETURN_VALUE) {
+        if (
+            receiver.onFlashLoan(_msgSender(), token, value, fee, data) !=
+            RETURN_VALUE
+        ) {
             revert ERC3156InvalidReceiver(address(receiver));
         }
         _spendAllowance(address(receiver), address(this), value + fee);

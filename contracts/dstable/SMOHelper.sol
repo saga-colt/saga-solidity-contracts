@@ -15,7 +15,7 @@ import "../Uniswap/Uniswapv3/interfaces/ISwapRouter.sol";
 /**
  * @title SMOHelper
  * @dev Enhanced Stablecoin Market Operations Helper contract with advanced routing
- * 
+ *
  * This contract facilitates SMO operations with:
  * 1. Flash minting dSTABLE tokens
  * 2. Redeeming dSTABLE for collateral (using redeemAsProtocol - no fees)
@@ -36,7 +36,7 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
         uint256 profit,
         string routingMethod
     );
-    
+
     event OperatorSet(address indexed oldOperator, address indexed newOperator);
 
     /* Errors */
@@ -55,12 +55,12 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
 
     /* Constants */
     // Uniswap V3 addresses
-    address public constant UNISWAP_V3_FACTORY = 0x1F98431c8aD98523631AE4a59f267346ea31F984;
+    address public constant UNISWAP_V3_FACTORY =
+        0x1F98431c8aD98523631AE4a59f267346ea31F984;
 
     // Token addresses
     address public constant WETH = 0x4200000000000000000000000000000000000006;
     address public constant USDC = 0xfc960C233B8E98e0Cf282e29BDE8d3f105fc24d5;
-
 
     // Basis points
     uint256 public constant BPS = 10_000;
@@ -84,15 +84,18 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
         uint256 expectedAmountOut; // Expected output amount (for slippage calculation)
     }
 
-
     constructor(
         address _dstable,
         address _redeemer,
         address _uniswapRouter,
         address _operator
     ) {
-        if (_dstable == address(0) || _redeemer == address(0) || 
-            _uniswapRouter == address(0) || _operator == address(0)) {
+        if (
+            _dstable == address(0) ||
+            _redeemer == address(0) ||
+            _uniswapRouter == address(0) ||
+            _operator == address(0)
+        ) {
             revert ZeroAddress();
         }
 
@@ -118,21 +121,21 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
         if (block.timestamp > params.deadline) {
             revert("SMOHelper: Transaction deadline exceeded");
         }
-        
+
         // Validate dSTABLE amount
         if (dstableAmount == 0) {
             revert("SMOHelper: dSTABLE amount cannot be zero");
         }
-        
+
         // Check if flash loan is supported
         uint256 maxFlashLoan = dstable.maxFlashLoan(address(dstable));
         if (dstableAmount > maxFlashLoan) {
             revert FlashLoanAmountExceedsMaximum(dstableAmount, maxFlashLoan);
         }
-        
+
         // Encode enhanced parameters
         bytes memory data = abi.encode(params);
-        
+
         // Execute flash loan with enhanced callback
         dstable.flashLoan(
             IERC3156FlashBorrower(address(this)),
@@ -141,8 +144,8 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
             data
         );
     }
-      
-     /**
+
+    /**
      * @notice Flash loan callback function with enhanced routing
      * @param initiator Address that initiated the flash loan
      * @param amount Amount being flash loaned
@@ -166,60 +169,77 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
 
         // Decode SMO parameters
         SMOParams memory params = abi.decode(data, (SMOParams));
-        
+
         // Validate deadline
         if (block.timestamp > params.deadline) {
             revert("SMOHelper: Transaction deadline exceeded");
         }
 
         // Step 1: Redeem dSTABLE for collateral (NO FEES - using redeemAsProtocol)
-        uint256 collateralBalanceBefore = IERC20(params.collateralAsset).balanceOf(address(this));
-        
+        uint256 collateralBalanceBefore = IERC20(params.collateralAsset)
+            .balanceOf(address(this));
+
         redeemer.redeemAsProtocol(
             amount,
             params.collateralAsset,
             params.minCollateralAmount
         );
 
-        uint256 collateralReceived = IERC20(params.collateralAsset).balanceOf(address(this)) - collateralBalanceBefore;
-        
+        uint256 collateralReceived = IERC20(params.collateralAsset).balanceOf(
+            address(this)
+        ) - collateralBalanceBefore;
+
         // Validate collateral received
         if (collateralReceived < params.minCollateralAmount) {
-            revert InsufficientCollateralReceived(params.minCollateralAmount, collateralReceived);
+            revert InsufficientCollateralReceived(
+                params.minCollateralAmount,
+                collateralReceived
+            );
         }
 
         // Step 2: Find and execute optimal swap
         uint256 dstableBalanceBefore = dstable.balanceOf(address(this));
         string memory routingMethod;
-        
+
         // Approve router to spend collateral tokens
-        IERC20(params.collateralAsset).approve(uniswapRouter, collateralReceived);
-        
+        IERC20(params.collateralAsset).approve(
+            uniswapRouter,
+            collateralReceived
+        );
+
         // Validate swap path is provided
         if (params.swapPath.length == 0) {
             revert("SMOHelper: No swap path provided");
         }
-        
+
         // Calculate amount limit with slippage protection
-        uint256 amountLimit = _calculateAmountLimit(params.expectedAmountOut, params.slippageBps);
-        
+        uint256 amountLimit = _calculateAmountLimit(
+            params.expectedAmountOut,
+            params.slippageBps
+        );
+
         // Execute multihop swap
-        ISwapRouter.ExactInputParams memory swapParams = ISwapRouter.ExactInputParams({
-            path: params.swapPath,
-            recipient: address(this),
-            deadline: params.deadline,
-            amountIn: collateralReceived,
-            amountOutMinimum: amountLimit
-        });
-        
+        ISwapRouter.ExactInputParams memory swapParams = ISwapRouter
+            .ExactInputParams({
+                path: params.swapPath,
+                recipient: address(this),
+                deadline: params.deadline,
+                amountIn: collateralReceived,
+                amountOutMinimum: amountLimit
+            });
+
         ISwapRouter(uniswapRouter).exactInput(swapParams);
         routingMethod = "V3-Multihop";
 
-        uint256 dstableReceived = dstable.balanceOf(address(this)) - dstableBalanceBefore;
+        uint256 dstableReceived = dstable.balanceOf(address(this)) -
+            dstableBalanceBefore;
 
         // Validate dSTABLE received
         if (dstableReceived < params.minDStableReceived) {
-            revert InsufficientDStableReceived(params.minDStableReceived, dstableReceived);
+            revert InsufficientDStableReceived(
+                params.minDStableReceived,
+                dstableReceived
+            );
         }
 
         // Step 3: Repay flash loan
@@ -253,7 +273,9 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
      * @notice Sets a new operator address
      * @param newOperator The new operator address
      */
-    function setOperator(address newOperator) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setOperator(
+        address newOperator
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         if (newOperator == address(0)) {
             revert ZeroAddress();
         }
@@ -287,7 +309,10 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
      * @param to Address to send ETH to
      * @param amount Amount of ETH to rescue
      */
-    function rescueETH(address to, uint256 amount) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function rescueETH(
+        address to,
+        uint256 amount
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         if (to == address(0)) {
             revert ZeroAddress();
         }
@@ -300,7 +325,11 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
      * @param to Address to send tokens to
      * @param amount Amount of tokens to rescue
      */
-    function rescueTokens(address token, address to, uint256 amount) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function rescueTokens(
+        address token,
+        address to,
+        uint256 amount
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         if (to == address(0)) {
             revert ZeroAddress();
         }
@@ -344,9 +373,12 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
      * @param interfaceId The interface ID to check
      * @return True if the interface is supported
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return interfaceId == type(IERC3156FlashBorrower).interfaceId || 
-               super.supportsInterface(interfaceId);
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override returns (bool) {
+        return
+            interfaceId == type(IERC3156FlashBorrower).interfaceId ||
+            super.supportsInterface(interfaceId);
     }
 
     // Allow contract to receive ETH
@@ -382,7 +414,7 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
         uint256 k = len;
         while (_i != 0) {
             k = k - 1;
-            uint8 temp = (48 + uint8(_i - _i / 10 * 10));
+            uint8 temp = (48 + uint8(_i - (_i / 10) * 10));
             bytes1 b1 = bytes1(temp);
             bstr[k] = b1;
             _i /= 10;
@@ -400,5 +432,4 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
             dstable.transfer(refundTo, dustAmount);
         }
     }
-
 }
