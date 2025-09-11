@@ -116,7 +116,7 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
         if (block.timestamp > params.deadline) {
             revert DeadlineExceeded();
         }
-        
+
         // Validate dSTABLE amount
         if (dstableAmount == 0) {
             revert ZeroDStableAmount();
@@ -218,11 +218,17 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
             revert NoSwapPathProvided();
         }
         // Basic path structure validation: len >= 43 and (len - 20) % 23 == 0
-        if (params.swapPath.length < 43 || ((params.swapPath.length - 20) % 23) != 0) {
+        if (
+            params.swapPath.length < 43 ||
+            ((params.swapPath.length - 20) % 23) != 0
+        ) {
             revert InvalidPathLength();
         }
         // Ensure path starts with collateral and ends with dstable
-        if (_pathFirstToken(params.swapPath) != params.collateralAsset || _pathLastToken(params.swapPath) != address(dstable)) {
+        if (
+            _pathFirstToken(params.swapPath) != params.collateralAsset ||
+            _pathLastToken(params.swapPath) != address(dstable)
+        ) {
             revert InvalidSwapPathTokens();
         }
 
@@ -415,7 +421,9 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
     /**
      * @dev Returns first token (address) in a Uniswap V3 path
      */
-    function _pathFirstToken(bytes memory path) internal pure returns (address token) {
+    function _pathFirstToken(
+        bytes memory path
+    ) internal pure returns (address token) {
         assembly {
             token := shr(96, mload(add(path, 32)))
         }
@@ -424,7 +432,9 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
     /**
      * @dev Returns last token (address) in a Uniswap V3 path
      */
-    function _pathLastToken(bytes memory path) internal pure returns (address token) {
+    function _pathLastToken(
+        bytes memory path
+    ) internal pure returns (address token) {
         uint256 len = path.length;
         assembly {
             let ptr := add(path, add(32, sub(len, 20)))

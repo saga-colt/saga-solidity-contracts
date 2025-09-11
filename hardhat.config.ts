@@ -24,8 +24,9 @@ const wrapSigner = (signer: any, hre: HardhatRuntimeEnvironment) => {
     if (hre.network.live) {
       const sleepTime = 5000;
       console.log(
-        `\n>>> Waiting ${sleepTime}ms after transaction to ${result.to || "a new contract"
-        }`
+        `\n>>> Waiting ${sleepTime}ms after transaction to ${
+          result.to || "a new contract"
+        }`,
       );
       await sleep(sleepTime);
     }

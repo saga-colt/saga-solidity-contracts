@@ -33,7 +33,10 @@ contract MockUniswapRouter is ISwapRouter {
         amountOut = (params.amountIn * MOCK_MULTIHOP_RATIO) / 100;
 
         // Enforce amountOutMinimum like the real router (revert on insufficient output)
-        require(amountOut >= params.amountOutMinimum, "INSUFFICIENT_OUTPUT_AMOUNT");
+        require(
+            amountOut >= params.amountOutMinimum,
+            "INSUFFICIENT_OUTPUT_AMOUNT"
+        );
 
         // In a real implementation, this would transfer tokens through multiple pools
         // For testing, we assume the tokens are already transferred
