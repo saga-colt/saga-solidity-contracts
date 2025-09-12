@@ -42,7 +42,7 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
     error FlashLoanRepaymentFailed();
     error UnauthorizedFlashLoan();
     error InvalidFlashLoanInitiator();
-    error SlippageTooHigh(uint256 expected, uint256 actual);
+    error SlippageTooHigh(uint256 requestedSlippage, uint256 maxSlippage);
     error InsufficientCollateralReceived(uint256 expected, uint256 actual);
     error FlashLoanAmountExceedsMaximum(uint256 requested, uint256 maximum);
     error InvalidPathLength();
@@ -50,6 +50,9 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
     error ZeroDStableAmount();
     error NoSwapPathProvided();
     error InvalidSwapPathTokens();
+    error InvalidFeeTier(uint24 feeTier);
+    error InvalidIntermediateToken(address token);
+    error AssetRedemptionPaused(address asset);
 
     /* Roles */
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
@@ -57,6 +60,7 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
     /* Constants */
     // Basis points
     uint256 public constant HUNDRED_PERCENT_BPS = 10_000;
+    uint256 public constant MAX_SLIPPAGE_BPS = 2_000; // 20% maximum slippage
 
     /* State Variables */
     ERC20StablecoinUpgradeable public immutable dstable;
@@ -70,7 +74,7 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
         uint256 minDStableReceived;
         uint256 deadline;
         uint256 slippageBps; // Slippage protection (e.g., 100 = 1%)
-        address refundTo; // For dust sweeping
+        address profitTo; // For dust sweeping
         // Route information (discovered off-chain)
         bytes swapPath; // Encoded Uniswap V3 multihop path
         uint256 expectedAmountOut; // Expected output amount (for slippage calculation)
@@ -123,6 +127,14 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
             revert ZeroAddress();
         }
 
+        // Validate slippage is within reasonable bounds
+        if (params.slippageBps > MAX_SLIPPAGE_BPS) {
+            revert SlippageTooHigh(params.slippageBps, MAX_SLIPPAGE_BPS);
+        }
+        if (params.profitTo == address(0)) {
+            revert ZeroAddress();
+        }
+       
         // Check if flash loan is supported
         uint256 maxFlashLoan = dstable.maxFlashLoan(address(dstable));
         if (dstableAmount > maxFlashLoan) {
@@ -171,7 +183,12 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
             revert DeadlineExceeded();
         }
 
-        // Step 1: Redeem dSTABLE for collateral (NO FEES - using redeemAsProtocol)
+        // Step 1: Validate collateral asset is supported
+        if (!redeemer.isAssetRedemptionEnabled(params.collateralAsset)) {
+            revert AssetRedemptionPaused(params.collateralAsset);
+        }
+        
+        // Redeem dSTABLE for collateral (NO FEES - using redeemAsProtocol)
         uint256 collateralBalanceBefore = IERC20(params.collateralAsset)
             .balanceOf(address(this));
 
@@ -213,20 +230,8 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
         if (params.swapPath.length == 0) {
             revert NoSwapPathProvided();
         }
-        // Basic path structure validation: len >= 43 and (len - 20) % 23 == 0
-        if (
-            params.swapPath.length < 43 ||
-            ((params.swapPath.length - 20) % 23) != 0
-        ) {
-            revert InvalidPathLength();
-        }
-        // Ensure path starts with collateral and ends with dstable
-        if (
-            _pathFirstToken(params.swapPath) != params.collateralAsset ||
-            _pathLastToken(params.swapPath) != address(dstable)
-        ) {
-            revert InvalidSwapPathTokens();
-        }
+        // Enhanced path validation
+        _validateSwapPath(params.swapPath, params.collateralAsset, address(dstable));
 
         // Calculate amount limit with slippage protection
         uint256 amountLimit = _calculateAmountLimit(
@@ -269,7 +274,7 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
         // Step 4: Calculate and distribute profit
         uint256 profit = dstableReceived - amount - fee;
         if (profit > 0) {
-            IERC20(address(dstable)).safeTransfer(_msgSender(), profit);
+            IERC20(address(dstable)).safeTransfer(params.profitTo, profit);
         }
         IERC20(params.collateralAsset).forceApprove(uniswapRouter, 0);
         // Emit event with routing method
@@ -357,6 +362,22 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
     }
 
     /**
+     * @notice Returns the maximum allowed slippage in basis points
+     * @return The maximum slippage in basis points (2000 = 20%)
+     */
+    function getMaxSlippageBps() external pure returns (uint256) {
+        return MAX_SLIPPAGE_BPS;
+    }
+    
+    /**
+     * @notice Returns the valid Uniswap V3 fee tiers
+     * @return Array of valid fee tiers
+     */
+    function getValidFeeTiers() external pure returns (uint24[4] memory) {
+        return [uint24(100), uint24(500), uint24(3000), uint24(10000)];
+    }
+
+    /**
      * @notice Checks if the contract supports the IERC3156FlashBorrower interface
      * @param interfaceId The interface ID to check
      * @return True if the interface is supported
@@ -382,7 +403,7 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
         uint256 slippageBps
     ) internal pure returns (uint256) {
         // For exact input: minOut = floor(quotedOut * (1 - slippageBps/BPS))
-        return (quotedAmount * (HUNDRED_BPS - slippageBps)) / HUNDRED_BPS;
+        return (quotedAmount * (HUNDRED_PERCENT_BPS - slippageBps)) / HUNDRED_PERCENT_BPS;
     }
 
     /**
@@ -406,6 +427,67 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
         assembly {
             let ptr := add(path, add(32, sub(len, 20)))
             token := shr(96, mload(ptr))
+        }
+    }
+    
+    /**
+     * @dev Comprehensive Uniswap V3 path validation
+     */
+    function _validateSwapPath(
+        bytes memory path,
+        address expectedFirst,
+        address expectedLast
+    ) internal pure {
+        // Basic path structure validation: len >= 43 and (len - 20) % 23 == 0
+        if (
+            path.length < 43 ||
+            ((path.length - 20) % 23) != 0
+        ) {
+            revert InvalidPathLength();
+        }
+        
+        // Validate first and last tokens
+        address firstToken = _pathFirstToken(path);
+        address lastToken = _pathLastToken(path);
+        
+        if (firstToken != expectedFirst || lastToken != expectedLast) {
+            revert InvalidSwapPathTokens();
+        }
+        
+        // Validate intermediate tokens and fee tiers
+        uint256 numHops = (path.length - 20) / 23;
+        
+        for (uint256 i = 0; i < numHops; i++) {
+            uint256 offset = 20 + (i * 23);
+            
+            // Extract fee tier (3 bytes at offset)
+            uint24 feeTier;
+            assembly {
+                let ptr := add(path, add(32, offset))
+                feeTier := and(shr(232, mload(ptr)), 0xffffff)
+            }
+            
+            // Validate fee tier is one of the standard Uniswap V3 fee tiers
+            bool validFeeTier = (feeTier == 100 || feeTier == 500 || feeTier == 3000 || feeTier == 10000);
+            
+            if (!validFeeTier) {
+                revert InvalidFeeTier(feeTier);
+            }
+            
+            // Extract intermediate token if not the last hop
+            if (i < numHops - 1) {
+                address intermediateToken;
+                uint256 tokenOffset = offset + 3;
+                assembly {
+                    let ptr := add(path, add(32, tokenOffset))
+                    intermediateToken := shr(96, mload(ptr))
+                }
+                
+                // Basic validation: ensure intermediate token is not zero address
+                if (intermediateToken == address(0)) {
+                    revert InvalidIntermediateToken(intermediateToken);
+                }
+            }
         }
     }
 }
