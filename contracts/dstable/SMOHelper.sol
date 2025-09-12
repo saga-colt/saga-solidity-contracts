@@ -56,7 +56,7 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
 
     /* Constants */
     // Basis points
-    uint256 public constant HUNDRED_BPS = 10_000;
+    uint256 public constant HUNDRED_PERCENT_BPS = 10_000;
 
     /* State Variables */
     ERC20StablecoinUpgradeable public immutable dstable;
