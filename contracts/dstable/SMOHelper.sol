@@ -36,8 +36,6 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
         string routingMethod
     );
 
-    event OperatorSet(address indexed oldOperator, address indexed newOperator);
-
     /* Errors */
     error ZeroAddress();
     error InsufficientDStableReceived(uint256 expected, uint256 actual);
@@ -58,13 +56,12 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
 
     /* Constants */
     // Basis points
-    uint256 public constant BPS = 10_000;
+    uint256 public constant HUNDRED_BPS = 10_000;
 
     /* State Variables */
     ERC20StablecoinUpgradeable public immutable dstable;
     RedeemerV2 public immutable redeemer;
     address public immutable uniswapRouter;
-    address public operator;
 
     /* Structs */
     struct SMOParams {
@@ -97,7 +94,6 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
         dstable = ERC20StablecoinUpgradeable(_dstable);
         redeemer = RedeemerV2(_redeemer);
         uniswapRouter = _uniswapRouter;
-        operator = _operator;
 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(OPERATOR_ROLE, _operator);
@@ -273,7 +269,7 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
         // Step 4: Calculate and distribute profit
         uint256 profit = dstableReceived - amount - fee;
         if (profit > 0) {
-            IERC20(address(dstable)).safeTransfer(operator, profit);
+            IERC20(address(dstable)).safeTransfer(_msgSender(), profit);
         }
         IERC20(params.collateralAsset).forceApprove(uniswapRouter, 0);
         // Emit event with routing method
@@ -287,27 +283,6 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
         );
 
         return keccak256("ERC3156FlashBorrower.onFlashLoan");
-    }
-
-    /**
-     * @notice Sets a new operator address
-     * @param newOperator The new operator address
-     */
-    function setOperator(
-        address newOperator
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        if (newOperator == address(0)) {
-            revert ZeroAddress();
-        }
-
-        address oldOperator = operator;
-        operator = newOperator;
-
-        // Update roles
-        _revokeRole(OPERATOR_ROLE, oldOperator);
-        _grantRole(OPERATOR_ROLE, newOperator);
-
-        emit OperatorSet(oldOperator, newOperator);
     }
 
     /**
@@ -357,15 +332,7 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
         IERC20(token).safeTransfer(to, amount);
     }
 
-    /**
-     * @notice Returns the current operator address
-     * @return The operator address
-     */
-    function getOperator() external view returns (address) {
-        return operator;
-    }
-
-    /**
+     /**
      * @notice Returns the UniswapV3 router address
      * @return The UniswapV3 router address
      */
@@ -415,7 +382,7 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
         uint256 slippageBps
     ) internal pure returns (uint256) {
         // For exact input: minOut = floor(quotedOut * (1 - slippageBps/BPS))
-        return (quotedAmount * (BPS - slippageBps)) / BPS;
+        return (quotedAmount * (HUNDRED_BPS - slippageBps)) / HUNDRED_BPS;
     }
 
     /**
