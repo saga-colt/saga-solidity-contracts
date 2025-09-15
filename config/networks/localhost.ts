@@ -156,12 +156,16 @@ export async function getConfig(
         hardDStablePeg: 1n * ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
         priceDecimals: ORACLE_AGGREGATOR_PRICE_DECIMALS,
         baseCurrency: ZeroAddress,
-        redstoneOracleAssets: {
-          plainRedstoneOracleWrappers: {
-            [WSAGADeployment?.address || ""]:
-              mockOracleNameToAddress["WSAGA_USD"],
+        tellorOracleAssets: {
+          plainTellorOracleWrappers: {
+            ...(WSAGADeployment?.address && mockOracleNameToAddress["WSAGA_USD"]
+              ? {
+                  [WSAGADeployment.address]:
+                    mockOracleNameToAddress["WSAGA_USD"],
+                }
+              : {}),
           },
-          redstoneOracleWrappersWithThresholding: {
+          tellorOracleWrappersWithThresholding: {
             ...(USDCDeployment?.address && mockOracleNameToAddress["USDC_USD"]
               ? {
                   [USDCDeployment.address]: {
@@ -190,35 +194,23 @@ export async function getConfig(
                   },
                 }
               : {}),
-          },
-          compositeRedstoneOracleWrappersWithThresholding: {
             ...(sUSDSDeployment?.address &&
-            mockOracleNameToAddress["sUSDS_USDS"] &&
-            mockOracleNameToAddress["USDS_USD"]
+            mockOracleNameToAddress["sUSDS_USDS"]
               ? {
                   [sUSDSDeployment.address]: {
-                    feedAsset: sUSDSDeployment.address,
-                    feed1: mockOracleNameToAddress["sUSDS_USDS"],
-                    feed2: mockOracleNameToAddress["USDS_USD"],
-                    lowerThresholdInBase1: 0n,
-                    fixedPriceInBase1: 0n,
-                    lowerThresholdInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-                    fixedPriceInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
+                    feed: mockOracleNameToAddress["sUSDS_USDS"],
+                    lowerThreshold: 0n,
+                    fixedPrice: 0n,
                   },
                 }
               : {}),
             ...(sfrxUSDDeployment?.address &&
-            mockOracleNameToAddress["sfrxUSD_frxUSD"] &&
-            mockOracleNameToAddress["frxUSD_USD"]
+            mockOracleNameToAddress["sfrxUSD_frxUSD"]
               ? {
                   [sfrxUSDDeployment.address]: {
-                    feedAsset: sfrxUSDDeployment.address,
-                    feed1: mockOracleNameToAddress["sfrxUSD_frxUSD"],
-                    feed2: mockOracleNameToAddress["frxUSD_USD"],
-                    lowerThresholdInBase1: 0n,
-                    fixedPriceInBase1: 0n,
-                    lowerThresholdInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-                    fixedPriceInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
+                    feed: mockOracleNameToAddress["sfrxUSD_frxUSD"],
+                    lowerThreshold: 0n,
+                    fixedPrice: 0n,
                   },
                 }
               : {}),

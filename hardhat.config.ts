@@ -26,7 +26,7 @@ const wrapSigner = (signer: any, hre: HardhatRuntimeEnvironment) => {
       console.log(
         `\n>>> Waiting ${sleepTime}ms after transaction to ${
           result.to || "a new contract"
-        }`
+        }`,
       );
       await sleep(sleepTime);
     }
