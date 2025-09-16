@@ -5,6 +5,7 @@ import { DLendConfig } from "./dlend/types";
 export interface Config {
   readonly MOCK_ONLY?: MockConfig;
   readonly tokenAddresses: TokenAddresses;
+  readonly uniswapRouter: string;
   readonly walletAddresses: WalletAddresses;
   readonly oracleAggregators: {
     [key: string]: OracleAggregatorConfig;
@@ -121,7 +122,7 @@ export interface IReserveCollateralParams {
 
 export interface IReserveParams
   extends IReserveBorrowParams,
-    IReserveCollateralParams {
+  IReserveCollateralParams {
   readonly aTokenImpl: string;
   readonly reserveFactor: string;
   readonly supplyCap: string;

@@ -65,6 +65,16 @@ const config: HardhatUserConfig = {
   solidity: {
     compilers: [
       {
+        version: "0.7.6",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 999999,
+          },
+          ...(process.env.VIA_IR === "true" ? { viaIR: true } : {}),
+        },
+      },
+      {
         version: "0.8.10",
         settings: {
           optimizer: {
@@ -116,6 +126,62 @@ const config: HardhatUserConfig = {
             runs: 200,
           },
           viaIR: true,
+        },
+      },
+      // UniswapV3 contracts - force to use 0.7.6
+      "contracts/Uniswap/Uniswapv3/Libraries/TickBitmap.sol": {
+        version: "0.7.6",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 999999,
+          },
+        },
+      },
+      "contracts/Uniswap/Uniswapv3/UniswapV3Pool.sol": {
+        version: "0.7.6",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 999999,
+          },
+        },
+      },
+      "contracts/Uniswap/Uniswapv3/NoDelegateCall.sol": {
+        version: "0.7.6",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 999999,
+          },
+        },
+      },
+      // UniswapV3 interfaces - use 0.8.20
+      "contracts/Uniswap/Uniswapv3/interfaces/ISwapRouter.sol": {
+        version: "0.8.20",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+      },
+      "contracts/Uniswap/Uniswapv3/interfaces/IUniswapV3Pool.sol": {
+        version: "0.8.20",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+      },
+      "contracts/Uniswap/Uniswapv3/interfaces/IUniswapV3PoolDeployer.sol": {
+        version: "0.8.20",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
         },
       },
     },
