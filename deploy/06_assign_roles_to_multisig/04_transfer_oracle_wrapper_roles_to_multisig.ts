@@ -2,100 +2,104 @@ import { Signer } from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 
+import { getConfig } from "../../config/config";
+import {
+  USD_ORACLE_AGGREGATOR_ID,
+  USD_TELLOR_ORACLE_WRAPPER_ID,
+  USD_TELLOR_WRAPPER_WITH_THRESHOLDING_ID,
+} from "../../typescript/deploy-ids";
+import { ZERO_BYTES_32 } from "../../typescript/dlend/constants";
+import { isMainnet } from "../../typescript/hardhat/deploy";
+
 /**
  * Transfer Tellor oracle wrapper roles to governance multisig
  *
  * @param hre The Hardhat Runtime Environment for deployment
  */
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+  if (!isMainnet(hre.network.name)) {
+    console.log(
+      `\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping non-mainnet network`,
+    );
+    return true;
+  }
+
+  const { getNamedAccounts, ethers, deployments } = hre;
+  const { deployer } = await getNamedAccounts();
+  const deployerSigner = await ethers.getSigner(deployer);
+
+  // Get the configuration from the network
+  const config = await getConfig(hre);
+
+  // Get the governance multisig address
+  const { governanceMultisig } = config.walletAddresses;
+
   console.log(
-    `\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping until admin tool is ready`,
+    `\n🔑 ${__filename.split("/").slice(-2).join("/")}: Transferring Tellor oracle wrapper roles to governance multisig`,
   );
+
+  const DEFAULT_ADMIN_ROLE = ZERO_BYTES_32;
+  const ORACLE_MANAGER_ROLE = await ethers
+    .getContractAt(
+      "OracleAggregator",
+      (await deployments.get(USD_ORACLE_AGGREGATOR_ID)).address,
+    )
+    .then((c) => c.ORACLE_MANAGER_ROLE());
+
+  if (!ORACLE_MANAGER_ROLE) {
+    throw new Error("❌ Could not determine ORACLE_MANAGER_ROLE.");
+  }
+
+  // Transfer roles for USD Tellor oracle wrappers
+  if (ORACLE_MANAGER_ROLE) {
+    await transferRole(
+      hre,
+      USD_TELLOR_ORACLE_WRAPPER_ID,
+      "USD Tellor Plain Wrapper",
+      ORACLE_MANAGER_ROLE,
+      "ORACLE_MANAGER_ROLE",
+      deployerSigner,
+      governanceMultisig,
+      deployer,
+    );
+  }
+  await transferRole(
+    hre,
+    USD_TELLOR_ORACLE_WRAPPER_ID,
+    "USD Tellor Plain Wrapper",
+    DEFAULT_ADMIN_ROLE,
+    "DEFAULT_ADMIN_ROLE",
+    deployerSigner,
+    governanceMultisig,
+    deployer,
+  );
+
+  if (ORACLE_MANAGER_ROLE) {
+    await transferRole(
+      hre,
+      USD_TELLOR_WRAPPER_WITH_THRESHOLDING_ID,
+      "USD Tellor Wrapper With Thresholding",
+      ORACLE_MANAGER_ROLE,
+      "ORACLE_MANAGER_ROLE",
+      deployerSigner,
+      governanceMultisig,
+      deployer,
+    );
+  }
+  await transferRole(
+    hre,
+    USD_TELLOR_WRAPPER_WITH_THRESHOLDING_ID,
+    "USD Tellor Wrapper With Thresholding",
+    DEFAULT_ADMIN_ROLE,
+    "DEFAULT_ADMIN_ROLE",
+    deployerSigner,
+    governanceMultisig,
+    deployer,
+  );
+
+  console.log(`\n🔑 ${__filename.split("/").slice(-2).join("/")}: ✅ Done\n`);
+
   return true;
-
-  // if (!isMainnet(hre.network.name)) {
-  //   console.log(
-  //     `\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping non-mainnet network`,
-  //   );
-  //   return true;
-  // }
-
-  // const { getNamedAccounts, ethers, deployments } = hre;
-  // const { deployer } = await getNamedAccounts();
-  // const deployerSigner = await ethers.getSigner(deployer);
-
-  // // Get the configuration from the network
-  // const config = await getConfig(hre);
-
-  // // Get the governance multisig address
-  // const { governanceMultisig } = config.walletAddresses;
-
-  // console.log(
-  //   `\n🔑 ${__filename.split("/").slice(-2).join("/")}: Transferring Tellor oracle wrapper roles to governance multisig`,
-  // );
-
-  // const DEFAULT_ADMIN_ROLE = ZERO_BYTES_32;
-  // const ORACLE_MANAGER_ROLE = await ethers
-  //   .getContractAt(
-  //     "OracleAggregator",
-  //     (await deployments.get(USD_ORACLE_AGGREGATOR_ID)).address,
-  //   )
-  //   .then((c) => c.ORACLE_MANAGER_ROLE());
-
-  // if (!ORACLE_MANAGER_ROLE) {
-  //   throw new Error("❌ Could not determine ORACLE_MANAGER_ROLE.");
-  // }
-
-  // // Transfer roles for USD Tellor oracle wrappers
-  // if (ORACLE_MANAGER_ROLE) {
-  //   await transferRole(
-  //     hre,
-  //     USD_TELLOR_ORACLE_WRAPPER_ID,
-  //     "USD Tellor Plain Wrapper",
-  //     ORACLE_MANAGER_ROLE,
-  //     "ORACLE_MANAGER_ROLE",
-  //     deployerSigner,
-  //     governanceMultisig,
-  //     deployer,
-  //   );
-  // }
-  // await transferRole(
-  //   hre,
-  //   USD_TELLOR_ORACLE_WRAPPER_ID,
-  //   "USD Tellor Plain Wrapper",
-  //   DEFAULT_ADMIN_ROLE,
-  //   "DEFAULT_ADMIN_ROLE",
-  //   deployerSigner,
-  //   governanceMultisig,
-  //   deployer,
-  // );
-
-  // if (ORACLE_MANAGER_ROLE) {
-  //   await transferRole(
-  //     hre,
-  //     USD_TELLOR_WRAPPER_WITH_THRESHOLDING_ID,
-  //     "USD Tellor Wrapper With Thresholding",
-  //     ORACLE_MANAGER_ROLE,
-  //     "ORACLE_MANAGER_ROLE",
-  //     deployerSigner,
-  //     governanceMultisig,
-  //     deployer,
-  //   );
-  // }
-  // await transferRole(
-  //   hre,
-  //   USD_TELLOR_WRAPPER_WITH_THRESHOLDING_ID,
-  //   "USD Tellor Wrapper With Thresholding",
-  //   DEFAULT_ADMIN_ROLE,
-  //   "DEFAULT_ADMIN_ROLE",
-  //   deployerSigner,
-  //   governanceMultisig,
-  //   deployer,
-  // );
-
-  // console.log(`\n🔑 ${__filename.split("/").slice(-2).join("/")}: ✅ Done\n`);
-
-  // return true;
 };
 
 /**
