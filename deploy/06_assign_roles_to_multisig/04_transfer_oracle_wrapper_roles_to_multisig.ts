@@ -174,6 +174,9 @@ async function transferRole(
 
 func.id = "transfer_oracle_wrapper_roles_to_multisig";
 func.tags = ["governance", "roles"];
-func.dependencies = ["setup-usd-tellor-oracle-wrappers"];
+func.dependencies = [
+  "setup-usd-tellor-oracle-wrappers",
+  "point-saga-feed-to-oracle-aggregator",
+];
 
 export default func;

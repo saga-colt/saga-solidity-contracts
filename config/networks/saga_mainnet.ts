@@ -59,6 +59,7 @@ export async function getConfig(
       D: emptyStringIfUndefined(dDeployment?.address),
       USDT: usdtAddress,
       USDC: usdcAddress,
+      SAGA: sagaAddress,
     },
     walletAddresses: {
       governanceMultisig: governanceSafeMultisig, // Created via Safe
