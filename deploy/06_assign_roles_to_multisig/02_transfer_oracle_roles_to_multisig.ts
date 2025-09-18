@@ -2,7 +2,10 @@ import { Signer } from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 
+import { getConfig } from "../../config/config";
+import { USD_ORACLE_AGGREGATOR_ID } from "../../typescript/deploy-ids";
 import { ZERO_BYTES_32 } from "../../typescript/dlend/constants";
+import { isMainnet } from "../../typescript/hardhat/deploy";
 
 /**
  * Transfer oracle roles to governance multisig
@@ -10,41 +13,36 @@ import { ZERO_BYTES_32 } from "../../typescript/dlend/constants";
  * @param hre The Hardhat Runtime Environment for deployment
  */
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  console.log(
-    `\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping until admin tool is ready`,
+  if (!isMainnet(hre.network.name)) {
+    console.log(
+      `\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping non-mainnet network`,
+    );
+    return true;
+  }
+
+  const { getNamedAccounts, ethers } = hre;
+  const { deployer } = await getNamedAccounts();
+  const deployerSigner = await ethers.getSigner(deployer);
+
+  // Get the configuration from the network
+  const config = await getConfig(hre);
+
+  // Get the governance multisig address
+  const { governanceMultisig } = config.walletAddresses;
+
+  // Transfer roles for USD oracle aggregator
+  await transferOracleAggregatorRoles(
+    hre,
+    USD_ORACLE_AGGREGATOR_ID,
+    "USD",
+    deployerSigner,
+    governanceMultisig,
+    deployer,
   );
+
+  console.log(`\n🔑 ${__filename.split("/").slice(-2).join("/")}: ✅ Done\n`);
+
   return true;
-
-  // if (!isMainnet(hre.network.name)) {
-  //   console.log(
-  //     `\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping non-mainnet network`,
-  //   );
-  //   return true;
-  // }
-
-  // const { getNamedAccounts, ethers } = hre;
-  // const { deployer } = await getNamedAccounts();
-  // const deployerSigner = await ethers.getSigner(deployer);
-
-  // // Get the configuration from the network
-  // const config = await getConfig(hre);
-
-  // // Get the governance multisig address
-  // const { governanceMultisig } = config.walletAddresses;
-
-  // // Transfer roles for USD oracle aggregator
-  // await transferOracleAggregatorRoles(
-  //   hre,
-  //   USD_ORACLE_AGGREGATOR_ID,
-  //   "USD",
-  //   deployerSigner,
-  //   governanceMultisig,
-  //   deployer,
-  // );
-
-  // console.log(`\n🔑 ${__filename.split("/").slice(-2).join("/")}: ✅ Done\n`);
-
-  // return true;
 };
 
 /**
