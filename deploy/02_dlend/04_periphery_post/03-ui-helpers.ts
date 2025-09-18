@@ -35,7 +35,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Then deploy UiPoolDataProvider
   await deploy(UI_POOL_DATA_PROVIDER_ID, {
     from: deployer,
-    args: [priceOracle.address, config.tokenAddresses.WSAGA], // Use price oracle and WSAGA token address
+    args: [priceOracle.address, config.tokenAddresses.SAGA], // Use price oracle and SAGA token address
     log: true,
     waitConfirmations: 1,
   });

@@ -29,7 +29,7 @@ export async function getConfig(
   const dDeployment = await _hre.deployments.getOrNull(D_TOKEN_ID);
   const usdtAddress = "0xC8fe3C1de344854f4429bB333AFFAeF97eF88CEa";
   const usdcAddress = "0xfc960C233B8E98e0Cf282e29BDE8d3f105fc24d5";
-  const sagaAddress = "0x6f250229af8D83c51500f3565b10E93d8907B644";
+  const sagaAddress = "0xa19377761fed745723b90993988e04d641c2cffe";
 
   const governanceSafeMultisig = "0xf19cf8881237CA819Fd50C9C22cb258e9DB8644e"; // Safe on Saga
 
