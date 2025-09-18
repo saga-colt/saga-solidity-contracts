@@ -49,6 +49,11 @@ export const strategyWETH: IReserveParams = {
   borrowableIsolation: false,
 };
 
+export const strategySAGA: IReserveParams = {
+  ...strategyWETH,
+  supplyCap: "2500000", // TODO: PLEASE REVIEW BEFORE DEPLOYING
+};
+
 const baseYieldBearingStablecoinConfig: IReserveParams = {
   strategy: rateStrategyMediumLiquidityStable,
   baseLTVAsCollateral: "8000",
