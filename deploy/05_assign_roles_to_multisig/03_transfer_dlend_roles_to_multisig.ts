@@ -7,9 +7,7 @@ import { DeployFunction } from "hardhat-deploy/types";
  * @param _hre Hardhat Runtime Environment
  */
 const func: DeployFunction = async function (_hre: HardhatRuntimeEnvironment) {
-  console.log(
-    `\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping until admin tool is ready`,
-  );
+  console.log(`\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping until admin tool is ready`);
   return true;
 
   // if (!isMainnet(hre.network.name)) {

@@ -12,27 +12,19 @@ async function main() {
   const { deployer } = await getNamedAccounts();
   const deployerSigner: Signer = await ethers.getSigner(deployer);
 
-  console.log(
-    `\nScanning roles and ownership for deployer: ${deployer} on network: ${network.name}`
-  );
+  console.log(`\nScanning roles and ownership for deployer: ${deployer} on network: ${network.name}`);
 
   const config = await getConfig(hre);
   const { governanceMultisig } = config.walletAddresses;
 
   console.log(`Governance Multisig: ${governanceMultisig}`);
 
-  const deploymentsPath = path.join(
-    __dirname,
-    "..",
-    "..",
-    "deployments",
-    network.name
-  );
+  const deploymentsPath = path.join(__dirname, "..", "..", "deployments", network.name);
   const migrationsFilePath = path.join(deploymentsPath, ".migrations.json");
 
   if (!fs.existsSync(deploymentsPath)) {
     console.error(
-      `\nError: deployments directory not found for network ${network.name}. Please ensure contracts are deployed on this network.`
+      `\nError: deployments directory not found for network ${network.name}. Please ensure contracts are deployed on this network.`,
     );
     return false;
   }
@@ -42,13 +34,9 @@ async function main() {
   if (fs.existsSync(migrationsFilePath)) {
     const migrations = JSON.parse(fs.readFileSync(migrationsFilePath, "utf-8"));
     deployedNames = Object.keys(migrations);
-    console.log(
-      `Found ${deployedNames.length} entries in .migrations.json (for context).`
-    );
+    console.log(`Found ${deployedNames.length} entries in .migrations.json (for context).`);
   } else {
-    console.log(
-      `.migrations.json not found for network ${network.name}. Proceeding by scanning deployment files.`
-    );
+    console.log(`.migrations.json not found for network ${network.name}. Proceeding by scanning deployment files.`);
   }
 
   const contractsWithPotentialRoles: {
@@ -66,13 +54,9 @@ async function main() {
 
   // Read deployment artifacts directly from the directory
   const deploymentFiles = fs.readdirSync(deploymentsPath);
-  const contractArtifactFiles = deploymentFiles.filter(
-    (file) => file.endsWith(".json") && file !== ".migrations.json"
-  );
+  const contractArtifactFiles = deploymentFiles.filter((file) => file.endsWith(".json") && file !== ".migrations.json");
 
-  console.log(
-    `Found ${contractArtifactFiles.length} potential contract artifact files in ${deploymentsPath}.`
-  );
+  console.log(`Found ${contractArtifactFiles.length} potential contract artifact files in ${deploymentsPath}.`);
 
   for (const filename of contractArtifactFiles) {
     const deploymentName = filename.replace(".json", ""); // Use filename as a potential deployment name
@@ -93,14 +77,12 @@ async function main() {
           item.inputs[0].type === "bytes32" &&
           item.inputs[1].type === "address" &&
           item.outputs?.length === 1 &&
-          item.outputs[0].type === "bool"
+          item.outputs[0].type === "bool",
       );
 
       if (hasRoleFunction) {
         console.log(`  Contract ${contractName} has a hasRole function.`);
-        console.log(
-          `\nChecking roles for contract: ${contractName} at ${contractAddress}`
-        );
+        console.log(`\nChecking roles for contract: ${contractName} at ${contractAddress}`);
 
         const roles: { name: string; hash: string }[] = [];
 
@@ -115,29 +97,16 @@ async function main() {
             item.outputs[0].type === "bytes32"
           ) {
             // Check if the function name looks like a role constant
-            if (
-              item.name &&
-              (item.name.endsWith("_ROLE") ||
-                item.name === "DEFAULT_ADMIN_ROLE")
-            ) {
+            if (item.name && (item.name.endsWith("_ROLE") || item.name === "DEFAULT_ADMIN_ROLE")) {
               const roleName = item.name;
               try {
-                const contract = await ethers.getContractAt(
-                  abi,
-                  contractAddress,
-                  deployerSigner
-                );
+                const contract = await ethers.getContractAt(abi, contractAddress, deployerSigner);
                 // Call the function to get the role hash
                 const roleHash = await contract[roleName]();
                 roles.push({ name: roleName, hash: roleHash });
-                console.log(
-                  `  - Found role: ${roleName} with hash ${roleHash}`
-                );
+                console.log(`  - Found role: ${roleName} with hash ${roleHash}`);
               } catch (error) {
-                console.error(
-                  `    Error getting role hash for ${roleName}:`,
-                  error
-                );
+                console.error(`    Error getting role hash for ${roleName}:`, error);
               }
             }
           }
@@ -164,15 +133,12 @@ async function main() {
           item.name === "owner" &&
           item.inputs?.length === 0 &&
           item.outputs?.length === 1 &&
-          item.outputs[0].type === "address"
+          item.outputs[0].type === "address",
       );
 
       const transferOwnershipFunction = abi.find(
         (item) =>
-          item.type === "function" &&
-          item.name === "transferOwnership" &&
-          item.inputs?.length === 1 &&
-          item.inputs[0].type === "address"
+          item.type === "function" && item.name === "transferOwnership" && item.inputs?.length === 1 && item.inputs[0].type === "address",
       );
 
       if (ownerFunction && transferOwnershipFunction) {
@@ -184,15 +150,12 @@ async function main() {
         });
       }
     } catch (error) {
-      console.error(
-        `Error reading or processing artifact file ${filename}:`,
-        error
-      );
+      console.error(`Error reading or processing artifact file ${filename}:`, error);
     }
   }
 
   console.log(
-    `\nScan complete. Found potential roles in ${contractsWithPotentialRoles.length} contracts and potential ownership in ${contractsWithPotentialOwnership.length} contracts.`
+    `\nScan complete. Found potential roles in ${contractsWithPotentialRoles.length} contracts and potential ownership in ${contractsWithPotentialOwnership.length} contracts.`,
   );
 
   const deployerRoles: {
@@ -211,19 +174,10 @@ async function main() {
   console.log("\nChecking deployer's roles and ownership...");
 
   for (const contractInfo of contractsWithPotentialRoles) {
-    const {
-      name: contractName,
-      address: contractAddress,
-      abi,
-      roles,
-    } = contractInfo;
+    const { name: contractName, address: contractAddress, abi, roles } = contractInfo;
 
     try {
-      const contract = await ethers.getContractAt(
-        abi,
-        contractAddress,
-        deployerSigner
-      );
+      const contract = await ethers.getContractAt(abi, contractAddress, deployerSigner);
 
       const rolesHeldByDeployer: { name: string; hash: string }[] = [];
 
@@ -256,14 +210,8 @@ async function main() {
     const { name: contractName, address: contractAddress, abi } = contractInfo;
 
     try {
-      console.log(
-        `  Checking ownership for ${contractName} at ${contractAddress}`
-      );
-      const contract = await ethers.getContractAt(
-        abi,
-        contractAddress,
-        deployerSigner
-      );
+      console.log(`  Checking ownership for ${contractName} at ${contractAddress}`);
+      const contract = await ethers.getContractAt(abi, contractAddress, deployerSigner);
 
       const currentOwner = await contract.owner();
 
@@ -271,9 +219,7 @@ async function main() {
         deployerOwnedContracts.push(contractInfo);
         console.log(`  - Deployer IS the owner of ${contractName}`);
       } else {
-        console.log(
-          `  - Deployer is NOT the owner of ${contractName}. Current owner: ${currentOwner}`
-        );
+        console.log(`  - Deployer is NOT the owner of ${contractName}. Current owner: ${currentOwner}`);
       }
     } catch (error) {
       console.error(`Error checking ownership for ${contractName}:`, error);
@@ -282,15 +228,11 @@ async function main() {
 
   console.log("\n--- Summary of Deployer's Roles and Ownership ---");
   if (deployerRoles.length === 0 && deployerOwnedContracts.length === 0) {
-    console.log(
-      "Deployer holds no identifiable roles or ownership on deployed contracts."
-    );
+    console.log("Deployer holds no identifiable roles or ownership on deployed contracts.");
   } else {
     console.log("Contracts with Roles Held by Deployer:");
     for (const contractInfo of deployerRoles) {
-      console.log(
-        `Contract: ${contractInfo.contractName} (${contractInfo.contractAddress})`
-      );
+      console.log(`Contract: ${contractInfo.contractName} (${contractInfo.contractAddress})`);
       for (const role of contractInfo.roles) {
         console.log(`  - ${role.name} (hash: ${role.hash})`);
       }
@@ -315,8 +257,7 @@ async function main() {
     output: process.stdout,
   });
 
-  const question =
-    "\nDo you want to transfer the listed roles and ownership to the governance multisig? (yes/no): ";
+  const question = "\nDo you want to transfer the listed roles and ownership to the governance multisig? (yes/no): ";
 
   const answer = await new Promise<string>((resolve) => {
     rl.question(question, resolve);
@@ -336,101 +277,63 @@ async function main() {
     const { contractName, contractAddress, abi, roles } = contractInfo;
 
     try {
-      const contract = await ethers.getContractAt(
-        abi,
-        contractAddress,
-        deployerSigner
-      );
+      const contract = await ethers.getContractAt(abi, contractAddress, deployerSigner);
 
       // Separate roles
       const adminRole = roles.find((r) => r.name === "DEFAULT_ADMIN_ROLE");
       const otherRoles = roles.filter((r) => r.name !== "DEFAULT_ADMIN_ROLE");
 
       // 1. Transfer other roles first
-      console.log(
-        `  - Transferring ${otherRoles.length} non-admin role(s) on ${contractName}...`
-      );
+      console.log(`  - Transferring ${otherRoles.length} non-admin role(s) on ${contractName}...`);
       for (const role of otherRoles) {
         console.log(`    - Transferring role ${role.name}...`);
         try {
           // Grant role to multisig
-          const grantTx = await contract.grantRole(
-            role.hash,
-            governanceMultisig
-          );
+          const grantTx = await contract.grantRole(role.hash, governanceMultisig);
           await grantTx.wait();
-          console.log(
-            `      Granted ${role.name} to ${governanceMultisig} (Tx: ${grantTx.hash})`
-          );
+          console.log(`      Granted ${role.name} to ${governanceMultisig} (Tx: ${grantTx.hash})`);
 
           // Revoke role from deployer
           const revokeTx = await contract.revokeRole(role.hash, deployer);
           await revokeTx.wait();
-          console.log(
-            `      Revoked ${role.name} from ${deployer} (Tx: ${revokeTx.hash})`
-          );
+          console.log(`      Revoked ${role.name} from ${deployer} (Tx: ${revokeTx.hash})`);
         } catch (error) {
-          console.error(
-            `      Error transferring role ${role.name} on ${contractName}:`,
-            error
-          );
+          console.error(`      Error transferring role ${role.name} on ${contractName}:`, error);
           // Decide if you want to stop the whole process or just skip this role/contract
-          console.warn(
-            `      Skipping remaining role transfers for ${contractName} due to error.`
-          );
+          console.warn(`      Skipping remaining role transfers for ${contractName} due to error.`);
           break; // Break inner loop for this contract if a non-admin role fails
         }
       }
 
       // 2. Transfer DEFAULT_ADMIN_ROLE last (if it exists and other roles were successful)
       if (adminRole) {
-        console.log(
-          `  - Transferring DEFAULT_ADMIN_ROLE on ${contractName}...`
-        );
+        console.log(`  - Transferring DEFAULT_ADMIN_ROLE on ${contractName}...`);
         try {
           // CRITICAL: Grant the admin role to the new admin *before* revoking it from the old one.
           // Grant role to multisig
-          const grantTx = await contract.grantRole(
-            adminRole.hash,
-            governanceMultisig
-          );
+          const grantTx = await contract.grantRole(adminRole.hash, governanceMultisig);
           await grantTx.wait();
-          console.log(
-            `    Granted ${adminRole.name} to ${governanceMultisig} (Tx: ${grantTx.hash})`
-          );
+          console.log(`    Granted ${adminRole.name} to ${governanceMultisig} (Tx: ${grantTx.hash})`);
 
           // Safety check: Verify the multisig now has the admin role before revoking.
-          const hasRoleCheck = await contract.hasRole(
-            adminRole.hash,
-            governanceMultisig
-          );
+          const hasRoleCheck = await contract.hasRole(adminRole.hash, governanceMultisig);
           if (!hasRoleCheck) {
             throw new Error(
-              `Verification failed: Governance multisig ${governanceMultisig} does NOT have role ${adminRole.name} on ${contractName} after grant attempt.`
+              `Verification failed: Governance multisig ${governanceMultisig} does NOT have role ${adminRole.name} on ${contractName} after grant attempt.`,
             );
           }
-          console.log(
-            `      Verification successful: Multisig now has role ${adminRole.name}.`
-          );
+          console.log(`      Verification successful: Multisig now has role ${adminRole.name}.`);
 
           // Revoke role from deployer
           const revokeTx = await contract.revokeRole(adminRole.hash, deployer);
           await revokeTx.wait();
-          console.log(
-            `    Revoked ${adminRole.name} from ${deployer} (Tx: ${revokeTx.hash})`
-          );
+          console.log(`    Revoked ${adminRole.name} from ${deployer} (Tx: ${revokeTx.hash})`);
         } catch (error) {
-          console.error(
-            `    Error transferring ${adminRole.name} on ${contractName}:`,
-            error
-          );
+          console.error(`    Error transferring ${adminRole.name} on ${contractName}:`, error);
         }
       }
     } catch (error) {
-      console.error(
-        `Error interacting with contract ${contractName} for role transfer:`,
-        error
-      );
+      console.error(`Error interacting with contract ${contractName} for role transfer:`, error);
     }
   }
 
@@ -440,28 +343,16 @@ async function main() {
 
     try {
       console.log(`  - Transferring ownership of ${contractName}...`);
-      const contract = await ethers.getContractAt(
-        abi,
-        contractAddress,
-        deployerSigner
-      );
+      const contract = await ethers.getContractAt(abi, contractAddress, deployerSigner);
       try {
         const transferTx = await contract.transferOwnership(governanceMultisig);
         await transferTx.wait();
-        console.log(
-          `    Transferred ownership of ${contractName} to ${governanceMultisig} (Tx: ${transferTx.hash})`
-        );
+        console.log(`    Transferred ownership of ${contractName} to ${governanceMultisig} (Tx: ${transferTx.hash})`);
       } catch (error) {
-        console.error(
-          `    Error transferring ownership of ${contractName}:`,
-          error
-        );
+        console.error(`    Error transferring ownership of ${contractName}:`, error);
       }
     } catch (error) {
-      console.error(
-        `Error interacting with contract ${contractName} for ownership transfer:`,
-        error
-      );
+      console.error(`Error interacting with contract ${contractName} for ownership transfer:`, error);
     }
   }
 

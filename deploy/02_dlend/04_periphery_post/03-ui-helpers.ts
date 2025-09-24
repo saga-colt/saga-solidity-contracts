@@ -2,11 +2,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 
 import { getConfig } from "../../../config/config";
-import {
-  PRICE_ORACLE_ID,
-  UI_INCENTIVE_DATA_PROVIDER_ID,
-  UI_POOL_DATA_PROVIDER_ID,
-} from "../../../typescript/deploy-ids";
+import { PRICE_ORACLE_ID, UI_INCENTIVE_DATA_PROVIDER_ID, UI_POOL_DATA_PROVIDER_ID } from "../../../typescript/deploy-ids";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
@@ -15,9 +11,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const config = await getConfig(hre);
 
   if (!config.dLend) {
-    console.log(
-      "No dLend configuration found for this network. Skipping dLend deployment.",
-    );
+    console.log("No dLend configuration found for this network. Skipping dLend deployment.");
     return true;
   }
 

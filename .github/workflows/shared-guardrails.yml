@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: "18"
   REPORTS_DIR: reports
 
 jobs:
@@ -43,9 +43,9 @@ jobs:
         run: |
           set -eo pipefail
           if [ -f ".shared/scripts/guardrails/check.ts" ] && [ -x "node_modules/.bin/ts-node" ]; then
-            node_modules/.bin/ts-node .shared/scripts/guardrails/check.ts --fail-fast --skip-prettier
+            node_modules/.bin/ts-node .shared/scripts/guardrails/check.ts --fail-fast
           elif node -e "const pkg=require('./package.json');process.exit(pkg && pkg.scripts && pkg.scripts['guardrails:check'] ? 0 : 1)"; then
-            npm run guardrails:check -- --fail-fast --skip-prettier
+            npm run guardrails:check -- --fail-fast
           else
             echo "::warning::No shared guardrails script configured; running baseline linters."
             if [ -x "node_modules/.bin/eslint" ]; then

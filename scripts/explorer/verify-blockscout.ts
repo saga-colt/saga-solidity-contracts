@@ -41,15 +41,11 @@ type ParsedMetadata = {
   };
 };
 
-const BLOCKSCOUT_API_BASE =
-  process.env.BLOCKSCOUT_API_BASE || "https://api-sagaevm.sagaexplorer.io/api";
+const BLOCKSCOUT_API_BASE = process.env.BLOCKSCOUT_API_BASE || "https://api-sagaevm.sagaexplorer.io/api";
 const DEFAULT_LICENSE_TYPE = "3"; // MIT
 // Always show already-verified contracts in output (no flags)
 
-function httpPostForm(
-  url: string,
-  form: Record<string, string>
-): Promise<{ status: string; message: string; result: any }> {
+function httpPostForm(url: string, form: Record<string, string>): Promise<{ status: string; message: string; result: any }> {
   const body = new URLSearchParams(form).toString();
   return new Promise((resolve, reject) => {
     const { hostname, pathname, search, protocol } = new URL(url);
@@ -76,7 +72,7 @@ function httpPostForm(
             reject(new Error(`Non-JSON response (${res.statusCode}): ${data}`));
           }
         });
-      }
+      },
     );
     req.on("error", reject);
     req.write(body);
@@ -84,9 +80,7 @@ function httpPostForm(
   });
 }
 
-function httpGet(
-  url: string
-): Promise<{ status: string; message: string; result: any }> {
+function httpGet(url: string): Promise<{ status: string; message: string; result: any }> {
   return new Promise((resolve, reject) => {
     https
       .get(url, (res) => {
@@ -123,11 +117,7 @@ function getCompilationTarget(metadata: ParsedMetadata): {
   return { contractName, sourcePath };
 }
 
-function encodeConstructorArgs(
-  abi: any[],
-  args: any[] | undefined,
-  bytecode?: string
-): string {
+function encodeConstructorArgs(abi: any[], args: any[] | undefined, bytecode?: string): string {
   if (!args || args.length === 0) return "";
   // Prefer encoding directly from constructor fragment
   const intf = new Interface(abi as Fragment[]);
@@ -144,16 +134,9 @@ async function loadJson<T>(filePath: string): Promise<T> {
   return JSON.parse(raw) as T;
 }
 
-function buildCandidateContractNames(
-  sourcePath: string,
-  contractName: string
-): string[] {
+function buildCandidateContractNames(sourcePath: string, contractName: string): string[] {
   const fileOnly = path.basename(sourcePath);
-  return [
-    `${sourcePath}:${contractName}`,
-    `${fileOnly}:${contractName}`,
-    `${contractName}`,
-  ];
+  return [`${sourcePath}:${contractName}`, `${fileOnly}:${contractName}`, `${contractName}`];
 }
 
 function sleep(ms: number): Promise<void> {
@@ -172,9 +155,7 @@ function toPrintable(value: any): string {
 
 function printResultLine(r: VerifyResult): void {
   // Single line, same format as final summary
-  console.log(
-    `${r.ok ? "[OK]" : "[FAIL]"} ${r.name} @ ${r.address}${r.note ? ` - ${r.note}` : ""}`
-  );
+  console.log(`${r.ok ? "[OK]" : "[FAIL]"} ${r.name} @ ${r.address}${r.note ? ` - ${r.note}` : ""}`);
 }
 
 function truncateMiddle(str: string, maxLen: number): string {
@@ -186,11 +167,7 @@ function truncateMiddle(str: string, maxLen: number): string {
   return `${str.slice(0, head)}...${str.slice(-tail)}`;
 }
 
-function summarizeSubmitErrors(
-  submitErrors: string[],
-  maxReasons = 2,
-  maxLen = 140
-): string {
+function summarizeSubmitErrors(submitErrors: string[], maxReasons = 2, maxLen = 140): string {
   if (!submitErrors || submitErrors.length === 0) return "submit failed";
   const counts = new Map<string, number>();
   const normalizeReason = (msg: string): string => {
@@ -219,12 +196,7 @@ function summarizeSubmitErrors(
     const [reason, attempts] = items[0];
     return `submit failed (${attempts} attempts): ${truncateMiddle(reason, maxLen)}`;
   }
-  const parts = items
-    .slice(0, maxReasons)
-    .map(
-      ([reason, n]) =>
-        `${truncateMiddle(reason, Math.floor(maxLen / maxReasons))} (${n}x)`
-    );
+  const parts = items.slice(0, maxReasons).map(([reason, n]) => `${truncateMiddle(reason, Math.floor(maxLen / maxReasons))} (${n}x)`);
   return `submit failed: ${parts.join(" | ")}`;
 }
 
@@ -237,7 +209,7 @@ function runHardhatVerify(
   network: string,
   address: string,
   ctorArgs: any[] | undefined,
-  contractFqn?: string
+  contractFqn?: string,
 ): { ok: boolean; note: string } {
   const args: string[] = ["hardhat", "verify", "--network", network];
   if (contractFqn) {
@@ -256,21 +228,15 @@ function runHardhatVerify(
   const res = spawnSync("npx", args, { encoding: "utf8" });
   const out = `${res.stdout || ""}\n${res.stderr || ""}`;
   const lower = out.toLowerCase();
-  const success =
-    lower.includes("successfully verified") ||
-    lower.includes("already verified") ||
-    lower.includes("pass - verified");
+  const success = lower.includes("successfully verified") || lower.includes("already verified") || lower.includes("pass - verified");
   const note = success
-    ? out.match(/Successfully verified contract[^\n]*/)?.[0] ||
-      "verified via hardhat-verify"
+    ? out.match(/Successfully verified contract[^\n]*/)?.[0] || "verified via hardhat-verify"
     : truncateMiddle(out.trim() || "hardhat-verify failed", 200);
   return { ok: success, note };
 }
 
 async function main() {
-  const network = process.argv.includes("--network")
-    ? process.argv[process.argv.indexOf("--network") + 1]
-    : "saga_mainnet";
+  const network = process.argv.includes("--network") ? process.argv[process.argv.indexOf("--network") + 1] : "saga_mainnet";
 
   const deploymentsDir = path.resolve(process.cwd(), "deployments", network);
   const solcInputsDir = path.join(deploymentsDir, "solcInputs");
@@ -278,9 +244,7 @@ async function main() {
   const files = await fs.readdir(deploymentsDir);
   const jsonFiles = files.filter((f) => f.endsWith(".json"));
   const filterEnv = process.env.VERIFY_ONLY?.trim();
-  const filterSet = filterEnv
-    ? new Set(filterEnv.split(",").map((s) => s.trim()))
-    : undefined;
+  const filterSet = filterEnv ? new Set(filterEnv.split(",").map((s) => s.trim())) : undefined;
 
   const results: Array<VerifyResult> = [];
 
@@ -306,18 +270,10 @@ async function main() {
 
     try {
       // Quick skip if already verified
-      const statusResp = await httpGet(
-        `${BLOCKSCOUT_API_BASE}?module=contract&action=getsourcecode&address=${address}`
-      );
+      const statusResp = await httpGet(`${BLOCKSCOUT_API_BASE}?module=contract&action=getsourcecode&address=${address}`);
       if (statusResp.status === "1" && Array.isArray(statusResp.result)) {
         const rec = statusResp.result[0];
-        if (
-          rec &&
-          rec.SourceCode &&
-          rec.SourceCode.length > 0 &&
-          rec.ABI &&
-          rec.ABI !== "[]"
-        ) {
+        if (rec && rec.SourceCode && rec.SourceCode.length > 0 && rec.ABI && rec.ABI !== "[]") {
           const r: VerifyResult = {
             name,
             address,
@@ -335,20 +291,14 @@ async function main() {
       let metadata: ParsedMetadata;
       if (typeof deployment.metadata === "string") {
         metadata = JSON.parse(deployment.metadata) as ParsedMetadata;
-      } else if (
-        deployment.metadata &&
-        typeof deployment.metadata === "object"
-      ) {
+      } else if (deployment.metadata && typeof deployment.metadata === "object") {
         metadata = deployment.metadata as unknown as ParsedMetadata;
       } else {
         throw new Error("metadata missing in deployment file");
       }
 
       const { contractName, sourcePath } = getCompilationTarget(metadata);
-      const candidateNames = buildCandidateContractNames(
-        sourcePath,
-        contractName
-      );
+      const candidateNames = buildCandidateContractNames(sourcePath, contractName);
 
       const compilerVersion = toCompilerVersionTag(metadata.compiler.version);
       const optimizer = metadata.settings.optimizer || {
@@ -365,11 +315,7 @@ async function main() {
       const solcInputRaw = await fs.readFile(solcInputPath, "utf8");
 
       // Encode constructor args
-      const encodedArgs = encodeConstructorArgs(
-        metadata.output.abi,
-        deployment.args,
-        deployment.bytecode
-      );
+      const encodedArgs = encodeConstructorArgs(metadata.output.abi, deployment.args, deployment.bytecode);
 
       let finalMsg = "";
       let submitted = false;
@@ -396,9 +342,7 @@ async function main() {
         const submit = await httpPostForm(BLOCKSCOUT_API_BASE, form);
         if (submit.status !== "1") {
           // Record detailed API error and try next candidate; API may flake
-          const submitMsg = [submit.message, toPrintable(submit.result)]
-            .filter(Boolean)
-            .join(" - ");
+          const submitMsg = [submit.message, toPrintable(submit.result)].filter(Boolean).join(" - ");
           submitErrors.push(`${candidate}: ${submitMsg || "unknown error"}`);
           continue;
         }
@@ -406,9 +350,7 @@ async function main() {
         submitted = true;
         for (let i = 0; i < 40; i += 1) {
           await sleep(3000);
-          const check = await httpGet(
-            `${BLOCKSCOUT_API_BASE}?module=contract&action=checkverifystatus&guid=${encodeURIComponent(guid)}`
-          );
+          const check = await httpGet(`${BLOCKSCOUT_API_BASE}?module=contract&action=checkverifystatus&guid=${encodeURIComponent(guid)}`);
           if (check.status === "1") {
             finalMsg = check.result || "OK";
             break;
@@ -416,16 +358,13 @@ async function main() {
           if (
             check.status === "0" &&
             typeof check.result === "string" &&
-            (check.result.includes("Already Verified") ||
-              check.result.includes("Pass - Verified"))
+            (check.result.includes("Already Verified") || check.result.includes("Pass - Verified"))
           ) {
             finalMsg = check.result;
             break;
           }
           // Track last non-success status for better error messages
-          lastCheckNote = [check.message, toPrintable(check.result)]
-            .filter(Boolean)
-            .join(" - ");
+          lastCheckNote = [check.message, toPrintable(check.result)].filter(Boolean).join(" - ");
         }
         if (finalMsg) break;
       }
@@ -493,9 +432,7 @@ async function main() {
       const key = `${r.name}:${r.address}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      console.log(
-        `[FAIL] ${r.name} @ ${r.address}${r.note ? ` - ${truncateMiddle(r.note, 120)}` : ""}`
-      );
+      console.log(`[FAIL] ${r.name} @ ${r.address}${r.note ? ` - ${truncateMiddle(r.note, 120)}` : ""}`);
     }
   }
 }

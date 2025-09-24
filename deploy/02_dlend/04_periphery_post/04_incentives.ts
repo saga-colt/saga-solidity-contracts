@@ -18,9 +18,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const config = await getConfig(hre);
 
   if (!config.dLend) {
-    console.log(
-      "No dLend configuration found for this network. Skipping dLend deployment.",
-    );
+    console.log("No dLend configuration found for this network. Skipping dLend deployment.");
     return true;
   }
 
@@ -48,18 +46,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     waitConfirmations: 1,
   });
 
-  const incentivesImplContract = await ethers.getContractAt(
-    "RewardsController",
-    incentivesImpl.address,
-  );
+  const incentivesImplContract = await ethers.getContractAt("RewardsController", incentivesImpl.address);
 
   // Initialize the implementation
   try {
     await incentivesImplContract.initialize(ZeroAddress);
   } catch (error: any) {
-    if (
-      error?.message.includes("Contract instance has already been initialized")
-    ) {
+    if (error?.message.includes("Contract instance has already been initialized")) {
       console.log("Incentives implementation already initialized");
     } else {
       throw Error(`Failed to initialize Incentives implementation: ${error}`);
@@ -67,34 +60,19 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   // The Rewards Controller must be set at AddressesProvider with id keccak256("INCENTIVES_CONTROLLER")
-  const incentivesControllerId = ethers.keccak256(
-    ethers.toUtf8Bytes("INCENTIVES_CONTROLLER"),
-  );
+  const incentivesControllerId = ethers.keccak256(ethers.toUtf8Bytes("INCENTIVES_CONTROLLER"));
 
-  const isRewardsProxyPending =
-    (await addressesProviderInstance.getAddressFromID(
-      incentivesControllerId,
-    )) === ZeroAddress;
+  const isRewardsProxyPending = (await addressesProviderInstance.getAddressFromID(incentivesControllerId)) === ZeroAddress;
 
   if (isRewardsProxyPending) {
-    const proxyArtifact = await getExtendedArtifact(
-      "InitializableImmutableAdminUpgradeabilityProxy",
-    );
+    const proxyArtifact = await getExtendedArtifact("InitializableImmutableAdminUpgradeabilityProxy");
 
-    const _setRewardsAsProxyTx =
-      await addressesProviderInstance.setAddressAsProxy(
-        incentivesControllerId,
-        incentivesImpl.address,
-      );
+    const _setRewardsAsProxyTx = await addressesProviderInstance.setAddressAsProxy(incentivesControllerId, incentivesImpl.address);
 
-    const proxyAddress = await addressesProviderInstance.getAddressFromID(
-      incentivesControllerId,
-    );
+    const proxyAddress = await addressesProviderInstance.getAddressFromID(incentivesControllerId);
 
     if (proxyAddress === ZeroAddress) {
-      throw new Error(
-        "Failed to deploy IncentivesProxy: obtained zero address from AddressesProvider",
-      );
+      throw new Error("Failed to deploy IncentivesProxy: obtained zero address from AddressesProvider");
     }
 
     await save(INCENTIVES_PROXY_ID, {
@@ -113,13 +91,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // If artifact missing or zero, attempt to fetch from on-chain AddressesProvider
   if (!incentivesProxyAddress || incentivesProxyAddress === ZeroAddress) {
-    const proxyAddressOnChain =
-      await addressesProviderInstance.getAddressFromID(incentivesControllerId);
+    const proxyAddressOnChain = await addressesProviderInstance.getAddressFromID(incentivesControllerId);
 
     if (proxyAddressOnChain !== ZeroAddress) {
-      const proxyArtifact = await getExtendedArtifact(
-        "InitializableImmutableAdminUpgradeabilityProxy",
-      );
+      const proxyArtifact = await getExtendedArtifact("InitializableImmutableAdminUpgradeabilityProxy");
 
       await save(INCENTIVES_PROXY_ID, {
         ...proxyArtifact,
@@ -128,24 +103,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
       incentivesProxyAddress = proxyAddressOnChain;
     } else {
-      throw new Error(
-        "IncentivesProxy address not found on-chain and artifact missing/invalid. Deployment cannot continue.",
-      );
+      throw new Error("IncentivesProxy address not found on-chain and artifact missing/invalid. Deployment cannot continue.");
     }
   }
 
   // Initialize EmissionManager with the rewards controller address
-  const emissionManagerContract = await ethers.getContractAt(
-    "EmissionManager",
-    emissionManager.address,
-  );
+  const emissionManagerContract = await ethers.getContractAt("EmissionManager", emissionManager.address);
 
   if (incentivesProxyAddress) {
     await emissionManagerContract.setRewardsController(incentivesProxyAddress);
   } else {
-    console.log(
-      "Warning: IncentivesProxy address is undefined, skipping setRewardsController",
-    );
+    console.log("Warning: IncentivesProxy address is undefined, skipping setRewardsController");
   }
 
   // Deploy Rewards Strategies
@@ -167,11 +135,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 func.id = "dLend:Incentives";
 func.tags = ["dlend", "dlend-periphery-post"];
-func.dependencies = [
-  "dlend-core",
-  "dlend-periphery-pre",
-  "dlend-market",
-  "PoolAddressesProvider",
-];
+func.dependencies = ["dlend-core", "dlend-periphery-pre", "dlend-market", "PoolAddressesProvider"];
 
 export default func;

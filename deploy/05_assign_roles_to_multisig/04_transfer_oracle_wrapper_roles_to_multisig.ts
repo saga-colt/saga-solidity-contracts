@@ -8,9 +8,7 @@ import { DeployFunction } from "hardhat-deploy/types";
  * @param _hre The Hardhat Runtime Environment for deployment
  */
 const func: DeployFunction = async function (_hre: HardhatRuntimeEnvironment) {
-  console.log(
-    `\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping until admin tool is ready`,
-  );
+  console.log(`\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping until admin tool is ready`);
   return true;
 
   // if (!isMainnet(hre.network.name)) {
@@ -127,9 +125,7 @@ async function transferRole(
   const contractDeployment = await deployments.get(contractId);
 
   if (!contractDeployment) {
-    console.log(
-      `  ⚠️ ${contractName} not deployed, skipping ${roleName} transfer`,
-    );
+    console.log(`  ⚠️ ${contractName} not deployed, skipping ${roleName} transfer`);
     return false; // Indicate that the transfer was skipped
   }
 
@@ -153,9 +149,7 @@ async function transferRole(
   const multisigHasRole = await contract.hasRole(role, governanceMultisig);
 
   if (!multisigHasRole) {
-    throw new Error(
-      `❌ Governance multisig ${governanceMultisig} does not have the role ${roleName}. Aborting revocation from deployer.`,
-    );
+    throw new Error(`❌ Governance multisig ${governanceMultisig} does not have the role ${roleName}. Aborting revocation from deployer.`);
   }
 
   // Revoke role from deployer

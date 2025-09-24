@@ -105,9 +105,7 @@
           "evm.methodIdentifiers",
           "metadata"
         ],
-        "": [
-          "ast"
-        ]
+        "": ["ast"]
       }
     }
   }

@@ -52,11 +52,7 @@ export default [
       "config/**/*.js",
     ],
   },
-  ...compat.extends(
-    "plugin:jsdoc/recommended",
-    "plugin:eslint-comments/recommended",
-    "prettier",
-  ),
+  ...compat.extends("plugin:jsdoc/recommended", "plugin:eslint-comments/recommended", "prettier"),
   {
     plugins: {
       "@typescript-eslint": typescriptEslint,
