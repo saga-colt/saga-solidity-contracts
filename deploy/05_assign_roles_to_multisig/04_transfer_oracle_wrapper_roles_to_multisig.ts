@@ -5,9 +5,9 @@ import { DeployFunction } from "hardhat-deploy/types";
 /**
  * Transfer Tellor oracle wrapper roles to governance multisig
  *
- * @param hre The Hardhat Runtime Environment for deployment
+ * @param _hre The Hardhat Runtime Environment for deployment
  */
-const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+const func: DeployFunction = async function (_hre: HardhatRuntimeEnvironment) {
   console.log(
     `\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping until admin tool is ready`,
   );
@@ -98,6 +98,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // return true;
 };
 
+/* eslint-disable unused-imports/no-unused-vars -- Keep dormant role transfer helpers until admin automation lands */
 /**
  * Transfer a specified role from deployer to governance multisig for a given contract
  *
@@ -173,3 +174,5 @@ func.tags = ["governance", "roles"];
 func.dependencies = ["setup-usd-tellor-oracle-wrappers"];
 
 export default func;
+
+/* eslint-enable unused-imports/no-unused-vars -- Restore unused-var enforcement */

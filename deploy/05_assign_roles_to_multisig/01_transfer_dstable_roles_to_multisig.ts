@@ -7,9 +7,9 @@ import { ZERO_BYTES_32 } from "../../typescript/dlend/constants";
 /**
  * Transfer dStable roles to governance multisig
  *
- * @param hre The Hardhat Runtime Environment for deployment
+ * @param _hre The Hardhat Runtime Environment for deployment
  */
-const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+const func: DeployFunction = async function (_hre: HardhatRuntimeEnvironment) {
   console.log(
     `\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping until admin tool is ready`,
   );
@@ -98,6 +98,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // return true;
 };
 
+/* eslint-disable unused-imports/no-unused-vars -- Keep dormant role transfer helpers until admin automation lands */
 /**
  * Transfer roles from deployer to governance multisig
  *
@@ -694,6 +695,8 @@ async function transferCollateralVaultRoles(
 
   return true;
 }
+
+/* eslint-enable unused-imports/no-unused-vars -- Restore unused-var enforcement */
 
 func.id = "transfer_dstable_roles_to_multisig";
 func.tags = ["governance", "roles"];
