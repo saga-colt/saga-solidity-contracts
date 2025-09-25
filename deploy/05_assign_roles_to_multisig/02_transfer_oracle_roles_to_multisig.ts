@@ -7,12 +7,10 @@ import { ZERO_BYTES_32 } from "../../typescript/dlend/constants";
 /**
  * Transfer oracle roles to governance multisig
  *
- * @param hre The Hardhat Runtime Environment for deployment
+ * @param _hre The Hardhat Runtime Environment for deployment
  */
-const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  console.log(
-    `\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping until admin tool is ready`,
-  );
+const func: DeployFunction = async function (_hre: HardhatRuntimeEnvironment) {
+  console.log(`\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping until admin tool is ready`);
   return true;
 
   // if (!isMainnet(hre.network.name)) {
@@ -47,6 +45,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // return true;
 };
 
+/* eslint-disable unused-imports/no-unused-vars -- Keep dormant role transfer helpers until admin automation lands */
 /**
  * Transfer roles from deployer to governance multisig for the oracle aggregator contract
  *
@@ -69,62 +68,31 @@ async function transferOracleAggregatorRoles(
   const { deployments, ethers } = hre;
 
   try {
-    const oracleAggregatorDeployment =
-      await deployments.get(oracleAggregatorId);
+    const oracleAggregatorDeployment = await deployments.get(oracleAggregatorId);
 
     if (oracleAggregatorDeployment) {
-      console.log(
-        `\n  📄 ORACLE AGGREGATOR ROLES: ${oracleType} Oracle Aggregator`,
-      );
+      console.log(`\n  📄 ORACLE AGGREGATOR ROLES: ${oracleType} Oracle Aggregator`);
 
-      const oracleAggregator = await ethers.getContractAt(
-        "OracleAggregator",
-        oracleAggregatorDeployment.address,
-        deployerSigner,
-      );
+      const oracleAggregator = await ethers.getContractAt("OracleAggregator", oracleAggregatorDeployment.address, deployerSigner);
 
       // Get roles
       const DEFAULT_ADMIN_ROLE = ZERO_BYTES_32;
       const ORACLE_MANAGER_ROLE = await oracleAggregator.ORACLE_MANAGER_ROLE();
 
       // Grant DEFAULT_ADMIN_ROLE to multisig
-      if (
-        !(await oracleAggregator.hasRole(
-          DEFAULT_ADMIN_ROLE,
-          governanceMultisig,
-        ))
-      ) {
-        await oracleAggregator.grantRole(
-          DEFAULT_ADMIN_ROLE,
-          governanceMultisig,
-        );
-        console.log(
-          `    ➕ Granted DEFAULT_ADMIN_ROLE to ${governanceMultisig}`,
-        );
+      if (!(await oracleAggregator.hasRole(DEFAULT_ADMIN_ROLE, governanceMultisig))) {
+        await oracleAggregator.grantRole(DEFAULT_ADMIN_ROLE, governanceMultisig);
+        console.log(`    ➕ Granted DEFAULT_ADMIN_ROLE to ${governanceMultisig}`);
       } else {
-        console.log(
-          `    ✓ DEFAULT_ADMIN_ROLE already granted to ${governanceMultisig}`,
-        );
+        console.log(`    ✓ DEFAULT_ADMIN_ROLE already granted to ${governanceMultisig}`);
       }
 
       // Grant ORACLE_MANAGER_ROLE to multisig
-      if (
-        !(await oracleAggregator.hasRole(
-          ORACLE_MANAGER_ROLE,
-          governanceMultisig,
-        ))
-      ) {
-        await oracleAggregator.grantRole(
-          ORACLE_MANAGER_ROLE,
-          governanceMultisig,
-        );
-        console.log(
-          `    ➕ Granted ORACLE_MANAGER_ROLE to ${governanceMultisig}`,
-        );
+      if (!(await oracleAggregator.hasRole(ORACLE_MANAGER_ROLE, governanceMultisig))) {
+        await oracleAggregator.grantRole(ORACLE_MANAGER_ROLE, governanceMultisig);
+        console.log(`    ➕ Granted ORACLE_MANAGER_ROLE to ${governanceMultisig}`);
       } else {
-        console.log(
-          `    ✓ ORACLE_MANAGER_ROLE already granted to ${governanceMultisig}`,
-        );
+        console.log(`    ✓ ORACLE_MANAGER_ROLE already granted to ${governanceMultisig}`);
       }
 
       // Revoke ORACLE_MANAGER_ROLE from deployer first
@@ -141,14 +109,10 @@ async function transferOracleAggregatorRoles(
 
       console.log(`    ✅ Completed Oracle Aggregator role transfers`);
     } else {
-      console.log(
-        `  ⚠️ ${oracleType} Oracle Aggregator not deployed, skipping role transfer`,
-      );
+      console.log(`  ⚠️ ${oracleType} Oracle Aggregator not deployed, skipping role transfer`);
     }
   } catch (error) {
-    console.error(
-      `  ❌ Failed to transfer ${oracleType} Oracle Aggregator roles: ${error}`,
-    );
+    console.error(`  ❌ Failed to transfer ${oracleType} Oracle Aggregator roles: ${error}`);
   }
 
   return true;
@@ -159,3 +123,5 @@ func.tags = ["governance", "roles"];
 func.dependencies = ["usd-oracle"];
 
 export default func;
+
+/* eslint-enable unused-imports/no-unused-vars -- Restore unused-var enforcement */

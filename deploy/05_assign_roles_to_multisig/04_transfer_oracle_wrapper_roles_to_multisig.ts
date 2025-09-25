@@ -5,12 +5,10 @@ import { DeployFunction } from "hardhat-deploy/types";
 /**
  * Transfer Tellor oracle wrapper roles to governance multisig
  *
- * @param hre The Hardhat Runtime Environment for deployment
+ * @param _hre The Hardhat Runtime Environment for deployment
  */
-const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  console.log(
-    `\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping until admin tool is ready`,
-  );
+const func: DeployFunction = async function (_hre: HardhatRuntimeEnvironment) {
+  console.log(`\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping until admin tool is ready`);
   return true;
 
   // if (!isMainnet(hre.network.name)) {
@@ -98,6 +96,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // return true;
 };
 
+/* eslint-disable unused-imports/no-unused-vars -- Keep dormant role transfer helpers until admin automation lands */
 /**
  * Transfer a specified role from deployer to governance multisig for a given contract
  *
@@ -126,9 +125,7 @@ async function transferRole(
   const contractDeployment = await deployments.get(contractId);
 
   if (!contractDeployment) {
-    console.log(
-      `  ⚠️ ${contractName} not deployed, skipping ${roleName} transfer`,
-    );
+    console.log(`  ⚠️ ${contractName} not deployed, skipping ${roleName} transfer`);
     return false; // Indicate that the transfer was skipped
   }
 
@@ -152,9 +149,7 @@ async function transferRole(
   const multisigHasRole = await contract.hasRole(role, governanceMultisig);
 
   if (!multisigHasRole) {
-    throw new Error(
-      `❌ Governance multisig ${governanceMultisig} does not have the role ${roleName}. Aborting revocation from deployer.`,
-    );
+    throw new Error(`❌ Governance multisig ${governanceMultisig} does not have the role ${roleName}. Aborting revocation from deployer.`);
   }
 
   // Revoke role from deployer
@@ -173,3 +168,5 @@ func.tags = ["governance", "roles"];
 func.dependencies = ["setup-usd-tellor-oracle-wrappers"];
 
 export default func;
+
+/* eslint-enable unused-imports/no-unused-vars -- Restore unused-var enforcement */

@@ -17,14 +17,8 @@ describe("ChainlinkCompositeAggregator", () => {
   describe("Constructor and initialization", () => {
     it("should initialize with correct parameters", async () => {
       // Deploy mock feeds
-      const mockFeed1 = await ethers.deployContract("MockChainlinkAggregatorV3", [
-        8,
-        "Mock Feed 1",
-      ]);
-      const mockFeed2 = await ethers.deployContract("MockChainlinkAggregatorV3", [
-        8,
-        "Mock Feed 2",
-      ]);
+      const mockFeed1 = await ethers.deployContract("MockChainlinkAggregatorV3", [8, "Mock Feed 1"]);
+      const mockFeed2 = await ethers.deployContract("MockChainlinkAggregatorV3", [8, "Mock Feed 2"]);
 
       const primaryThreshold = {
         lowerThresholdInBase: ethers.parseUnits("0.99", 8),
@@ -78,7 +72,7 @@ describe("ChainlinkCompositeAggregator", () => {
           await mockFeed.getAddress(),
           primaryThreshold,
           secondaryThreshold,
-        ])
+        ]),
       ).to.be.revertedWithCustomError(ChainlinkCompositeAggregatorFactory, "ZeroFeedAddress");
 
       // Test zero address for second feed
@@ -88,19 +82,13 @@ describe("ChainlinkCompositeAggregator", () => {
           ethers.ZeroAddress,
           primaryThreshold,
           secondaryThreshold,
-        ])
+        ]),
       ).to.be.revertedWithCustomError(ChainlinkCompositeAggregatorFactory, "ZeroFeedAddress");
     });
 
     it("should return correct description", async () => {
-      const mockFeed1 = await ethers.deployContract("MockChainlinkAggregatorV3", [
-        8,
-        "ETH/USD",
-      ]);
-      const mockFeed2 = await ethers.deployContract("MockChainlinkAggregatorV3", [
-        8,
-        "USD/EUR",
-      ]);
+      const mockFeed1 = await ethers.deployContract("MockChainlinkAggregatorV3", [8, "ETH/USD"]);
+      const mockFeed2 = await ethers.deployContract("MockChainlinkAggregatorV3", [8, "USD/EUR"]);
 
       const compositeAggregator = await ethers.deployContract("ChainlinkCompositeAggregator", [
         await mockFeed1.getAddress(),
@@ -201,7 +189,7 @@ describe("ChainlinkCompositeAggregator", () => {
       const roundId = 123;
       const roundData = await compositeAggregator.getRoundData(roundId);
       const latestRoundData = await compositeAggregator.latestRoundData();
-      
+
       // getRoundData should return the same as latestRoundData (ignoring roundId)
       expect(roundData.answer).to.equal(latestRoundData.answer);
       expect(roundData.startedAt).to.equal(latestRoundData.startedAt);
@@ -295,10 +283,7 @@ describe("ChainlinkCompositeAggregator", () => {
       await mockFeed1.setMockWithTimestamp(ethers.parseUnits("2.0", 8), staleTimestamp);
       await mockFeed2.setMockWithTimestamp(ethers.parseUnits("3.0", 8), staleTimestamp);
 
-      await expect(compositeAggregator.latestRoundData()).to.be.revertedWithCustomError(
-        compositeAggregator,
-        "PriceIsStale"
-      );
+      await expect(compositeAggregator.latestRoundData()).to.be.revertedWithCustomError(compositeAggregator, "PriceIsStale");
     });
 
     it("should work when prices are fresh", async () => {
@@ -349,4 +334,4 @@ describe("ChainlinkCompositeAggregator", () => {
       expect(roundData.answer).to.equal(expectedPrice);
     });
   });
-}); 
+});

@@ -4,12 +4,10 @@ import { DeployFunction } from "hardhat-deploy/types";
 /**
  * Transfer all dLEND roles to the governance multisig
  *
- * @param hre Hardhat Runtime Environment
+ * @param _hre Hardhat Runtime Environment
  */
-const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  console.log(
-    `\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping until admin tool is ready`,
-  );
+const func: DeployFunction = async function (_hre: HardhatRuntimeEnvironment) {
+  console.log(`\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping until admin tool is ready`);
   return true;
 
   // if (!isMainnet(hre.network.name)) {

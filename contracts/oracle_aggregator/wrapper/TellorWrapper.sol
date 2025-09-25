@@ -33,9 +33,7 @@ contract TellorWrapper is BaseLiquityV2Wrapper {
         uint256 _baseCurrencyUnit
     ) BaseLiquityV2Wrapper(baseCurrency, _baseCurrencyUnit) {}
 
-    function getPriceInfo(
-        address asset
-    ) public view virtual override returns (uint256 price, bool isAlive) {
+    function getPriceInfo(address asset) public view virtual override returns (uint256 price, bool isAlive) {
         LiquityV2OracleAggregatorV3Interface feed = assetToFeed[asset];
         if (address(feed) == address(0)) {
             revert FeedNotSet(asset);
@@ -49,9 +47,7 @@ contract TellorWrapper is BaseLiquityV2Wrapper {
         }
 
         price = uint256(answer);
-        isAlive =
-            updatedAt + LIQUITY_V2_HEARTBEAT + heartbeatStaleTimeLimit >
-            block.timestamp;
+        isAlive = updatedAt + LIQUITY_V2_HEARTBEAT + heartbeatStaleTimeLimit > block.timestamp;
 
         price = _convertToBaseCurrencyUnit(price);
     }
@@ -62,13 +58,8 @@ contract TellorWrapper is BaseLiquityV2Wrapper {
      * @param asset The address of the asset
      * @param feed The address of the Tellor oracle feed
      */
-    function setFeed(
-        address asset,
-        address feed
-    ) external onlyRole(ORACLE_MANAGER_ROLE) {
-        LiquityV2OracleAggregatorV3Interface feedInterface = LiquityV2OracleAggregatorV3Interface(
-                feed
-            );
+    function setFeed(address asset, address feed) external onlyRole(ORACLE_MANAGER_ROLE) {
+        LiquityV2OracleAggregatorV3Interface feedInterface = LiquityV2OracleAggregatorV3Interface(feed);
 
         // Validate that feed decimals match expected decimals
         uint8 feedDecimals = feedInterface.decimals();
