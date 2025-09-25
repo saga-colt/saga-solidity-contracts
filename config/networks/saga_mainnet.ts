@@ -3,10 +3,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { ONE_PERCENT_BPS } from "../../typescript/common/bps_constants";
 import { D_TOKEN_ID } from "../../typescript/deploy-ids";
-import {
-  ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-  ORACLE_AGGREGATOR_PRICE_DECIMALS,
-} from "../../typescript/oracle_aggregator/constants";
+import { ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT, ORACLE_AGGREGATOR_PRICE_DECIMALS } from "../../typescript/oracle_aggregator/constants";
 import { fetchTokenInfo } from "../../typescript/token/utils";
 import {
   rateStrategyHighLiquidityStable,
@@ -23,9 +20,7 @@ import { Config } from "../types";
  * @param _hre - Hardhat Runtime Environment
  * @returns The configuration for the network
  */
-export async function getConfig(
-  _hre: HardhatRuntimeEnvironment,
-): Promise<Config> {
+export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config> {
   const dDeployment = await _hre.deployments.getOrNull(D_TOKEN_ID);
   const usdtAddress = "0xC8fe3C1de344854f4429bB333AFFAeF97eF88CEa";
   const usdcAddress = "0xfc960C233B8E98e0Cf282e29BDE8d3f105fc24d5";

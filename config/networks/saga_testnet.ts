@@ -2,27 +2,15 @@ import { ZeroAddress } from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { ONE_PERCENT_BPS } from "../../typescript/common/bps_constants";
-import {
-  D_A_TOKEN_WRAPPER_ID,
-  D_TOKEN_ID,
-  INCENTIVES_PROXY_ID,
-} from "../../typescript/deploy-ids";
-import {
-  ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-  ORACLE_AGGREGATOR_PRICE_DECIMALS,
-} from "../../typescript/oracle_aggregator/constants";
+import { D_A_TOKEN_WRAPPER_ID, D_TOKEN_ID, INCENTIVES_PROXY_ID } from "../../typescript/deploy-ids";
+import { ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT, ORACLE_AGGREGATOR_PRICE_DECIMALS } from "../../typescript/oracle_aggregator/constants";
 import {
   rateStrategyHighLiquidityStable,
   rateStrategyHighLiquidityVolatile,
   rateStrategyMediumLiquidityStable,
   rateStrategyMediumLiquidityVolatile,
 } from "../dlend/interest-rate-strategies";
-import {
-  strategyD,
-  strategySfrxUSD,
-  strategyStS,
-  strategyWstkscUSD,
-} from "../dlend/reserves-params";
+import { strategyD, strategySfrxUSD, strategyStS, strategyWstkscUSD } from "../dlend/reserves-params";
 import { Config } from "../types";
 
 /**
@@ -31,9 +19,7 @@ import { Config } from "../types";
  * @param _hre - Hardhat Runtime Environment
  * @returns The configuration for the network
  */
-export async function getConfig(
-  _hre: HardhatRuntimeEnvironment,
-): Promise<Config> {
+export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config> {
   // Token info will only be populated after their deployment
   const dDeployment = await _hre.deployments.getOrNull(D_TOKEN_ID);
   const USDCDeployment = await _hre.deployments.getOrNull("USDC");
@@ -44,31 +30,22 @@ export async function getConfig(
   const WSAGADeployment = await _hre.deployments.getOrNull("WSAGA");
 
   // Fetch deployed dLend StaticATokenLM wrapper (optional, may be undefined on testnet)
-  const dLendATokenWrapperDDeployment =
-    await _hre.deployments.getOrNull(D_A_TOKEN_WRAPPER_ID);
+  const dLendATokenWrapperDDeployment = await _hre.deployments.getOrNull(D_A_TOKEN_WRAPPER_ID);
 
   // Fetch deployed dLend RewardsController (optional)
-  const rewardsControllerDeployment =
-    await _hre.deployments.getOrNull(INCENTIVES_PROXY_ID);
+  const rewardsControllerDeployment = await _hre.deployments.getOrNull(INCENTIVES_PROXY_ID);
 
   // Fetch deployed dLend aToken for dUSD (optional)
   const aTokenDUSDDeployment = await _hre.deployments.getOrNull("dLEND-D");
 
   // Get mock oracle deployments
   const mockOracleNameToAddress: Record<string, string> = {};
-  const mockOracleAddressesDeployment = await _hre.deployments.getOrNull(
-    "MockOracleNameToAddress",
-  );
+  const mockOracleAddressesDeployment = await _hre.deployments.getOrNull("MockOracleNameToAddress");
 
   if (mockOracleAddressesDeployment?.linkedData) {
-    Object.assign(
-      mockOracleNameToAddress,
-      mockOracleAddressesDeployment.linkedData,
-    );
+    Object.assign(mockOracleNameToAddress, mockOracleAddressesDeployment.linkedData);
   } else {
-    console.warn(
-      "WARN: MockOracleNameToAddress deployment not found or has no linkedData. Oracle configuration might be incomplete.",
-    );
+    console.warn("WARN: MockOracleNameToAddress deployment not found or has no linkedData. Oracle configuration might be incomplete.");
   }
 
   const { deployer } = await _hre.getNamedAccounts();
@@ -156,8 +133,7 @@ export async function getConfig(
         redstoneOracleAssets: {
           // Moved from API3
           plainRedstoneOracleWrappers: {
-            [WSAGADeployment?.address || ""]:
-              mockOracleNameToAddress["WSAGA_USD"],
+            [WSAGADeployment?.address || ""]: mockOracleNameToAddress["WSAGA_USD"],
           },
           // Moved from API3
           redstoneOracleWrappersWithThresholding: {
@@ -179,8 +155,7 @@ export async function getConfig(
                   },
                 }
               : {}),
-            ...(frxUSDDeployment?.address &&
-            mockOracleNameToAddress["frxUSD_USD"]
+            ...(frxUSDDeployment?.address && mockOracleNameToAddress["frxUSD_USD"]
               ? {
                   [frxUSDDeployment.address]: {
                     feed: mockOracleNameToAddress["frxUSD_USD"], // Changed from proxy
@@ -193,9 +168,7 @@ export async function getConfig(
           // Moved from API3
           compositeRedstoneOracleWrappersWithThresholding: {
             // sUSDS composite feed (sUSDS/USDS * USDS/USD)
-            ...(sUSDSDeployment?.address &&
-            mockOracleNameToAddress["sUSDS_USDS"] &&
-            mockOracleNameToAddress["USDS_USD"]
+            ...(sUSDSDeployment?.address && mockOracleNameToAddress["sUSDS_USDS"] && mockOracleNameToAddress["USDS_USD"]
               ? {
                   [sUSDSDeployment.address]: {
                     feedAsset: sUSDSDeployment.address,
@@ -209,9 +182,7 @@ export async function getConfig(
                 }
               : {}),
             // sfrxUSD composite feed (sfrxUSD/frxUSD * frxUSD/USD)
-            ...(sfrxUSDDeployment?.address &&
-            mockOracleNameToAddress["sfrxUSD_frxUSD"] &&
-            mockOracleNameToAddress["frxUSD_USD"]
+            ...(sfrxUSDDeployment?.address && mockOracleNameToAddress["sfrxUSD_frxUSD"] && mockOracleNameToAddress["frxUSD_USD"]
               ? {
                   [sfrxUSDDeployment.address]: {
                     feedAsset: sfrxUSDDeployment.address,
@@ -257,27 +228,17 @@ export async function getConfig(
         initialWithdrawalFeeBps: 0.1 * ONE_PERCENT_BPS, // 0.1%
         adapters: [
           {
-            vaultAsset: emptyStringIfUndefined(
-              dLendATokenWrapperDDeployment?.address,
-            ),
+            vaultAsset: emptyStringIfUndefined(dLendATokenWrapperDDeployment?.address),
             adapterContract: "WrappedDLendConversionAdapter",
           },
         ],
-        defaultDepositVaultAsset: emptyStringIfUndefined(
-          dLendATokenWrapperDDeployment?.address,
-        ),
+        defaultDepositVaultAsset: emptyStringIfUndefined(dLendATokenWrapperDDeployment?.address),
         collateralVault: "DStakeCollateralVault_sdUSD",
         collateralExchangers: [deployer],
         dLendRewardManager: {
-          managedVaultAsset: emptyStringIfUndefined(
-            dLendATokenWrapperDDeployment?.address,
-          ), // This should be the deployed StaticATokenLM address for dUSD
-          dLendAssetToClaimFor: emptyStringIfUndefined(
-            aTokenDUSDDeployment?.address,
-          ), // Use the deployed dLEND-D aToken address
-          dLendRewardsController: emptyStringIfUndefined(
-            rewardsControllerDeployment?.address,
-          ), // This will be fetched after dLend incentives deployment
+          managedVaultAsset: emptyStringIfUndefined(dLendATokenWrapperDDeployment?.address), // This should be the deployed StaticATokenLM address for dUSD
+          dLendAssetToClaimFor: emptyStringIfUndefined(aTokenDUSDDeployment?.address), // Use the deployed dLEND-D aToken address
+          dLendRewardsController: emptyStringIfUndefined(rewardsControllerDeployment?.address), // This will be fetched after dLend incentives deployment
           treasury: deployer, // Or a dedicated treasury address
           maxTreasuryFeeBps: 5 * ONE_PERCENT_BPS, // Example: 5%
           initialTreasuryFeeBps: 1 * ONE_PERCENT_BPS, // Example: 1%

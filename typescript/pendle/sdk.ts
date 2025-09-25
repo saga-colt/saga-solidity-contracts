@@ -129,16 +129,10 @@ function extractAddressFromChainId(addressWithChainId: string): string {
  * @param params Optional query parameters to include in the request
  * @returns Promise that resolves to the API response containing transaction data and result data
  */
-export async function callSDK<Data>(
-  path: string,
-  params: Record<string, any> = {},
-): Promise<AxiosResponse<MethodReturnType<Data>>> {
-  const response = await axios.get<MethodReturnType<Data>>(
-    HOSTED_SDK_URL + path,
-    {
-      params,
-    },
-  );
+export async function callSDK<Data>(path: string, params: Record<string, any> = {}): Promise<AxiosResponse<MethodReturnType<Data>>> {
+  const response = await axios.get<MethodReturnType<Data>>(HOSTED_SDK_URL + path, {
+    params,
+  });
 
   return response;
 }
@@ -164,17 +158,14 @@ export async function swapExactPToToken(
   chainId: number,
   slippage: number = 0.01,
 ): Promise<AxiosResponse<MethodReturnType<RedeemPyData>>> {
-  return await callSDK<RedeemPyData>(
-    `v2/sdk/${chainId}/markets/${market}/swap`,
-    {
-      receiver: receiver,
-      slippage: slippage,
-      tokenIn: ptToken,
-      amountIn: amountIn,
-      tokenOut: tokenOut,
-      enableAggregator: true,
-    },
-  );
+  return await callSDK<RedeemPyData>(`v2/sdk/${chainId}/markets/${market}/swap`, {
+    receiver: receiver,
+    slippage: slippage,
+    tokenIn: ptToken,
+    amountIn: amountIn,
+    tokenOut: tokenOut,
+    enableAggregator: true,
+  });
 }
 
 /**
@@ -185,15 +176,10 @@ export async function swapExactPToToken(
  * @param chainId - Chain ID
  * @returns Object containing market address and underlying asset address
  */
-export async function getPTMarketInfo(
-  ptTokenAddress: string,
-  chainId: number,
-): Promise<PTMarketInfo> {
+export async function getPTMarketInfo(ptTokenAddress: string, chainId: number): Promise<PTMarketInfo> {
   try {
     // Call markets API directly (different structure than SDK endpoints)
-    const response = await axios.get<PendleMarketsResponse>(
-      HOSTED_SDK_URL + `v1/${chainId}/markets/active`,
-    );
+    const response = await axios.get<PendleMarketsResponse>(HOSTED_SDK_URL + `v1/${chainId}/markets/active`);
     const marketsData = response.data;
 
     if (!marketsData || !marketsData.markets) {
@@ -229,9 +215,7 @@ export async function getPTMarketInfo(
     };
   } catch (error) {
     console.error("Failed to get PT market info from API:", error);
-    throw new Error(
-      `Could not determine market info for PT token: ${ptTokenAddress}`,
-    );
+    throw new Error(`Could not determine market info for PT token: ${ptTokenAddress}`);
   }
 }
 
@@ -242,28 +226,19 @@ export async function getPTMarketInfo(
  * @param pyFactory - The address of the Pendle pyFactory contract
  * @returns True if the token is a PT token
  */
-export async function isPT(
-  tokenAddress: string,
-  pyFactory: string,
-): Promise<boolean> {
+export async function isPT(tokenAddress: string, pyFactory: string): Promise<boolean> {
   try {
     // We need to dynamically import ethers to avoid circular dependencies
     const { ethers } = await import("hardhat");
 
     // Connect to the pyFactory contract
-    const pyFactoryContract = await ethers.getContractAt(
-      PY_FACTORY_ABI,
-      pyFactory,
-    );
+    const pyFactoryContract = await ethers.getContractAt(PY_FACTORY_ABI, pyFactory);
 
     // Call isPT function to check if the token is a PT token
     const isPT = await pyFactoryContract.isPT(tokenAddress);
     return isPT;
   } catch (error) {
-    console.warn(
-      `Failed to check if ${tokenAddress} is PT token using pyFactory ${pyFactory}:`,
-      error,
-    );
+    console.warn(`Failed to check if ${tokenAddress} is PT token using pyFactory ${pyFactory}:`, error);
     return false;
   }
 }

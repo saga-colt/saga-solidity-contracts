@@ -4,17 +4,12 @@ import { WrappedDLendConversionAdapter } from "../../typechain-types/contracts/v
 import { IERC20, ERC20 } from "../../typechain-types";
 import type { DStakeCollateralVault } from "../../typechain-types/contracts/vaults/dstake/DStakeCollateralVault";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
-import {
-  createDStakeFixture,
-  DSTAKE_CONFIGS,
-  DStakeFixtureConfig,
-} from "./fixture";
+import { createDStakeFixture, DSTAKE_CONFIGS, DStakeFixtureConfig } from "./fixture";
 import { ZeroAddress } from "ethers";
 import { ERC20StablecoinUpgradeable } from "../../typechain-types/contracts/dstable/ERC20StablecoinUpgradeable";
 import type { IERC4626 } from "../../typechain-types";
 
-const parseUnits = (value: string | number, decimals: number | bigint) =>
-  ethers.parseUnits(value.toString(), decimals);
+const parseUnits = (value: string | number, decimals: number | bigint) => ethers.parseUnits(value.toString(), decimals);
 
 DSTAKE_CONFIGS.forEach((config: DStakeFixtureConfig) => {
   describe(`WrappedDLendConversionAdapter for ${config.DStakeTokenSymbol}`, function () {
@@ -52,11 +47,7 @@ DSTAKE_CONFIGS.forEach((config: DStakeFixtureConfig) => {
       wrapperToken = out.vaultAssetToken;
       adapterAddress = out.adapterAddress;
       // get the full adapter contract for WrappedDLendConversionAdapter
-      adapter = (await ethers.getContractAt(
-        "WrappedDLendConversionAdapter",
-        adapterAddress,
-        deployer
-      )) as WrappedDLendConversionAdapter;
+      adapter = (await ethers.getContractAt("WrappedDLendConversionAdapter", adapterAddress, deployer)) as WrappedDLendConversionAdapter;
       collateralVault = out.collateralVault as unknown as DStakeCollateralVault;
       collateralVaultAddress = await collateralVault.getAddress();
 
@@ -64,23 +55,19 @@ DSTAKE_CONFIGS.forEach((config: DStakeFixtureConfig) => {
       wrapper = (await ethers.getContractAt(
         "@openzeppelin/contracts/interfaces/IERC4626.sol:IERC4626",
         vaultAssetAddress,
-        deployer
+        deployer,
       )) as unknown as IERC4626;
 
       // Determine wrapper token decimals
       const tempWrapper = (await ethers.getContractAt(
         "@openzeppelin/contracts/token/ERC20/ERC20.sol:ERC20",
-        vaultAssetAddress
+        vaultAssetAddress,
       )) as unknown as ERC20;
       vaultAssetDecimals = await tempWrapper.decimals();
 
       // Grant MINTER_ROLE to deployer so we can mint dStable
       const dStableAddress = await dStableToken.getAddress();
-      stable = (await ethers.getContractAt(
-        "ERC20StablecoinUpgradeable",
-        dStableAddress,
-        deployer
-      )) as ERC20StablecoinUpgradeable;
+      stable = (await ethers.getContractAt("ERC20StablecoinUpgradeable", dStableAddress, deployer)) as ERC20StablecoinUpgradeable;
       const minterRole = await stable.MINTER_ROLE();
       await stable.grantRole(minterRole, deployer.address);
 
@@ -98,9 +85,7 @@ DSTAKE_CONFIGS.forEach((config: DStakeFixtureConfig) => {
         // wrappedDLendToken address
         expect(await adapter.wrappedDLendToken()).to.equal(vaultAssetAddress);
         // collateralVault address
-        expect(await adapter.collateralVault()).to.equal(
-          collateralVaultAddress
-        );
+        expect(await adapter.collateralVault()).to.equal(collateralVaultAddress);
         // wrapper underlying asset matches dStable
         expect(await wrapper.asset()).to.equal(await dStableToken.getAddress());
       });
@@ -108,24 +93,20 @@ DSTAKE_CONFIGS.forEach((config: DStakeFixtureConfig) => {
 
     describe("convertToVaultAsset", function () {
       it("should revert if dStableAmount is 0", async function () {
-        await expect(
-          adapter.connect(user1).convertToVaultAsset(0)
-        ).to.be.revertedWithCustomError(adapter, "InvalidAmount");
+        await expect(adapter.connect(user1).convertToVaultAsset(0)).to.be.revertedWithCustomError(adapter, "InvalidAmount");
       });
 
       it("should revert if user has insufficient dStable balance", async function () {
         const amt = parseUnits(1, dStableDecimals);
         // Approve adapter so transferFrom checks balance not allowance
         await dStableToken.connect(user1).approve(adapterAddress, amt);
-        await expect(adapter.connect(user1).convertToVaultAsset(amt)).to.be
-          .reverted;
+        await expect(adapter.connect(user1).convertToVaultAsset(amt)).to.be.reverted;
       });
 
       it("should revert if adapter is not approved to spend dStable", async function () {
         const amt = parseUnits(100, dStableDecimals);
         await stable.mint(user1.address, amt);
-        await expect(adapter.connect(user1).convertToVaultAsset(amt)).to.be
-          .reverted;
+        await expect(adapter.connect(user1).convertToVaultAsset(amt)).to.be.reverted;
       });
 
       it("should successfully convert dStable to wrappedDLendToken", async function () {
@@ -135,50 +116,38 @@ DSTAKE_CONFIGS.forEach((config: DStakeFixtureConfig) => {
         await dStableToken.connect(user1).approve(adapterAddress, amt);
 
         // Preview expected vault amount
-        const [previewAsset, expectedVaultAmt] =
-          await adapter.previewConvertToVaultAsset(amt);
+        const [previewAsset, expectedVaultAmt] = await adapter.previewConvertToVaultAsset(amt);
         expect(previewAsset).to.equal(vaultAssetAddress);
 
         // Balances before
         const initialUserDStable = await dStableToken.balanceOf(user1.address);
-        const initialAdapterDStable =
-          await dStableToken.balanceOf(adapterAddress);
-        const initialVaultWrapped = await wrapperToken.balanceOf(
-          collateralVaultAddress
-        );
+        const initialAdapterDStable = await dStableToken.balanceOf(adapterAddress);
+        const initialVaultWrapped = await wrapperToken.balanceOf(collateralVaultAddress);
 
         // Execute conversion
         await adapter.connect(user1).convertToVaultAsset(amt);
 
         // Balances after
         const finalUserDStable = await dStableToken.balanceOf(user1.address);
-        const finalAdapterDStable =
-          await dStableToken.balanceOf(adapterAddress);
-        const finalVaultWrapped = await wrapperToken.balanceOf(
-          collateralVaultAddress
-        );
+        const finalAdapterDStable = await dStableToken.balanceOf(adapterAddress);
+        const finalVaultWrapped = await wrapperToken.balanceOf(collateralVaultAddress);
 
         expect(finalUserDStable).to.equal(initialUserDStable - amt);
         expect(finalAdapterDStable).to.equal(0);
-        expect(finalVaultWrapped).to.equal(
-          initialVaultWrapped + expectedVaultAmt
-        );
+        expect(finalVaultWrapped).to.equal(initialVaultWrapped + expectedVaultAmt);
       });
     });
 
     describe("convertFromVaultAsset", function () {
       it("should revert if vaultAssetAmount is 0", async function () {
-        await expect(
-          adapter.connect(user1).convertFromVaultAsset(0)
-        ).to.be.revertedWithCustomError(adapter, "InvalidAmount");
+        await expect(adapter.connect(user1).convertFromVaultAsset(0)).to.be.revertedWithCustomError(adapter, "InvalidAmount");
       });
 
       it("should revert if user has insufficient wrappedDLendToken balance", async function () {
         const amt = parseUnits(1, vaultAssetDecimals);
         // Approve adapter so safeTransferFrom checks balance
         await wrapperToken.connect(user1).approve(adapterAddress, amt);
-        await expect(adapter.connect(user1).convertFromVaultAsset(amt)).to.be
-          .reverted;
+        await expect(adapter.connect(user1).convertFromVaultAsset(amt)).to.be.reverted;
       });
 
       it("should revert if adapter is not approved to spend wrappedDLendToken", async function () {
@@ -187,16 +156,12 @@ DSTAKE_CONFIGS.forEach((config: DStakeFixtureConfig) => {
         await stable.mint(user1.address, depositAmt);
         await dStableToken.connect(user1).approve(adapterAddress, depositAmt);
         // Get expected vault amount and convert
-        const [, vaultAmt] =
-          await adapter.previewConvertToVaultAsset(depositAmt);
+        const [, vaultAmt] = await adapter.previewConvertToVaultAsset(depositAmt);
         await adapter.connect(user1).convertToVaultAsset(depositAmt);
         // Send vault tokens to user1 via collateralVault
-        await collateralVault
-          .connect(deployer)
-          .sendAsset(vaultAssetAddress, vaultAmt, user1.address);
+        await collateralVault.connect(deployer).sendAsset(vaultAssetAddress, vaultAmt, user1.address);
         // Do not approve adapter for wrapped tokens
-        await expect(adapter.connect(user1).convertFromVaultAsset(vaultAmt)).to
-          .be.reverted;
+        await expect(adapter.connect(user1).convertFromVaultAsset(vaultAmt)).to.be.reverted;
       });
 
       it("should successfully convert wrappedDLendToken to dStable", async function () {
@@ -205,12 +170,9 @@ DSTAKE_CONFIGS.forEach((config: DStakeFixtureConfig) => {
         await stable.mint(user1.address, depositAmt);
         await dStableToken.connect(user1).approve(adapterAddress, depositAmt);
         // use preview to get expected vault amount
-        const [, vaultAmt] =
-          await adapter.previewConvertToVaultAsset(depositAmt);
+        const [, vaultAmt] = await adapter.previewConvertToVaultAsset(depositAmt);
         await adapter.connect(user1).convertToVaultAsset(depositAmt);
-        await collateralVault
-          .connect(deployer)
-          .sendAsset(vaultAssetAddress, vaultAmt, user1.address);
+        await collateralVault.connect(deployer).sendAsset(vaultAssetAddress, vaultAmt, user1.address);
 
         // Balances before
         const initialUserWrapped = await wrapperToken.balanceOf(user1.address);
@@ -218,8 +180,7 @@ DSTAKE_CONFIGS.forEach((config: DStakeFixtureConfig) => {
 
         // Approve and preview
         await wrapperToken.connect(user1).approve(adapterAddress, vaultAmt);
-        const expectedDStableAmt =
-          await adapter.previewConvertFromVaultAsset(vaultAmt);
+        const expectedDStableAmt = await adapter.previewConvertFromVaultAsset(vaultAmt);
 
         // Execute conversion
         await adapter.connect(user1).convertFromVaultAsset(vaultAmt);
@@ -229,22 +190,16 @@ DSTAKE_CONFIGS.forEach((config: DStakeFixtureConfig) => {
         const finalUserDStable = await dStableToken.balanceOf(user1.address);
 
         expect(finalUserWrapped).to.equal(initialUserWrapped - vaultAmt);
-        expect(finalUserDStable).to.equal(
-          initialUserDStable + expectedDStableAmt
-        );
+        expect(finalUserDStable).to.equal(initialUserDStable + expectedDStableAmt);
       });
     });
 
     describe("View Functions", function () {
       it("assetValueInDStable returns correct values", async function () {
         const depositAmt = parseUnits(10, dStableDecimals);
-        const [_, vaultAmt] =
-          await adapter.previewConvertToVaultAsset(depositAmt);
+        const [_, vaultAmt] = await adapter.previewConvertToVaultAsset(depositAmt);
         // preview assetValue
-        const value = await adapter.assetValueInDStable(
-          vaultAssetAddress,
-          vaultAmt
-        );
+        const value = await adapter.assetValueInDStable(vaultAssetAddress, vaultAmt);
         const expected = await wrapper.previewRedeem(vaultAmt);
         expect(value).to.equal(expected);
       });
@@ -255,8 +210,7 @@ DSTAKE_CONFIGS.forEach((config: DStakeFixtureConfig) => {
 
       it("previewConvertToVaultAsset behaves correctly", async function () {
         const depositAmt = parseUnits(50, dStableDecimals);
-        const [asset, amt] =
-          await adapter.previewConvertToVaultAsset(depositAmt);
+        const [asset, amt] = await adapter.previewConvertToVaultAsset(depositAmt);
         expect(asset).to.equal(vaultAssetAddress);
         const expected = await wrapper.previewDeposit(depositAmt);
         expect(amt).to.equal(expected);
@@ -265,9 +219,7 @@ DSTAKE_CONFIGS.forEach((config: DStakeFixtureConfig) => {
       it("previewConvertFromVaultAsset behaves correctly", async function () {
         const previewAmt = parseUnits(20, vaultAssetDecimals);
         const expected = await wrapper.previewRedeem(previewAmt);
-        expect(await adapter.previewConvertFromVaultAsset(previewAmt)).to.equal(
-          expected
-        );
+        expect(await adapter.previewConvertFromVaultAsset(previewAmt)).to.equal(expected);
       });
     });
   });

@@ -58,7 +58,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const mockOracleContract = await hre.ethers.getContractAt(
       "MockChainlinkAggregatorV3",
       mockOracle.address,
-      signer
+      signer,
     );
 
     // Convert price to int256 format expected by Tellor (18 decimals)
@@ -70,7 +70,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     mockOracleNameToProvider[feed.name] = "TELLOR"; // Now using Tellor
 
     console.log(
-      `Deployed ${mockOracleName} at ${mockOracle.address} with price ${feed.price}`
+      `Deployed ${mockOracleName} at ${mockOracle.address} with price ${feed.price}`,
     );
   }
 

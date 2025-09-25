@@ -3,11 +3,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 
 import { getConfig } from "../../config/config";
-import {
-  D_A_TOKEN_WRAPPER_ID,
-  INCENTIVES_PROXY_ID,
-  POOL_ADDRESSES_PROVIDER_ID,
-} from "../../typescript/deploy-ids";
+import { D_A_TOKEN_WRAPPER_ID, INCENTIVES_PROXY_ID, POOL_ADDRESSES_PROVIDER_ID } from "../../typescript/deploy-ids";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
@@ -26,21 +22,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   // Verify key dLend contracts are deployed
-  const poolAddressesProvider = await deployments.getOrNull(
-    POOL_ADDRESSES_PROVIDER_ID,
-  );
+  const poolAddressesProvider = await deployments.getOrNull(POOL_ADDRESSES_PROVIDER_ID);
   const incentivesProxy = await deployments.getOrNull(INCENTIVES_PROXY_ID);
 
   if (!poolAddressesProvider) {
     console.log(
       "dLend contracts not fully deployed. dStable aToken wrappers require dLend infrastructure. Skipping dStable aToken wrapper deployment.",
     );
-    console.log(
-      `  - PoolAddressesProvider: ${poolAddressesProvider ? "✅" : "❌"}`,
-    );
-    console.log(
-      `  - IncentivesProxy: ${incentivesProxy ? "✅" : "❌"} (optional but recommended)`,
-    );
+    console.log(`  - PoolAddressesProvider: ${poolAddressesProvider ? "✅" : "❌"}`);
+    console.log(`  - IncentivesProxy: ${incentivesProxy ? "✅" : "❌"} (optional but recommended)`);
     return true;
   }
 
@@ -52,10 +42,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   const poolAddress = await poolAddressesProviderContract.getPool();
-  const poolContract = await ethers.getContractAt(
-    "contracts/dlend/core/interfaces/IPool.sol:IPool",
-    poolAddress,
-  );
+  const poolContract = await ethers.getContractAt("contracts/dlend/core/interfaces/IPool.sol:IPool", poolAddress);
 
   // Get rewards controller if available (we already checked this above)
   let rewardsControllerAddress = ethers.ZeroAddress;
@@ -77,10 +64,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Deploy StaticATokenLM for d
   if (dAToken && dAToken !== ethers.ZeroAddress) {
-    const dATokenContract = await ethers.getContractAt(
-      "IERC20Detailed",
-      dAToken,
-    );
+    const dATokenContract = await ethers.getContractAt("IERC20Detailed", dAToken);
     const dATokenSymbol = await dATokenContract.symbol();
 
     // console.log(`Deploying StaticATokenLM wrapper for ${dATokenSymbol}...`);
@@ -88,13 +72,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     await deploy(D_A_TOKEN_WRAPPER_ID, {
       from: deployer,
       contract: "StaticATokenLM",
-      args: [
-        poolAddress,
-        rewardsControllerAddress,
-        dAToken,
-        `Static ${dATokenSymbol}`,
-        `stk${dATokenSymbol}`,
-      ],
+      args: [poolAddress, rewardsControllerAddress, dAToken, `Static ${dATokenSymbol}`, `stk${dATokenSymbol}`],
     });
   } else {
     console.log("d aToken not found or invalid, skipping wrapper deployment");
