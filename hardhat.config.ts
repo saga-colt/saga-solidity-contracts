@@ -24,8 +24,7 @@ const wrapSigner = (signer: any, hre: HardhatRuntimeEnvironment) => {
     if (hre.network.live) {
       const sleepTime = 5000;
       console.log(
-        `\n>>> Waiting ${sleepTime}ms after transaction to ${
-          result.to || "a new contract"
+        `\n>>> Waiting ${sleepTime}ms after transaction to ${result.to || "a new contract"
         }`,
       );
       await sleep(sleepTime);
@@ -184,6 +183,17 @@ const config: HardhatUserConfig = {
           },
         },
       },
+      // SMOHelper contract - use viaIR to avoid stack too deep errors
+      "contracts/dstable/SMOHelper.sol": {
+        version: "0.8.20",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+          viaIR: true,
+        },
+      },
     },
   },
   networks: {
@@ -191,6 +201,22 @@ const config: HardhatUserConfig = {
       deploy: ["deploy-mocks", "deploy"],
       allowUnlimitedContractSize: true,
       saveDeployments: false, // allow testing without needing to remove the previous deployments
+      // Forking configuration - can be overridden via environment variables
+      forking: process.env.FORK_URL
+        ? {
+          url: process.env.FORK_URL,
+          blockNumber: process.env.FORK_BLOCK_NUMBER
+            ? parseInt(process.env.FORK_BLOCK_NUMBER)
+            : undefined,
+          enabled: true,
+        }
+        : undefined,
+      // Configure hardfork for Saga network compatibility
+      hardfork: "london", // Use istanbul to avoid hardfork activation issues
+      // Set chain ID to match the forked network when forking
+      chainId: 5464,
+      // Set gas price to 0 for Saga network compatibility
+      gasPrice: 0,
     },
     localhost: {
       deploy: ["deploy-mocks", "deploy"],
@@ -237,6 +263,7 @@ const config: HardhatUserConfig = {
   etherscan: {
     apiKey: {
       saga_mainnet: "empty",
+      sagaevm: "empty",
     },
     customChains: [
       {

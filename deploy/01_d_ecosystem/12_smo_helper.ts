@@ -23,7 +23,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   // Check governance multisig configuration
-  if (!config.walletAddresses?.governanceMultisig || !isAddress(config.walletAddresses.governanceMultisig)) {
+  if (
+    !config.walletAddresses?.governanceMultisig ||
+    !isAddress(config.walletAddresses.governanceMultisig)
+  ) {
     missingConfigs.push("walletAddresses.governanceMultisig");
   }
 
@@ -32,9 +35,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     console.log(
       `⚠️  Skipping SMOHelper deployment - missing configuration values: ${missingConfigs.join(", ")}`,
     );
-    console.log(
-      `☯️  ${__filename.split("/").slice(-1)[0]}: ⏭️  (skipped)`,
-    );
+    console.log(`☯️  ${__filename.split("/").slice(-1)[0]}: ⏭️  (skipped)`);
     return true;
   }
 
@@ -69,17 +70,24 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   if (!hasOperatorRole) {
-    console.log("⚠️  Governance multisig does not have OPERATOR_ROLE - this should not happen as it's set in constructor");
+    console.log(
+      "⚠️  Governance multisig does not have OPERATOR_ROLE - this should not happen as it's set in constructor",
+    );
   } else {
     console.log("✅ Governance multisig has OPERATOR_ROLE");
   }
 
   // Check if the deployer has DEFAULT_ADMIN_ROLE (should be true from constructor)
   const adminRole = await smoHelperContract.DEFAULT_ADMIN_ROLE();
-  const deployerHasAdminRole = await smoHelperContract.hasRole(adminRole, deployer);
+  const deployerHasAdminRole = await smoHelperContract.hasRole(
+    adminRole,
+    deployer,
+  );
 
   if (!deployerHasAdminRole) {
-    console.log("⚠️  Deployer does not have DEFAULT_ADMIN_ROLE - this should not happen as it's set in constructor");
+    console.log(
+      "⚠️  Deployer does not have DEFAULT_ADMIN_ROLE - this should not happen as it's set in constructor",
+    );
   } else {
     console.log("✅ Deployer has DEFAULT_ADMIN_ROLE");
   }
@@ -87,22 +95,29 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Verify contract addresses are correctly set
   const deployedDStableAddress = await smoHelperContract.getDStableToken();
   const deployedRedeemerAddress = await smoHelperContract.getRedeemer();
-  const deployedUniswapRouterAddress = await smoHelperContract.getUniswapRouter();
+  const deployedUniswapRouterAddress =
+    await smoHelperContract.getUniswapRouter();
 
   if (deployedDStableAddress !== dToken.address) {
-    console.log(`⚠️  DStable address mismatch: expected ${dToken.address}, got ${deployedDStableAddress}`);
+    console.log(
+      `⚠️  DStable address mismatch: expected ${dToken.address}, got ${deployedDStableAddress}`,
+    );
   } else {
     console.log("✅ DStable address correctly set");
   }
 
   if (deployedRedeemerAddress !== dRedeemer.address) {
-    console.log(`⚠️  Redeemer address mismatch: expected ${dRedeemer.address}, got ${deployedRedeemerAddress}`);
+    console.log(
+      `⚠️  Redeemer address mismatch: expected ${dRedeemer.address}, got ${deployedRedeemerAddress}`,
+    );
   } else {
     console.log("✅ Redeemer address correctly set");
   }
 
   if (deployedUniswapRouterAddress !== config.uniswapRouter) {
-    console.log(`⚠️  Uniswap router address mismatch: expected ${config.uniswapRouter}, got ${deployedUniswapRouterAddress}`);
+    console.log(
+      `⚠️  Uniswap router address mismatch: expected ${config.uniswapRouter}, got ${deployedUniswapRouterAddress}`,
+    );
   } else {
     console.log("✅ Uniswap router address correctly set");
   }

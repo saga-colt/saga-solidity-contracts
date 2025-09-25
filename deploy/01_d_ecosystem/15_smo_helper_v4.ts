@@ -4,7 +4,6 @@ import { DeployFunction } from "hardhat-deploy/types";
 
 import { getConfig } from "../../config/config";
 import {
-  D_ISSUER_CONTRACT_ID,
   D_REDEEMER_CONTRACT_ID,
   D_SMO_HELPER_ID,
   D_TOKEN_ID,
@@ -34,7 +33,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // If any required config values are missing, skip deployment
   if (missingConfigs.length > 0) {
     console.log(
-      `⚠️  Skipping SMOHelper V2 deployment - missing configuration values: ${missingConfigs.join(", ")}`,
+      `⚠️  Skipping SMOHelper V4 deployment - missing configuration values: ${missingConfigs.join(", ")}`,
     );
     console.log(`☯️  ${__filename.split("/").slice(-1)[0]}: ⏭️  (skipped)`);
     return true;
@@ -43,69 +42,84 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Get required contract addresses
   const dToken = await get(D_TOKEN_ID);
   const dRedeemer = await get(D_REDEEMER_CONTRACT_ID);
-  const dIssuer = await get(D_ISSUER_CONTRACT_ID);
 
-  // Get the old SMOHelper contract to revoke operator access
-  const oldSmoHelper = await get(D_SMO_HELPER_ID);
-  const oldSmoHelperContract = await hre.ethers.getContractAt(
-    "SMOHelper",
-    oldSmoHelper.address,
-    await hre.ethers.getSigner(deployer),
-  );
+  // List of all previous SMOHelper deployments to check and revoke operator access from
+  const previousSmoHelperDeployments = [
+    { name: "D_SmoHelper", id: D_SMO_HELPER_ID },
+    { name: "D_SmoHelperV2", id: "D_SmoHelperV2" },
+    { name: "D_SmoHelperV3", id: "D_SmoHelperV3" },
+  ];
 
-  // Check if the old SMOHelper has the old operator address
-  const oldOperatorAddress = "0xd2f775Ff2cD41bfe43C7A8c016eD10393553fe44";
-  const operatorRole = await oldSmoHelperContract.OPERATOR_ROLE();
-  const hasOldOperatorRole = await oldSmoHelperContract.hasRole(
-    operatorRole,
-    oldOperatorAddress,
-  );
-
-  if (hasOldOperatorRole) {
-    console.log(
-      `🔄 Revoking OPERATOR_ROLE from old operator: ${oldOperatorAddress}`,
-    );
-
+  // Revoke operator access from all previous SMOHelper deployments
+  for (const deployment of previousSmoHelperDeployments) {
     try {
-      const revokeTx = await oldSmoHelperContract.revokeRole(
+      const smoHelperDeployment = await get(deployment.id);
+      const smoHelperContract = await hre.ethers.getContractAt(
+        "SMOHelper",
+        smoHelperDeployment.address,
+        await hre.ethers.getSigner(deployer),
+      );
+
+      const operatorRole = await smoHelperContract.OPERATOR_ROLE();
+      const hasOperatorRole = await smoHelperContract.hasRole(
         operatorRole,
-        oldOperatorAddress,
+        deployer,
       );
-      await revokeTx.wait();
-      console.log(
-        `✅ Successfully revoked OPERATOR_ROLE from ${oldOperatorAddress}`,
-      );
+
+      if (hasOperatorRole) {
+        console.log(
+          `🔄 Revoking OPERATOR_ROLE from deployer (${deployer}) on ${deployment.name} (${smoHelperDeployment.address})`,
+        );
+
+        try {
+          const revokeTx = await smoHelperContract.revokeRole(
+            operatorRole,
+            deployer,
+          );
+          await revokeTx.wait();
+          console.log(
+            `✅ Successfully revoked OPERATOR_ROLE from deployer on ${deployment.name}`,
+          );
+        } catch (error) {
+          console.log(
+            `⚠️  Failed to revoke OPERATOR_ROLE from deployer on ${deployment.name}:`,
+            error,
+          );
+        }
+      } else {
+        console.log(
+          `ℹ️  Deployer (${deployer}) does not have OPERATOR_ROLE on ${deployment.name}`,
+        );
+      }
     } catch (error) {
       console.log(
-        `⚠️  Failed to revoke OPERATOR_ROLE from ${oldOperatorAddress}:`,
-        error,
+        `ℹ️  ${deployment.name} not found or not accessible:`,
+        error.message,
       );
     }
-  } else {
-    console.log(
-      `ℹ️  Old operator ${oldOperatorAddress} does not have OPERATOR_ROLE on old SMOHelper`,
-    );
   }
 
-  // Deploy new SMOHelper V2 with issuer integration
-  const smoHelperV2Deployment = await deploy("D_SmoHelperV2", {
+  // Deploy new SMOHelper V4 with issuer integration
+  const smoHelperV4Deployment = await deploy("D_SmoHelperV4", {
     from: deployer,
     contract: "SMOHelper",
     args: [
       dToken.address, // dstable
       dRedeemer.address, // redeemer
-      dIssuer.address, // issuer
       config.uniswapRouter, // uniswapRouter
       config.walletAddresses.governanceMultisig, // operator
     ],
   });
 
   // Verify the new deployment and check roles
-  const smoHelperV2Contract = await hre.ethers.getContractAt(
+  const smoHelperV4Contract = await hre.ethers.getContractAt(
     "SMOHelper",
-    smoHelperV2Deployment.address,
+    smoHelperV4Deployment.address,
     await hre.ethers.getSigner(deployer),
   );
+
+  // Get the operator role for the new contract
+  const operatorRole = await smoHelperV4Contract.OPERATOR_ROLE();
 
   // Grant OPERATOR_ROLE to the new operator address
   const newOperatorAddress = "0xd2f775Ff2cD41bfe43C7A8c016eD10393553fe44";
@@ -114,7 +128,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   try {
-    const grantTx = await smoHelperV2Contract.grantRole(
+    const grantTx = await smoHelperV4Contract.grantRole(
       operatorRole,
       newOperatorAddress,
     );
@@ -130,7 +144,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   // Verify the new operator has the role
-  const hasNewOperatorRole = await smoHelperV2Contract.hasRole(
+  const hasNewOperatorRole = await smoHelperV4Contract.hasRole(
     operatorRole,
     newOperatorAddress,
   );
@@ -144,7 +158,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   // Check if the governance multisig has the OPERATOR_ROLE (from constructor)
-  const hasGovernanceOperatorRole = await smoHelperV2Contract.hasRole(
+  const hasGovernanceOperatorRole = await smoHelperV4Contract.hasRole(
     operatorRole,
     config.walletAddresses.governanceMultisig,
   );
@@ -158,8 +172,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   // Check if the deployer has DEFAULT_ADMIN_ROLE (should be true from constructor)
-  const adminRole = await smoHelperV2Contract.DEFAULT_ADMIN_ROLE();
-  const deployerHasAdminRole = await smoHelperV2Contract.hasRole(
+  const adminRole = await smoHelperV4Contract.DEFAULT_ADMIN_ROLE();
+  const deployerHasAdminRole = await smoHelperV4Contract.hasRole(
     adminRole,
     deployer,
   );
@@ -173,10 +187,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   // Verify contract addresses are correctly set
-  const deployedDStableAddress = await smoHelperV2Contract.getDStableToken();
-  const deployedRedeemerAddress = await smoHelperV2Contract.getRedeemer();
+  const deployedDStableAddress = await smoHelperV4Contract.getDStableToken();
+  const deployedRedeemerAddress = await smoHelperV4Contract.getRedeemer();
   const deployedUniswapRouterAddress =
-    await smoHelperV2Contract.getUniswapRouter();
+    await smoHelperV4Contract.getUniswapRouter();
 
   if (deployedDStableAddress !== dToken.address) {
     console.log(
@@ -204,10 +218,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Summary
   console.log("\n📋 Migration Summary:");
-  console.log(`   Old SMOHelper: ${oldSmoHelper.address}`);
-  console.log(`   New SMOHelper V2: ${smoHelperV2Deployment.address}`);
   console.log(
-    `   Old operator (${oldOperatorAddress}) access: ${hasOldOperatorRole ? "REVOKED" : "NOT FOUND"}`,
+    `   Previous SMOHelper deployments checked: ${previousSmoHelperDeployments.map((d) => d.name).join(", ")}`,
+  );
+  console.log(`   New SMOHelper V4: ${smoHelperV4Deployment.address}`);
+  console.log(
+    `   Deployer operator access: REVOKED from all previous deployments`,
   );
   console.log(
     `   New operator (${newOperatorAddress}) access: ${hasNewOperatorRole ? "GRANTED" : "FAILED"}`,
@@ -217,57 +233,43 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   console.log("\n🔍 Manual Actions Check:");
   const manualActionsNeeded: string[] = [];
 
-  // Check if old operator access was successfully revoked
-  if (hasOldOperatorRole) {
-    const stillHasOldRole = await oldSmoHelperContract.hasRole(
-      operatorRole,
-      oldOperatorAddress,
-    );
-
-    if (stillHasOldRole) {
-      manualActionsNeeded.push(
-        `❌ REVOKE OPERATOR_ROLE from ${oldOperatorAddress} on old SMOHelper (${oldSmoHelper.address})`,
-      );
-    }
-  }
-
   // Check if new operator access was successfully granted
   if (!hasNewOperatorRole) {
     manualActionsNeeded.push(
-      `❌ GRANT OPERATOR_ROLE to ${newOperatorAddress} on new SMOHelper V2 (${smoHelperV2Deployment.address})`,
+      `❌ GRANT OPERATOR_ROLE to ${newOperatorAddress} on new SMOHelper V4 (${smoHelperV4Deployment.address})`,
     );
   }
 
   // Check if governance multisig has proper access
   if (!hasGovernanceOperatorRole) {
     manualActionsNeeded.push(
-      `❌ GRANT OPERATOR_ROLE to governance multisig (${config.walletAddresses.governanceMultisig}) on new SMOHelper V2`,
+      `❌ GRANT OPERATOR_ROLE to governance multisig (${config.walletAddresses.governanceMultisig}) on new SMOHelper V4`,
     );
   }
 
   // Check if deployer has admin access
   if (!deployerHasAdminRole) {
     manualActionsNeeded.push(
-      `❌ GRANT DEFAULT_ADMIN_ROLE to deployer (${deployer}) on new SMOHelper V2`,
+      `❌ GRANT DEFAULT_ADMIN_ROLE to deployer (${deployer}) on new SMOHelper V4`,
     );
   }
 
   // Check contract address configurations
   if (deployedDStableAddress !== dToken.address) {
     manualActionsNeeded.push(
-      `❌ VERIFY dSTABLE address configuration on new SMOHelper V2`,
+      `❌ VERIFY dSTABLE address configuration on new SMOHelper V4`,
     );
   }
 
   if (deployedRedeemerAddress !== dRedeemer.address) {
     manualActionsNeeded.push(
-      `❌ VERIFY Redeemer address configuration on new SMOHelper V2`,
+      `❌ VERIFY Redeemer address configuration on new SMOHelper V4`,
     );
   }
 
   if (deployedUniswapRouterAddress !== config.uniswapRouter) {
     manualActionsNeeded.push(
-      `❌ VERIFY Uniswap Router address configuration on new SMOHelper V2`,
+      `❌ VERIFY Uniswap Router address configuration on new SMOHelper V4`,
     );
   }
 
@@ -284,7 +286,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     console.log("   • Ensure you have the appropriate admin privileges");
     console.log("   • Verify all addresses are correct before executing");
     console.log(
-      "   • Test the new SMOHelper V2 functionality after manual fixes",
+      "   • Test the new SMOHelper V4 functionality after manual fixes",
     );
   } else {
     console.log(
@@ -295,12 +297,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Additional recommendations
   console.log("\n💡 Additional Recommendations:");
   console.log(
-    "   • Update any frontend/backend integrations to use the new SMOHelper V2 address",
+    "   • Update any frontend/backend integrations to use the new SMOHelper V4 address",
   );
   console.log(
-    "   • Consider pausing the old SMOHelper contract if no longer needed",
+    "   • Consider pausing the old SMOHelper contracts if no longer needed",
   );
-  console.log("   • Monitor the new SMOHelper V2 for proper operation");
+  console.log("   • Monitor the new SMOHelper V4 for proper operation");
   console.log("   • Update documentation with the new contract address");
 
   console.log(
@@ -310,13 +312,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   return true;
 };
 
-func.id = "D_SmoHelperV2";
-func.tags = ["d", "smo-helper-v2", "migration"];
-func.dependencies = [
-  D_TOKEN_ID,
-  D_REDEEMER_CONTRACT_ID,
-  D_ISSUER_CONTRACT_ID,
-  D_SMO_HELPER_ID,
-];
+func.id = "D_SmoHelperV4";
+func.tags = ["d", "smo-helper-v4", "migration"];
+func.dependencies = [D_TOKEN_ID, D_REDEEMER_CONTRACT_ID, D_SMO_HELPER_ID];
 
 export default func;

@@ -9,19 +9,19 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
 import "contracts/dstable/ERC20StablecoinUpgradeable.sol";
 import "contracts/dstable/RedeemerV2.sol";
-import "contracts/dstable/IssuerV2.sol";
-import "../Uniswap/Uniswapv3/interfaces/ISwapRouter.sol";
+import "../Uniswap/Uniswapv3/interfaces/ISagaSwapRouter.sol";
 
 /**
  * @title SMOHelper
- * @dev Enhanced Stablecoin Market Operations Helper contract with issuer integration
+ * @dev Enhanced Stablecoin Market Operations Helper contract with advanced routing
  *
  * This contract facilitates SMO operations with:
  * 1. Flash minting dSTABLE tokens
  * 2. Redeeming dSTABLE for collateral (using redeemAsProtocol - no fees)
- * 3. Using collateral to mint new dSTABLE tokens via the issuer
- * 4. Gas optimizations and dust management
- * 5. Repaying the flash loan and distributing profit
+ * 3. Advanced UniswapV3 routing with automatic route discovery
+ * 4. Multi-strategy routing (direct, via dUSD, via USDC)
+ * 5. Gas optimizations and dust management
+ * 6. Repaying the flash loan and distributing profit
  */
 contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
@@ -53,6 +53,7 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
     error InvalidFeeTier(uint24 feeTier);
     error InvalidIntermediateToken(address token);
     error AssetRedemptionPaused(address asset);
+    error UniswapExactInputFailed(bytes reason);
 
     /* Roles */
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
@@ -65,7 +66,6 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
     /* State Variables */
     ERC20StablecoinUpgradeable public immutable dstable;
     RedeemerV2 public immutable redeemer;
-    IssuerV2 public immutable issuer;
     address public immutable uniswapRouter;
 
     /* Structs */
@@ -84,14 +84,12 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
     constructor(
         address _dstable,
         address _redeemer,
-        address _issuer,
         address _uniswapRouter,
         address _operator
     ) {
         if (
             _dstable == address(0) ||
             _redeemer == address(0) ||
-            _issuer == address(0) ||
             _uniswapRouter == address(0) ||
             _operator == address(0)
         ) {
@@ -100,7 +98,6 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
 
         dstable = ERC20StablecoinUpgradeable(_dstable);
         redeemer = RedeemerV2(_redeemer);
-        issuer = IssuerV2(_issuer);
         uniswapRouter = _uniswapRouter;
 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -138,7 +135,7 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
         if (params.profitTo == address(0)) {
             revert ZeroAddress();
         }
-       
+
         // Check if flash loan is supported
         uint256 maxFlashLoan = dstable.maxFlashLoan(address(dstable));
         if (dstableAmount > maxFlashLoan) {
@@ -187,12 +184,9 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
             revert DeadlineExceeded();
         }
 
-        // Step 1: Validate collateral asset is supported
         if (!redeemer.isAssetRedemptionEnabled(params.collateralAsset)) {
             revert AssetRedemptionPaused(params.collateralAsset);
         }
-        
-        // Redeem dSTABLE for collateral (NO FEES - using redeemAsProtocol)
         uint256 collateralBalanceBefore = IERC20(params.collateralAsset)
             .balanceOf(address(this));
 
@@ -219,22 +213,51 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
             );
         }
 
-        // Step 2: Use collateral to mint dSTABLE via issuer
+        // Step 2: Find and execute optimal swap
         uint256 dstableBalanceBefore = dstable.balanceOf(address(this));
-        
-        // Approve issuer to pull collateral
-        IERC20(params.collateralAsset).forceApprove(address(issuer), 0);
-        IERC20(params.collateralAsset).forceApprove(address(issuer), collateralReceived);
-        
-        // Mint dSTABLE using the collateral via issuer
-        issuer.issue(
-            collateralReceived,
-            params.collateralAsset,
-            params.minDStableReceived
+        string memory routingMethod;
+
+        // Approve router to spend collateral tokens
+        IERC20(params.collateralAsset).forceApprove(uniswapRouter, 0);
+        IERC20(params.collateralAsset).forceApprove(
+            uniswapRouter,
+            collateralReceived
         );
-        
-        // Reset approval to avoid lingering allowance
-        IERC20(params.collateralAsset).forceApprove(address(issuer), 0);
+
+        // Validate swap path is provided
+        if (params.swapPath.length == 0) {
+            revert NoSwapPathProvided();
+        }
+
+        _validateSwapPath(
+            params.swapPath,
+            params.collateralAsset,
+            address(dstable)
+        );
+
+        // Calculate amount limit with slippage protection
+        uint256 amountLimit = _calculateAmountLimit(
+            params.expectedAmountOut,
+            params.slippageBps
+        );
+
+        // Always use Saga router variant exactInput with 4-field tuple (selector 0xb858183f)
+        bytes memory path = params.swapPath;
+        ISagaSwapRouter.ExactInputParams memory sagaParams = ISagaSwapRouter
+            .ExactInputParams({
+                path: path,
+                recipient: address(this),
+                amountIn: collateralReceived,
+                amountOutMinimum: amountLimit
+            });
+
+        try ISagaSwapRouter(uniswapRouter).exactInput(sagaParams) returns (
+            uint256 /* out */
+        ) {
+            routingMethod = "V3-ExactInput-NoDeadline";
+        } catch (bytes memory reason) {
+            revert UniswapExactInputFailed(reason);
+        }
 
         uint256 dstableReceived = dstable.balanceOf(address(this)) -
             dstableBalanceBefore;
@@ -260,7 +283,7 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
         if (profit > 0) {
             IERC20(address(dstable)).safeTransfer(params.profitTo, profit);
         }
-        
+        IERC20(params.collateralAsset).forceApprove(uniswapRouter, 0);
         // Emit event with routing method
         emit SMOExecuted(
             params.collateralAsset,
@@ -268,7 +291,7 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
             collateralReceived,
             dstableReceived,
             profit,
-            "issuer"
+            routingMethod
         );
 
         return keccak256("ERC3156FlashBorrower.onFlashLoan");
@@ -321,7 +344,7 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
         IERC20(token).safeTransfer(to, amount);
     }
 
-     /**
+    /**
      * @notice Returns the UniswapV3 router address
      * @return The UniswapV3 router address
      */
@@ -346,21 +369,13 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
     }
 
     /**
-     * @notice Returns the Issuer contract address
-     * @return The Issuer contract address
-     */
-    function getIssuer() external view returns (address) {
-        return address(issuer);
-    }
-
-    /**
      * @notice Returns the maximum allowed slippage in basis points
      * @return The maximum slippage in basis points (2000 = 20%)
      */
     function getMaxSlippageBps() external pure returns (uint256) {
         return MAX_SLIPPAGE_BPS;
     }
-    
+
     /**
      * @notice Returns the valid Uniswap V3 fee tiers
      * @return Array of valid fee tiers
@@ -395,7 +410,9 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
         uint256 slippageBps
     ) internal pure returns (uint256) {
         // For exact input: minOut = floor(quotedOut * (1 - slippageBps/BPS))
-        return (quotedAmount * (HUNDRED_PERCENT_BPS - slippageBps)) / HUNDRED_PERCENT_BPS;
+        return
+            (quotedAmount * (HUNDRED_PERCENT_BPS - slippageBps)) /
+            HUNDRED_PERCENT_BPS;
     }
 
     /**
@@ -421,7 +438,7 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
             token := shr(96, mload(ptr))
         }
     }
-    
+
     /**
      * @dev Comprehensive Uniswap V3 path validation
      */
@@ -431,41 +448,41 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
         address expectedLast
     ) internal pure {
         // Basic path structure validation: len >= 43 and (len - 20) % 23 == 0
-        if (
-            path.length < 43 ||
-            ((path.length - 20) % 23) != 0
-        ) {
+        if (path.length < 43 || ((path.length - 20) % 23) != 0) {
             revert InvalidPathLength();
         }
-        
+
         // Validate first and last tokens
         address firstToken = _pathFirstToken(path);
         address lastToken = _pathLastToken(path);
-        
+
         if (firstToken != expectedFirst || lastToken != expectedLast) {
             revert InvalidSwapPathTokens();
         }
-        
+
         // Validate intermediate tokens and fee tiers
         uint256 numHops = (path.length - 20) / 23;
-        
+
         for (uint256 i = 0; i < numHops; i++) {
             uint256 offset = 20 + (i * 23);
-            
+
             // Extract fee tier (3 bytes at offset)
             uint24 feeTier;
             assembly {
                 let ptr := add(path, add(32, offset))
                 feeTier := and(shr(232, mload(ptr)), 0xffffff)
             }
-            
+
             // Validate fee tier is one of the standard Uniswap V3 fee tiers
-            bool validFeeTier = (feeTier == 100 || feeTier == 500 || feeTier == 3000 || feeTier == 10000);
-            
+            bool validFeeTier = (feeTier == 100 ||
+                feeTier == 500 ||
+                feeTier == 3000 ||
+                feeTier == 10000);
+
             if (!validFeeTier) {
                 revert InvalidFeeTier(feeTier);
             }
-            
+
             // Extract intermediate token if not the last hop
             if (i < numHops - 1) {
                 address intermediateToken;
@@ -474,7 +491,7 @@ contract SMOHelper is AccessControl, ReentrancyGuard, Pausable {
                     let ptr := add(path, add(32, tokenOffset))
                     intermediateToken := shr(96, mload(ptr))
                 }
-                
+
                 // Basic validation: ensure intermediate token is not zero address
                 if (intermediateToken == address(0)) {
                     revert InvalidIntermediateToken(intermediateToken);
