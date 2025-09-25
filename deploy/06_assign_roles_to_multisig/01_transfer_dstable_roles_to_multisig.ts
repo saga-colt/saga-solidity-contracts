@@ -9,13 +9,11 @@ import { isMainnet } from "../../typescript/hardhat/deploy";
 /**
  * Transfer dStable roles to governance multisig
  *
- * @param _hre The Hardhat Runtime Environment for deployment
+ * @param hre Hardhat Runtime Environment for deployment
  */
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   if (!isMainnet(hre.network.name)) {
-    console.log(
-      `\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping non-mainnet network`,
-    );
+    console.log(`\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping non-mainnet network`);
     return true;
   }
 
@@ -37,55 +35,25 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
     // Get token IDs based on the dStable name
     const tokenId = dStableName; // The token ID is the same as the dStable name (e.g., "d")
-    const issuerContractId = `${dStableName}_IssuerV2`;
-    const redeemerContractId = `${dStableName}_RedeemerV2`;
+    const issuerContractId = `${dStableName}_Issuer`;
+    const redeemerContractId = `${dStableName}_Redeemer`;
     const collateralVaultContractId = `${dStableName}_CollateralHolderVault`;
     const amoManagerId = `${dStableName}_AmoManager`;
 
     // Transfer token roles
-    await transferTokenRoles(
-      hre,
-      tokenId,
-      deployerSigner,
-      governanceMultisig,
-      deployer,
-    );
+    await transferTokenRoles(hre, tokenId, deployerSigner, governanceMultisig, deployer);
 
     // Transfer Issuer roles
-    await transferIssuerRoles(
-      hre,
-      issuerContractId,
-      deployerSigner,
-      governanceMultisig,
-      deployer,
-    );
+    await transferIssuerRoles(hre, issuerContractId, deployerSigner, governanceMultisig, deployer);
 
     // Transfer Redeemer roles
-    await transferRedeemerRoles(
-      hre,
-      redeemerContractId,
-      deployerSigner,
-      governanceMultisig,
-      deployer,
-    );
+    await transferRedeemerRoles(hre, redeemerContractId, deployerSigner, governanceMultisig, deployer);
 
     // Transfer AmoManager roles
-    await transferAmoManagerRoles(
-      hre,
-      amoManagerId,
-      deployerSigner,
-      governanceMultisig,
-      deployer,
-    );
+    await transferAmoManagerRoles(hre, amoManagerId, deployerSigner, governanceMultisig, deployer);
 
     // Transfer CollateralVault roles
-    await transferCollateralVaultRoles(
-      hre,
-      collateralVaultContractId,
-      deployerSigner,
-      governanceMultisig,
-      deployer,
-    );
+    await transferCollateralVaultRoles(hre, collateralVaultContractId, deployerSigner, governanceMultisig, deployer);
 
     console.log(`✅ Completed ${dStableName} role transfers`);
   }
@@ -95,7 +63,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   return true;
 };
 
-/* eslint-disable unused-imports/no-unused-vars -- Keep dormant role transfer helpers until admin automation lands */
 /**
  * Transfer roles from deployer to governance multisig
  *
@@ -496,8 +463,6 @@ async function transferCollateralVaultRoles(
 
   return true;
 }
-
-/* eslint-enable unused-imports/no-unused-vars -- Restore unused-var enforcement */
 
 func.id = "transfer_dstable_roles_to_multisig";
 func.tags = ["governance", "roles"];

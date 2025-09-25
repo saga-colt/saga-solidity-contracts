@@ -15,12 +15,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     return true;
   }
 
-  // Use WSAGA if available, otherwise fallback to SAGA
-  const wethAddress = config.tokenAddresses.WSAGA || config.tokenAddresses.SAGA;
+  const wethAddress = config.tokenAddresses.SAGA;
 
   if (!wethAddress) {
-    console.log("Neither WSAGA nor SAGA configured for this network. Skipping UI helpers deployment.");
-    return true;
+    console.log("SAGA is not configured for this network.");
+    return false;
   }
 
   // Get the Aave price oracle address

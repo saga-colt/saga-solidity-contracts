@@ -31,18 +31,11 @@ export async function performOracleSanityChecks(
           `Sanity check failed for asset ${assetAddress} in ${wrapperName}: Normalized price ${normalizedPrice} is outside the range [${minPrice}, ${maxPrice}]`,
         );
       } else {
-        console.log(
-          `Sanity check passed for asset ${assetAddress} in ${wrapperName}: Normalized price is ${normalizedPrice}`,
-        );
+        console.log(`Sanity check passed for asset ${assetAddress} in ${wrapperName}: Normalized price is ${normalizedPrice}`);
       }
     } catch (error) {
-      console.error(
-        `Error performing sanity check for asset ${assetAddress} in ${wrapperName}:`,
-        error,
-      );
-      throw new Error(
-        `Error performing sanity check for asset ${assetAddress} in ${wrapperName}: ${error}`,
-      );
+      console.error(`Error performing sanity check for asset ${assetAddress} in ${wrapperName}:`, error);
+      throw new Error(`Error performing sanity check for asset ${assetAddress} in ${wrapperName}: ${error}`);
     }
   }
 }
@@ -67,44 +60,30 @@ export async function setupTellorSimpleFeedsForAssets(
   maxPrice: number,
   deployerAddress: string,
 ): Promise<void> {
-  const allTellorFeeds =
-    config.oracleAggregators.USD.tellorOracleAssets
-      ?.tellorOracleWrappersWithThresholding || {};
+  const allTellorFeeds = config.oracleAggregators.USD.tellorOracleAssets?.tellorOracleWrappersWithThresholding || {};
 
   for (const assetAddress of assetAddresses) {
     const feedConfig = allTellorFeeds[assetAddress];
 
     if (!feedConfig) {
-      console.log(
-        `⚠️  No Tellor feed configuration found for asset ${assetAddress}. Skipping.`,
-      );
+      console.log(`⚠️  No Tellor feed configuration found for asset ${assetAddress}. Skipping.`);
       continue;
     }
 
     // Check if feed already exists
-    try {
-      const existingFeed = await tellorWrapper.feeds(assetAddress);
+    const existingFeed = await tellorWrapper.assetToFeed(assetAddress);
 
-      if (existingFeed !== ZeroAddress) {
-        console.log(
-          `- Tellor feed for asset ${assetAddress} already configured. Skipping setup.`,
-        );
-        continue;
-      }
-    } catch (error) {
-      // Feed doesn't exist, proceed with setup
-      console.log(
-        `- Tellor feed for asset ${assetAddress} not found. Proceeding with setup...`,
-      );
+    if (existingFeed !== ZeroAddress) {
+      console.log(`- Tellor feed for asset ${assetAddress} already configured. Skipping setup.`);
+      continue;
     }
+
+    console.log(`- Tellor feed for asset ${assetAddress} not found. Proceeding with setup...`);
 
     // Check permissions before attempting to add feed
     try {
       const oracleManagerRole = await tellorWrapper.ORACLE_MANAGER_ROLE();
-      const hasRole = await tellorWrapper.hasRole(
-        oracleManagerRole,
-        deployerAddress,
-      );
+      const hasRole = await tellorWrapper.hasRole(oracleManagerRole, deployerAddress);
       console.log(`  - Deployer has ORACLE_MANAGER_ROLE: ${hasRole}`);
 
       if (!hasRole) {
@@ -113,10 +92,7 @@ export async function setupTellorSimpleFeedsForAssets(
         throw new Error(errorMessage);
       }
     } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message.includes("lacks ORACLE_MANAGER_ROLE")
-      ) {
+      if (error instanceof Error && error.message.includes("lacks ORACLE_MANAGER_ROLE")) {
         throw error; // Re-throw our custom error
       }
       console.warn(`  - Could not check ORACLE_MANAGER_ROLE:`, error);
@@ -133,22 +109,13 @@ export async function setupTellorSimpleFeedsForAssets(
       console.log(`✅ Set Tellor feed for asset ${assetAddress}`);
     } catch (error) {
       console.error(`❌ Error adding Tellor feed for ${assetAddress}:`, error);
-      throw new Error(
-        `Failed to add Tellor feed for ${assetAddress}: ${error}`,
-      );
+      throw new Error(`Failed to add Tellor feed for ${assetAddress}: ${error}`);
     }
 
     try {
       // Set threshold configuration if thresholds are specified
-      if (
-        feedConfig.lowerThreshold !== undefined &&
-        feedConfig.fixedPrice !== undefined
-      ) {
-        await tellorWrapper.setThresholdConfig(
-          assetAddress,
-          feedConfig.lowerThreshold,
-          feedConfig.fixedPrice,
-        );
+      if (feedConfig.lowerThreshold !== undefined && feedConfig.fixedPrice !== undefined) {
+        await tellorWrapper.setThresholdConfig(assetAddress, feedConfig.lowerThreshold, feedConfig.fixedPrice);
         console.log(`✅ Set threshold config for asset ${assetAddress}`);
       }
     } catch (error) {

@@ -10,13 +10,11 @@ import { isMainnet } from "../../typescript/hardhat/deploy";
 /**
  * Transfer oracle roles to governance multisig
  *
- * @param _hre The Hardhat Runtime Environment for deployment
+ * @param hre Hardhat Runtime Environment for deployment
  */
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   if (!isMainnet(hre.network.name)) {
-    console.log(
-      `\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping non-mainnet network`,
-    );
+    console.log(`\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping non-mainnet network`);
     return true;
   }
 
@@ -31,21 +29,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { governanceMultisig } = config.walletAddresses;
 
   // Transfer roles for USD oracle aggregator
-  await transferOracleAggregatorRoles(
-    hre,
-    USD_ORACLE_AGGREGATOR_ID,
-    "USD",
-    deployerSigner,
-    governanceMultisig,
-    deployer,
-  );
+  await transferOracleAggregatorRoles(hre, USD_ORACLE_AGGREGATOR_ID, "USD", deployerSigner, governanceMultisig, deployer);
 
   console.log(`\n🔑 ${__filename.split("/").slice(-2).join("/")}: ✅ Done\n`);
 
   return true;
 };
 
-/* eslint-disable unused-imports/no-unused-vars -- Keep dormant role transfer helpers until admin automation lands */
 /**
  * Transfer roles from deployer to governance multisig for the oracle aggregator contract
  *
@@ -123,5 +113,3 @@ func.tags = ["governance", "roles"];
 func.dependencies = ["usd-oracle"];
 
 export default func;
-
-/* eslint-enable unused-imports/no-unused-vars -- Restore unused-var enforcement */

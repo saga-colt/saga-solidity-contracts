@@ -14,13 +14,11 @@ import { isMainnet } from "../../typescript/hardhat/deploy";
 /**
  * Transfer Tellor oracle wrapper roles to governance multisig
  *
- * @param _hre The Hardhat Runtime Environment for deployment
+ * @param hre Hardhat Runtime Environment for deployment
  */
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   if (!isMainnet(hre.network.name)) {
-    console.log(
-      `\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping non-mainnet network`,
-    );
+    console.log(`\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping non-mainnet network`);
     return true;
   }
 
@@ -34,16 +32,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Get the governance multisig address
   const { governanceMultisig } = config.walletAddresses;
 
-  console.log(
-    `\n🔑 ${__filename.split("/").slice(-2).join("/")}: Transferring Tellor oracle wrapper roles to governance multisig`,
-  );
+  console.log(`\n🔑 ${__filename.split("/").slice(-2).join("/")}: Transferring Tellor oracle wrapper roles to governance multisig`);
 
   const DEFAULT_ADMIN_ROLE = ZERO_BYTES_32;
   const ORACLE_MANAGER_ROLE = await ethers
-    .getContractAt(
-      "OracleAggregator",
-      (await deployments.get(USD_ORACLE_AGGREGATOR_ID)).address,
-    )
+    .getContractAt("OracleAggregator", (await deployments.get(USD_ORACLE_AGGREGATOR_ID)).address)
     .then((c) => c.ORACLE_MANAGER_ROLE());
 
   if (!ORACLE_MANAGER_ROLE) {
@@ -102,7 +95,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   return true;
 };
 
-/* eslint-disable unused-imports/no-unused-vars -- Keep dormant role transfer helpers until admin automation lands */
 /**
  * Transfer a specified role from deployer to governance multisig for a given contract
  *
@@ -171,11 +163,6 @@ async function transferRole(
 
 func.id = "transfer_oracle_wrapper_roles_to_multisig";
 func.tags = ["governance", "roles"];
-func.dependencies = [
-  "setup-usd-tellor-oracle-wrappers",
-  "point-saga-feed-to-oracle-aggregator",
-];
+func.dependencies = ["setup-usd-tellor-oracle-wrappers", "point-saga-feed-to-oracle-aggregator"];
 
 export default func;
-
-/* eslint-enable unused-imports/no-unused-vars -- Restore unused-var enforcement */

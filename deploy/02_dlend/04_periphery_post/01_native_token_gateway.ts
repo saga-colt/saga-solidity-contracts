@@ -17,10 +17,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     return true;
   }
 
-  const wrappedNativeTokenAddress = config.tokenAddresses.WSAGA;
+  const wrappedNativeTokenAddress = config.tokenAddresses.WGAS;
 
   if (!wrappedNativeTokenAddress) {
-    console.log("WSAGA not configured for this network. Skipping WrappedTokenGatewayV3 deployment.");
+    console.log("WGAS not configured for this network. Skipping WrappedTokenGatewayV3 deployment.");
     return true;
   }
 
