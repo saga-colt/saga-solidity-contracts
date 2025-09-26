@@ -17,7 +17,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     return true;
   }
 
-  const wrappedNativeTokenAddress = config.tokenAddresses.WSAGA;
+  const wrappedNativeTokenAddress = config.tokenAddresses.WGAS;
+
+  if (!wrappedNativeTokenAddress) {
+    console.log("WGAS not configured for this network. Skipping WrappedTokenGatewayV3 deployment.");
+    return true;
+  }
 
   // Get pool address
   const pool = await deployments.get(POOL_PROXY_ID);
