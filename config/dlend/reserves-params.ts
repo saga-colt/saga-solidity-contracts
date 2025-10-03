@@ -33,8 +33,8 @@ export const strategyD: IReserveParams = {
 
 export const strategyWETH: IReserveParams = {
   strategy: rateStrategyHighLiquidityVolatile,
-  baseLTVAsCollateral: "8000",
-  liquidationThreshold: "8500",
+  baseLTVAsCollateral: "6000",
+  liquidationThreshold: "6500",
   liquidationBonus: "10500",
   liquidationProtocolFee: "7000", // 70%
   borrowingEnabled: false,
@@ -43,7 +43,7 @@ export const strategyWETH: IReserveParams = {
   reserveDecimals: "18",
   aTokenImpl: eContractid.AToken,
   reserveFactor: "1000",
-  supplyCap: "500",
+  supplyCap: "5000000",
   borrowCap: "0",
   debtCeiling: "0",
   borrowableIsolation: false,
