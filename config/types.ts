@@ -1,3 +1,4 @@
+import { SafeConfig } from "@dtrinity/shared-hardhat-tools";
 import { Address } from "hardhat-deploy/types";
 
 import { DLendConfig } from "./dlend/types";
@@ -6,6 +7,7 @@ export interface Config {
   readonly MOCK_ONLY?: MockConfig;
   readonly tokenAddresses: TokenAddresses;
   readonly walletAddresses: WalletAddresses;
+  readonly safeConfig?: SafeConfig;
   readonly oracleAggregators: {
     [key: string]: OracleAggregatorConfig;
   };
