@@ -31,11 +31,11 @@ export const strategyD: IReserveParams = {
   supplyCap: "2500000", // Specific to D
 };
 
-export const strategyWETH: IReserveParams = {
+export const strategySAGA: IReserveParams = {
   strategy: rateStrategyHighLiquidityVolatile,
   baseLTVAsCollateral: "6000",
   liquidationThreshold: "6500",
-  liquidationBonus: "10500",
+  liquidationBonus: "11000", // 10% liquidation fee
   liquidationProtocolFee: "7000", // 70%
   borrowingEnabled: false,
   stableBorrowRateEnabled: false,
@@ -43,15 +43,10 @@ export const strategyWETH: IReserveParams = {
   reserveDecimals: "18",
   aTokenImpl: eContractid.AToken,
   reserveFactor: "1000",
-  supplyCap: "5000000",
+  supplyCap: "2000000",
   borrowCap: "0",
   debtCeiling: "0",
   borrowableIsolation: false,
-};
-
-export const strategySAGA: IReserveParams = {
-  ...strategyWETH,
-  supplyCap: "2500000", // TODO: PLEASE REVIEW BEFORE DEPLOYING
 };
 
 const baseYieldBearingStablecoinConfig: IReserveParams = {
