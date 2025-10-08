@@ -1,15 +1,12 @@
 // USD Oracles
 export const USD_ORACLE_AGGREGATOR_ID = "USD_OracleAggregator";
 export const USD_TELLOR_ORACLE_WRAPPER_ID = "USD_TellorWrapper";
-export const USD_TELLOR_WRAPPER_WITH_THRESHOLDING_ID =
-  "USD_TellorWrapperWithThresholding";
+export const USD_TELLOR_WRAPPER_WITH_THRESHOLDING_ID = "USD_TellorWrapperWithThresholding";
 
 // Legacy Redstone IDs (deprecated, use Tellor instead)
 export const USD_REDSTONE_ORACLE_WRAPPER_ID = "USD_RedstoneChainlinkWrapper";
-export const USD_REDSTONE_WRAPPER_WITH_THRESHOLDING_ID =
-  "USD_RedstoneChainlinkWrapperWithThresholding";
-export const USD_REDSTONE_COMPOSITE_WRAPPER_WITH_THRESHOLDING_ID =
-  "USD_RedstoneChainlinkCompositeWrapperWithThresholding";
+export const USD_REDSTONE_WRAPPER_WITH_THRESHOLDING_ID = "USD_RedstoneChainlinkWrapperWithThresholding";
+export const USD_REDSTONE_COMPOSITE_WRAPPER_WITH_THRESHOLDING_ID = "USD_RedstoneChainlinkCompositeWrapperWithThresholding";
 
 // D
 export const D_TOKEN_ID = "D";
@@ -36,8 +33,7 @@ export const STABLE_DEBT_TOKEN_IMPL_ID = "StableDebtTokenImpl";
 export const RATE_STRATEGY_ID = "RateStrategy";
 export const POOL_PROXY_ID = "PoolProxy";
 export const POOL_CONFIGURATOR_PROXY_ID = "PoolConfiguratorProxy";
-export const POOL_ADDRESS_PROVIDER_REGISTRY_ID =
-  "PoolAddressesProviderRegistry";
+export const POOL_ADDRESS_PROVIDER_REGISTRY_ID = "PoolAddressesProviderRegistry";
 export const SUPPLY_LOGIC_ID = "SupplyLogic";
 export const BORROW_LOGIC_ID = "BorrowLogic";
 export const LIQUIDATION_LOGIC_ID = "LiquidationLogic";
@@ -55,8 +51,7 @@ export const EMISSION_MANAGER_ID = "EmissionManager";
 export const INCENTIVES_IMPL_ID = "RewardsController";
 export const INCENTIVES_PROXY_ID = "IncentivesProxy";
 export const PULL_REWARDS_TRANSFER_STRATEGY_ID = "PullRewardsTransferStrategy";
-export const ORACLE_AGGREGATOR_WRAPPER_BASE_ID =
-  "oracle-aggregator-wrapper-base";
+export const ORACLE_AGGREGATOR_WRAPPER_BASE_ID = "oracle-aggregator-wrapper-base";
 
 // Wrapped dLEND ATokens
 export const DLEND_STATIC_A_TOKEN_FACTORY_ID = "Palomino_StaticATokenFactory";

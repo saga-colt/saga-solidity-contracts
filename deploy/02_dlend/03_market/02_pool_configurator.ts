@@ -14,42 +14,30 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const config = await getConfig(hre);
 
   if (!config.dLend) {
-    console.log(
-      "No dLend configuration found for this network. Skipping dLend deployment.",
-    );
+    console.log("No dLend configuration found for this network. Skipping dLend deployment.");
     return true;
   }
 
   // Get addresses provider address
-  const { address: addressesProviderAddress } = await hre.deployments.get(
-    POOL_ADDRESSES_PROVIDER_ID,
-  );
+  const { address: addressesProviderAddress } = await hre.deployments.get(POOL_ADDRESSES_PROVIDER_ID);
 
   // Get configurator logic library
-  const configuratorLogicDeployment = await hre.deployments.get(
-    CONFIGURATOR_LOGIC_ID,
-  );
+  const configuratorLogicDeployment = await hre.deployments.get(CONFIGURATOR_LOGIC_ID);
 
   // Deploy pool configurator implementation
-  const poolConfiguratorDeployment = await hre.deployments.deploy(
-    POOL_CONFIGURATOR_ID,
-    {
-      from: deployer,
-      args: [],
-      contract: "PoolConfigurator",
-      libraries: {
-        ConfiguratorLogic: configuratorLogicDeployment.address,
-      },
-      autoMine: true,
-      log: false,
+  const poolConfiguratorDeployment = await hre.deployments.deploy(POOL_CONFIGURATOR_ID, {
+    from: deployer,
+    args: [],
+    contract: "PoolConfigurator",
+    libraries: {
+      ConfiguratorLogic: configuratorLogicDeployment.address,
     },
-  );
+    autoMine: true,
+    log: false,
+  });
 
   // Initialize implementation
-  const poolConfig = await hre.ethers.getContractAt(
-    "PoolConfigurator",
-    poolConfiguratorDeployment.address,
-  );
+  const poolConfig = await hre.ethers.getContractAt("PoolConfigurator", poolConfiguratorDeployment.address);
   await poolConfig.initialize(addressesProviderAddress);
 
   // Deploy reserves setup helper

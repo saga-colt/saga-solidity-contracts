@@ -4,11 +4,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 
 import { getConfig } from "../../config/config";
 import { DStakeInstanceConfig } from "../../config/types";
-import {
-  INCENTIVES_PROXY_ID,
-  POOL_ADDRESSES_PROVIDER_ID,
-  POOL_DATA_PROVIDER_ID,
-} from "../../typescript/deploy-ids";
+import { INCENTIVES_PROXY_ID, POOL_ADDRESSES_PROVIDER_ID, POOL_DATA_PROVIDER_ID } from "../../typescript/deploy-ids";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
@@ -18,9 +14,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const config = await getConfig(hre);
 
   if (!config.dStake) {
-    console.log(
-      "No dStake configuration found for this network. Skipping adapters.",
-    );
+    console.log("No dStake configuration found for this network. Skipping adapters.");
     return;
   }
 
@@ -33,19 +27,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   // Verify key dLend contracts are deployed
-  const poolAddressesProvider = await deployments.getOrNull(
-    POOL_ADDRESSES_PROVIDER_ID,
-  );
+  const poolAddressesProvider = await deployments.getOrNull(POOL_ADDRESSES_PROVIDER_ID);
   const incentivesProxy = await deployments.getOrNull(INCENTIVES_PROXY_ID);
   const poolDataProvider = await deployments.getOrNull(POOL_DATA_PROVIDER_ID);
 
   if (!poolAddressesProvider || !incentivesProxy || !poolDataProvider) {
-    console.log(
-      "dLend contracts not fully deployed. dStake adapters require dLend infrastructure. Skipping dStake adapters deployment.",
-    );
-    console.log(
-      `  - PoolAddressesProvider: ${poolAddressesProvider ? "✅" : "❌"}`,
-    );
+    console.log("dLend contracts not fully deployed. dStake adapters require dLend infrastructure. Skipping dStake adapters deployment.");
+    console.log(`  - PoolAddressesProvider: ${poolAddressesProvider ? "✅" : "❌"}`);
     console.log(`  - IncentivesProxy: ${incentivesProxy ? "✅" : "❌"}`);
     console.log(`  - PoolDataProvider: ${poolDataProvider ? "✅" : "❌"}`);
     return;
@@ -63,13 +51,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   for (const instanceKey in config.dStake) {
     const instanceConfig = config.dStake[instanceKey] as DStakeInstanceConfig;
 
-    if (
-      !instanceConfig.dStable ||
-      instanceConfig.dStable === ethers.ZeroAddress
-    ) {
-      throw new Error(
-        `Missing dStable address for dSTAKE instance ${instanceKey}`,
-      );
+    if (!instanceConfig.dStable || instanceConfig.dStable === ethers.ZeroAddress) {
+      throw new Error(`Missing dStable address for dSTAKE instance ${instanceKey}`);
     }
 
     if (!instanceConfig.symbol) {
@@ -78,28 +61,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
     for (const adapterConfig of instanceConfig.adapters) {
       if (!adapterConfig.adapterContract) {
-        throw new Error(
-          `Missing adapterContract for adapter in dSTAKE instance ${instanceKey}`,
-        );
+        throw new Error(`Missing adapterContract for adapter in dSTAKE instance ${instanceKey}`);
       }
 
-      if (
-        !adapterConfig.vaultAsset ||
-        adapterConfig.vaultAsset === ethers.ZeroAddress
-      ) {
-        throw new Error(
-          `Missing vaultAsset for adapter ${adapterConfig.adapterContract} in dSTAKE instance ${instanceKey}`,
-        );
+      if (!adapterConfig.vaultAsset || adapterConfig.vaultAsset === ethers.ZeroAddress) {
+        throw new Error(`Missing vaultAsset for adapter ${adapterConfig.adapterContract} in dSTAKE instance ${instanceKey}`);
       }
 
       // dLendConversionAdapter requires dLendAddressesProvider
-      if (
-        adapterConfig.adapterContract === "dLendConversionAdapter" &&
-        !dLendAddressesProviderAddress
-      ) {
-        throw new Error(
-          `dLend PoolAddressesProvider not found. Cannot deploy dLendConversionAdapter for dSTAKE instance ${instanceKey}`,
-        );
+      if (adapterConfig.adapterContract === "dLendConversionAdapter" && !dLendAddressesProviderAddress) {
+        throw new Error(`dLend PoolAddressesProvider not found. Cannot deploy dLendConversionAdapter for dSTAKE instance ${instanceKey}`);
       }
     }
   }
@@ -113,14 +84,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const collateralVaultDeploymentName = `DStakeCollateralVault_${instanceKey}`;
 
     // Get the collateral vault address from deployment
-    const collateralVault = await deployments.getOrNull(
-      collateralVaultDeploymentName,
-    );
+    const collateralVault = await deployments.getOrNull(collateralVaultDeploymentName);
 
     if (!collateralVault) {
-      console.log(
-        `    Error: ${collateralVaultDeploymentName} not found. Make sure dStakeCore is deployed first.`,
-      );
+      console.log(`    Error: ${collateralVaultDeploymentName} not found. Make sure dStakeCore is deployed first.`);
       continue;
     }
 

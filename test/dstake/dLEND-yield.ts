@@ -1,21 +1,10 @@
 import hre, { ethers, network, getNamedAccounts } from "hardhat";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
-import {
-  DStakeToken,
-  DStakeCollateralVault,
-  DStakeRouterDLend,
-  ERC20,
-  IERC20,
-  IDStableConversionAdapter,
-} from "../../typechain-types";
+import { DStakeToken, DStakeCollateralVault, DStakeRouterDLend, ERC20, IERC20, IDStableConversionAdapter } from "../../typechain-types";
 import { StaticATokenLM } from "../../typechain-types/contracts/vaults/atoken_wrapper/StaticATokenLM";
 import { IPool } from "../../typechain-types/contracts/dlend/core/interfaces/IPool";
-import {
-  createDStakeFixture,
-  STKD_CONFIG,
-  DStakeFixtureConfig,
-} from "./fixture";
+import { createDStakeFixture, STKD_CONFIG, DStakeFixtureConfig } from "./fixture";
 import { ERC20StablecoinUpgradeable } from "../../typechain-types/contracts/dstable/ERC20StablecoinUpgradeable";
 import { getConfig } from "../../config/config";
 import { TestERC20 } from "../../typechain-types/contracts/testing/token/TestERC20";
@@ -63,7 +52,7 @@ STAKE_CONFIGS.forEach((cfg) => {
       stable = (await ethers.getContractAt(
         "ERC20StablecoinUpgradeable",
         await dStableToken.getAddress(),
-        deployer
+        deployer,
       )) as ERC20StablecoinUpgradeable;
       const minterRole = await (stable as any).MINTER_ROLE();
       await stable.grantRole(minterRole, deployer.address);
@@ -71,23 +60,13 @@ STAKE_CONFIGS.forEach((cfg) => {
       // Initial deposit into dSTAKE vault
       const depositAmount = ethers.parseUnits("100", dStableDecimals);
       await stable.mint(user.address, depositAmount);
-      await dStableToken
-        .connect(user)
-        .approve(await DStakeToken.getAddress(), depositAmount);
+      await dStableToken.connect(user).approve(await DStakeToken.getAddress(), depositAmount);
       await DStakeToken.connect(user).deposit(depositAmount, user.address);
 
       // Locate static wrapper and pool contracts
-      staticWrapper = (await ethers.getContractAt(
-        "StaticATokenLM",
-        vaultAssetAddress,
-        deployer
-      )) as StaticATokenLM;
+      staticWrapper = (await ethers.getContractAt("StaticATokenLM", vaultAssetAddress, deployer)) as StaticATokenLM;
       poolAddress = await staticWrapper.POOL();
-      pool = (await ethers.getContractAt(
-        "contracts/dlend/core/interfaces/IPool.sol:IPool",
-        poolAddress,
-        deployer
-      )) as unknown as IPool;
+      pool = (await ethers.getContractAt("contracts/dlend/core/interfaces/IPool.sol:IPool", poolAddress, deployer)) as unknown as IPool;
     });
 
     it("should accrue yield over time, improve exchange rate, and allow correct withdrawals", async function () {
@@ -96,43 +75,22 @@ STAKE_CONFIGS.forEach((cfg) => {
       const initialTotalAssets = await DStakeToken.totalAssets();
       const WAD = ethers.parseUnits("1", dStableDecimals);
       const initialRate = (initialTotalAssets * WAD) / initialTotalSupply;
-      const initialPreview =
-        await DStakeToken.previewRedeem(initialTotalSupply);
+      const initialPreview = await DStakeToken.previewRedeem(initialTotalSupply);
 
       // Setup small borrow to generate interest for lenders
       const globalConfig = await getConfig(hre);
-      const dStableCollaterals = globalConfig.dStables[
-        cfg.dStableSymbol
-      ].collaterals.filter((addr) => addr !== ethers.ZeroAddress);
+      const dStableCollaterals = globalConfig.dStables[cfg.dStableSymbol].collaterals.filter((addr) => addr !== ethers.ZeroAddress);
       const collateralAsset = dStableCollaterals[dStableCollaterals.length - 1];
-      const collateralToken = (await ethers.getContractAt(
-        "TestERC20",
-        collateralAsset,
-        deployer
-      )) as unknown as TestERC20;
+      const collateralToken = (await ethers.getContractAt("TestERC20", collateralAsset, deployer)) as unknown as TestERC20;
       const colDecimals = await collateralToken.decimals();
       const collateralDeposit = ethers.parseUnits("125", colDecimals);
       // Approve and deposit collateral
-      await collateralToken
-        .connect(deployer)
-        .approve(poolAddress, collateralDeposit);
-      await pool
-        .connect(deployer)
-        .deposit(collateralAsset, collateralDeposit, deployer.address, 0);
-      await pool
-        .connect(deployer)
-        .setUserUseReserveAsCollateral(collateralAsset, true);
+      await collateralToken.connect(deployer).approve(poolAddress, collateralDeposit);
+      await pool.connect(deployer).deposit(collateralAsset, collateralDeposit, deployer.address, 0);
+      await pool.connect(deployer).setUserUseReserveAsCollateral(collateralAsset, true);
       // Borrow a small amount to create utilization
       const borrowAmountSmall = ethers.parseUnits("1", dStableDecimals);
-      await pool
-        .connect(deployer)
-        .borrow(
-          await staticWrapper.asset(),
-          borrowAmountSmall,
-          2,
-          0,
-          deployer.address
-        );
+      await pool.connect(deployer).borrow(await staticWrapper.asset(), borrowAmountSmall, 2, 0, deployer.address);
 
       // Simulate time passing
       const thirtyDays = 3600 * 24 * 30;
@@ -145,12 +103,7 @@ STAKE_CONFIGS.forEach((cfg) => {
       // Approve the dStable token to be pulled by the Pool for supply
       await stable.approve(poolAddress, yieldDeposit);
       // Supply to dLEND directly to update interest index
-      await pool.supply(
-        await staticWrapper.asset(),
-        yieldDeposit,
-        deployer.address,
-        0
-      );
+      await pool.supply(await staticWrapper.asset(), yieldDeposit, deployer.address, 0);
 
       // Post-yield checks
       const newTotalSupply = await DStakeToken.totalSupply();
@@ -165,11 +118,7 @@ STAKE_CONFIGS.forEach((cfg) => {
       // Withdraw a portion of shares
       const withdrawShares = initialTotalSupply / 2n;
       const userBalanceBefore = await dStableToken.balanceOf(user.address);
-      await DStakeToken.connect(user).redeem(
-        withdrawShares,
-        user.address,
-        user.address
-      );
+      await DStakeToken.connect(user).redeem(withdrawShares, user.address, user.address);
       const userBalanceAfter = await dStableToken.balanceOf(user.address);
       const actualRedeemed = userBalanceAfter - userBalanceBefore;
       expect(actualRedeemed).to.be.gt(0);
@@ -192,58 +141,28 @@ STAKE_CONFIGS.forEach((cfg) => {
 
       // Drain pool liquidity by borrowing all available dStable
       const globalConfig = await getConfig(hre);
-      const dStableCollaterals = globalConfig.dStables[
-        cfg.dStableSymbol
-      ].collaterals.filter((addr) => addr !== ethers.ZeroAddress);
+      const dStableCollaterals = globalConfig.dStables[cfg.dStableSymbol].collaterals.filter((addr) => addr !== ethers.ZeroAddress);
       const collateralAsset = dStableCollaterals[dStableCollaterals.length - 1];
-      const collateralToken = (await ethers.getContractAt(
-        "TestERC20",
-        collateralAsset,
-        deployer
-      )) as TestERC20;
+      const collateralToken = (await ethers.getContractAt("TestERC20", collateralAsset, deployer)) as TestERC20;
       const colDecimals = await collateralToken.decimals();
       const collateralDeposit = ethers.parseUnits("125", colDecimals);
       // Supply collateral and enable
-      await collateralToken
-        .connect(deployer)
-        .approve(poolAddress, collateralDeposit);
-      await pool
-        .connect(deployer)
-        .deposit(collateralAsset, collateralDeposit, deployer.address, 0);
-      await pool
-        .connect(deployer)
-        .setUserUseReserveAsCollateral(collateralAsset, true);
+      await collateralToken.connect(deployer).approve(poolAddress, collateralDeposit);
+      await pool.connect(deployer).deposit(collateralAsset, collateralDeposit, deployer.address, 0);
+      await pool.connect(deployer).setUserUseReserveAsCollateral(collateralAsset, true);
       // Borrow all pool liquidity (underlying tokens held in the AToken contract)
       const aTokenAddress = await staticWrapper.aToken();
       const poolLiquidity = await dStableToken.balanceOf(aTokenAddress);
-      await pool
-        .connect(deployer)
-        .borrow(
-          await staticWrapper.asset(),
-          poolLiquidity,
-          2,
-          0,
-          deployer.address
-        );
+      await pool.connect(deployer).borrow(await staticWrapper.asset(), poolLiquidity, 2, 0, deployer.address);
 
       // Attempt to withdraw full user's dStable should revert due to insufficient liquidity
       const depositAmount = ethers.parseUnits("100", dStableDecimals);
-      await expect(
-        DStakeToken.connect(user).withdraw(
-          depositAmount,
-          user.address,
-          user.address
-        )
-      ).to.be.reverted;
+      await expect(DStakeToken.connect(user).withdraw(depositAmount, user.address, user.address)).to.be.reverted;
 
       // State invariants remain unchanged
-      expect(await DStakeToken.balanceOf(user.address)).to.equal(
-        initialUserShares
-      );
+      expect(await DStakeToken.balanceOf(user.address)).to.equal(initialUserShares);
       expect(await DStakeToken.totalSupply()).to.equal(initialTotalSupply);
-      expect(await dStableToken.balanceOf(user.address)).to.equal(
-        initialUserDStable
-      );
+      expect(await dStableToken.balanceOf(user.address)).to.equal(initialUserDStable);
     });
   });
 });

@@ -2,10 +2,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 
 import { getConfig } from "../../../config/config";
-import {
-  ACL_MANAGER_ID,
-  POOL_ADDRESSES_PROVIDER_ID,
-} from "../../../typescript/deploy-ids";
+import { ACL_MANAGER_ID, POOL_ADDRESSES_PROVIDER_ID } from "../../../typescript/deploy-ids";
 import { ZERO_BYTES_32 } from "../../../typescript/dlend/constants";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -13,15 +10,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const config = await getConfig(hre);
 
   if (!config.dLend) {
-    console.log(
-      "No dLend configuration found for this network. Skipping dLend deployment.",
-    );
+    console.log("No dLend configuration found for this network. Skipping dLend deployment.");
     return true;
   }
 
-  const addressesProviderDeployedResult = await hre.deployments.get(
-    POOL_ADDRESSES_PROVIDER_ID,
-  );
+  const addressesProviderDeployedResult = await hre.deployments.get(POOL_ADDRESSES_PROVIDER_ID);
 
   const addressesProviderContract = await hre.ethers.getContractAt(
     "PoolAddressesProvider",
@@ -40,11 +33,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
   });
 
-  const aclManagerContract = await hre.ethers.getContractAt(
-    "ACLManager",
-    aclManagerDeployment.address,
-    deployer,
-  );
+  const aclManagerContract = await hre.ethers.getContractAt("ACLManager", aclManagerDeployment.address, deployer);
 
   // 3. Setup ACLManager for AddressProvider
   await addressesProviderContract.setACLManager(aclManagerDeployment.address);
@@ -56,14 +45,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await aclManagerContract.addEmergencyAdmin(deployer.address);
 
   // Verify setup
-  const isACLAdmin = await aclManagerContract.hasRole(
-    ZERO_BYTES_32,
-    deployer.address,
-  );
+  const isACLAdmin = await aclManagerContract.hasRole(ZERO_BYTES_32, deployer.address);
   const isPoolAdmin = await aclManagerContract.isPoolAdmin(deployer.address);
-  const isEmergencyAdmin = await aclManagerContract.isEmergencyAdmin(
-    deployer.address,
-  );
+  const isEmergencyAdmin = await aclManagerContract.isEmergencyAdmin(deployer.address);
 
   if (!isACLAdmin) {
     throw "[ACL][ERROR] ACLAdmin is not setup correctly";
@@ -84,10 +68,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 func.id = "dLend:init_acl";
 func.tags = ["dlend", "dlend-market"];
-func.dependencies = [
-  "dlend-core",
-  "dlend-periphery-pre",
-  "PoolAddressesProvider",
-];
+func.dependencies = ["dlend-core", "dlend-periphery-pre", "PoolAddressesProvider"];
 
 export default func;

@@ -3,12 +3,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 
 import { getConfig } from "../../config/config";
-import {
-  D_COLLATERAL_VAULT_CONTRACT_ID,
-  D_REDEEMER_CONTRACT_ID,
-  D_TOKEN_ID,
-  USD_ORACLE_AGGREGATOR_ID,
-} from "../../typescript/deploy-ids";
+import { D_COLLATERAL_VAULT_CONTRACT_ID, D_REDEEMER_CONTRACT_ID, D_TOKEN_ID, USD_ORACLE_AGGREGATOR_ID } from "../../typescript/deploy-ids";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployer } = await hre.getNamedAccounts();
@@ -31,12 +26,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // If any required config values are missing, skip deployment
   if (missingConfigs.length > 0) {
-    console.log(
-      `⚠️  Skipping RedeemerV2 deployment - missing configuration values: ${missingConfigs.join(", ")}`,
-    );
-    console.log(
-      `☯️  ${__filename.split("/").slice(-2).join("/")}: ⏭️  (skipped)`,
-    );
+    console.log(`⚠️  Skipping RedeemerV2 deployment - missing configuration values: ${missingConfigs.join(", ")}`);
+    console.log(`☯️  ${__filename.split("/").slice(-2).join("/")}: ⏭️  (skipped)`);
     return true;
   }
 
@@ -62,19 +53,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     dCollateralVaultDeployment.address,
     await hre.ethers.getSigner(deployer),
   );
-  const dWithdrawerRole =
-    await dCollateralVaultContract.COLLATERAL_WITHDRAWER_ROLE();
-  const dHasRole = await dCollateralVaultContract.hasRole(
-    dWithdrawerRole,
-    dRedeemerV2Deployment.address,
-  );
+  const dWithdrawerRole = await dCollateralVaultContract.COLLATERAL_WITHDRAWER_ROLE();
+  const dHasRole = await dCollateralVaultContract.hasRole(dWithdrawerRole, dRedeemerV2Deployment.address);
 
   if (!dHasRole) {
     console.log("Granting role for d RedeemerV2.");
-    await dCollateralVaultContract.grantRole(
-      dWithdrawerRole,
-      dRedeemerV2Deployment.address,
-    );
+    await dCollateralVaultContract.grantRole(dWithdrawerRole, dRedeemerV2Deployment.address);
     console.log("Role granted for d RedeemerV2.");
   }
 

@@ -27,7 +27,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     // An initial supply is minted to the deployer during contract deployment
 
     console.log(
-      `Deployed ${symbol} (${tokenConfig.name}) at ${deployed.address}`
+      `Deployed ${symbol} (${tokenConfig.name}) at ${deployed.address}`,
     );
   }
 

@@ -23,10 +23,7 @@ const wrapSigner = (signer: any, hre: HardhatRuntimeEnvironment) => {
 
     if (hre.network.live) {
       const sleepTime = 5000;
-      console.log(
-        `\n>>> Waiting ${sleepTime}ms after transaction to ${result.to || "a new contract"
-        }`,
-      );
+      console.log(`\n>>> Waiting ${sleepTime}ms after transaction to ${result.to || "a new contract"}`);
       await sleep(sleepTime);
     }
     return result;
@@ -204,12 +201,10 @@ const config: HardhatUserConfig = {
       // Forking configuration - can be overridden via environment variables
       forking: process.env.FORK_URL
         ? {
-          url: process.env.FORK_URL,
-          blockNumber: process.env.FORK_BLOCK_NUMBER
-            ? parseInt(process.env.FORK_BLOCK_NUMBER)
-            : undefined,
-          enabled: true,
-        }
+            url: process.env.FORK_URL,
+            blockNumber: process.env.FORK_BLOCK_NUMBER ? parseInt(process.env.FORK_BLOCK_NUMBER) : undefined,
+            enabled: true,
+          }
         : undefined,
       // Configure hardfork for Saga network compatibility
       hardfork: "london", // Use istanbul to avoid hardfork activation issues
