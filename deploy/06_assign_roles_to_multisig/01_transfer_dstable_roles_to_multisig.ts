@@ -157,7 +157,7 @@ async function transferIssuerRoles(
     if (issuerDeployment) {
       console.log(`\n  📄 ISSUER ROLES: ${issuerContractId}`);
 
-      const issuerContract = await ethers.getContractAt("Issuer", issuerDeployment.address, deployerSigner);
+      const issuerContract = await ethers.getContractAt("IssuerV2", issuerDeployment.address, deployerSigner);
 
       // Get roles
       const DEFAULT_ADMIN_ROLE = ZERO_BYTES_32;
@@ -239,7 +239,7 @@ async function transferRedeemerRoles(
     if (redeemerDeployment) {
       console.log(`\n  📄 REDEEMER ROLES: ${redeemerContractId}`);
 
-      const redeemerContract = await ethers.getContractAt("Redeemer", redeemerDeployment.address, deployerSigner);
+      const redeemerContract = await ethers.getContractAt("RedeemerV2", redeemerDeployment.address, deployerSigner);
 
       // Get roles
       const DEFAULT_ADMIN_ROLE = ZERO_BYTES_32;
