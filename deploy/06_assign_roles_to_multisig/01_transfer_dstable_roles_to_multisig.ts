@@ -2,101 +2,67 @@ import { Signer } from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 
+import { getConfig } from "../../config/config";
 import { ZERO_BYTES_32 } from "../../typescript/dlend/constants";
+import { isMainnet } from "../../typescript/hardhat/deploy";
 
 /**
  * Transfer dStable roles to governance multisig
  *
- * @param _hre The Hardhat Runtime Environment for deployment
+ * @param hre Hardhat Runtime Environment for deployment
  */
-const func: DeployFunction = async function (_hre: HardhatRuntimeEnvironment) {
-  console.log(`\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping until admin tool is ready`);
+const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+  if (!isMainnet(hre.network.name)) {
+    console.log(`\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping non-mainnet network`);
+    return true;
+  }
+
+  const { getNamedAccounts, ethers } = hre;
+  const { deployer } = await getNamedAccounts();
+  const deployerSigner = await ethers.getSigner(deployer);
+
+  // Get the configuration from the network
+  const config = await getConfig(hre);
+
+  // Get the governance multisig address
+  const { governanceMultisig } = config.walletAddresses;
+
+  // Iterate over all dStables in the config
+  const dStableNames = Object.keys(config.dStables);
+
+  for (const dStableName of dStableNames) {
+    console.log(`\n🔄 Transferring roles for ${dStableName}...`);
+
+    // Get token IDs based on the dStable name
+    const tokenId = dStableName; // The token ID is the same as the dStable name (e.g., "d")
+    const issuerContractId = `${dStableName}_Issuer`;
+    const redeemerContractId = `${dStableName}_Redeemer`;
+    const collateralVaultContractId = `${dStableName}_CollateralHolderVault`;
+    const amoManagerId = `${dStableName}_AmoManager`;
+
+    // Transfer token roles
+    await transferTokenRoles(hre, tokenId, deployerSigner, governanceMultisig, deployer);
+
+    // Transfer Issuer roles
+    await transferIssuerRoles(hre, issuerContractId, deployerSigner, governanceMultisig, deployer);
+
+    // Transfer Redeemer roles
+    await transferRedeemerRoles(hre, redeemerContractId, deployerSigner, governanceMultisig, deployer);
+
+    // Transfer AmoManager roles
+    await transferAmoManagerRoles(hre, amoManagerId, deployerSigner, governanceMultisig, deployer);
+
+    // Transfer CollateralVault roles
+    await transferCollateralVaultRoles(hre, collateralVaultContractId, deployerSigner, governanceMultisig, deployer);
+
+    console.log(`✅ Completed ${dStableName} role transfers`);
+  }
+
+  console.log(`\n🔑 ${__filename.split("/").slice(-2).join("/")}: ✅ Done\n`);
+
   return true;
-
-  // if (!isMainnet(hre.network.name)) {
-  //   console.log(
-  //     `\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping non-mainnet network`,
-  //   );
-  //   return true;
-  // }
-
-  // const { getNamedAccounts, ethers } = hre;
-  // const { deployer } = await getNamedAccounts();
-  // const deployerSigner = await ethers.getSigner(deployer);
-
-  // // Get the configuration from the network
-  // const config = await getConfig(hre);
-
-  // // Get the governance multisig address
-  // const { governanceMultisig } = config.walletAddresses;
-
-  // // Iterate over all dStables in the config
-  // const dStableNames = Object.keys(config.dStables);
-
-  // for (const dStableName of dStableNames) {
-  //   console.log(`\n🔄 Transferring roles for ${dStableName}...`);
-
-  //   // Get token IDs based on the dStable name
-  //   const tokenId = dStableName; // The token ID is the same as the dStable name (e.g., "d")
-  //   const issuerContractId = `${dStableName}_IssuerV2`;
-  //   const redeemerContractId = `${dStableName}_RedeemerV2`;
-  //   const collateralVaultContractId = `${dStableName}_CollateralHolderVault`;
-  //   const amoManagerId = `${dStableName}_AmoManager`;
-
-  //   // Transfer token roles
-  //   await transferTokenRoles(
-  //     hre,
-  //     tokenId,
-  //     deployerSigner,
-  //     governanceMultisig,
-  //     deployer,
-  //   );
-
-  //   // Transfer Issuer roles
-  //   await transferIssuerRoles(
-  //     hre,
-  //     issuerContractId,
-  //     deployerSigner,
-  //     governanceMultisig,
-  //     deployer,
-  //   );
-
-  //   // Transfer Redeemer roles
-  //   await transferRedeemerRoles(
-  //     hre,
-  //     redeemerContractId,
-  //     deployerSigner,
-  //     governanceMultisig,
-  //     deployer,
-  //   );
-
-  //   // Transfer AmoManager roles
-  //   await transferAmoManagerRoles(
-  //     hre,
-  //     amoManagerId,
-  //     deployerSigner,
-  //     governanceMultisig,
-  //     deployer,
-  //   );
-
-  //   // Transfer CollateralVault roles
-  //   await transferCollateralVaultRoles(
-  //     hre,
-  //     collateralVaultContractId,
-  //     deployerSigner,
-  //     governanceMultisig,
-  //     deployer,
-  //   );
-
-  //   console.log(`✅ Completed ${dStableName} role transfers`);
-  // }
-
-  // console.log(`\n🔑 ${__filename.split("/").slice(-2).join("/")}: ✅ Done\n`);
-
-  // return true;
 };
 
-/* eslint-disable unused-imports/no-unused-vars -- Keep dormant role transfer helpers until admin automation lands */
 /**
  * Transfer roles from deployer to governance multisig
  *
@@ -191,7 +157,7 @@ async function transferIssuerRoles(
     if (issuerDeployment) {
       console.log(`\n  📄 ISSUER ROLES: ${issuerContractId}`);
 
-      const issuerContract = await ethers.getContractAt("Issuer", issuerDeployment.address, deployerSigner);
+      const issuerContract = await ethers.getContractAt("IssuerV2", issuerDeployment.address, deployerSigner);
 
       // Get roles
       const DEFAULT_ADMIN_ROLE = ZERO_BYTES_32;
@@ -273,7 +239,7 @@ async function transferRedeemerRoles(
     if (redeemerDeployment) {
       console.log(`\n  📄 REDEEMER ROLES: ${redeemerContractId}`);
 
-      const redeemerContract = await ethers.getContractAt("Redeemer", redeemerDeployment.address, deployerSigner);
+      const redeemerContract = await ethers.getContractAt("RedeemerV2", redeemerDeployment.address, deployerSigner);
 
       // Get roles
       const DEFAULT_ADMIN_ROLE = ZERO_BYTES_32;
@@ -497,8 +463,6 @@ async function transferCollateralVaultRoles(
 
   return true;
 }
-
-/* eslint-enable unused-imports/no-unused-vars -- Restore unused-var enforcement */
 
 func.id = "transfer_dstable_roles_to_multisig";
 func.tags = ["governance", "roles"];
