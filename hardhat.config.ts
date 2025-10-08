@@ -19,6 +19,15 @@ const wrapSigner = (signer: any, hre: HardhatRuntimeEnvironment) => {
   const originalSendTransaction = signer.sendTransaction;
 
   signer.sendTransaction = async (tx: any) => {
+    // For local Hardhat-style networks, force upcoming blocks to have zero base fee
+    if (!hre.network.live && "provider" in hre.network && hre.network.provider !== undefined) {
+      try {
+        await hre.network.provider.send("hardhat_setNextBlockBaseFeePerGas", ["0x0"]);
+      } catch {
+        // Some JSON-RPC providers (e.g. Anvil) don't support this method; ignore failures silently
+      }
+    }
+
     const result = await originalSendTransaction.apply(signer, [tx]);
 
     if (hre.network.live) {
@@ -212,6 +221,8 @@ const config: HardhatUserConfig = {
       chainId: 5464,
       // Set gas price to 0 for Saga network compatibility
       gasPrice: 0,
+      // Keep the base fee aligned with Saga's zero-gas environment so tests accept 0 gas price
+      initialBaseFeePerGas: 0,
     },
     localhost: {
       deploy: ["deploy-mocks", "deploy"],

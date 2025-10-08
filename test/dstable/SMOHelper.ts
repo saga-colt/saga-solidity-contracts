@@ -1,14 +1,13 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
-import { SMOHelper, ERC20StablecoinUpgradeable, RedeemerV2 } from "../../typechain-types";
-import { MockERC20, MockCollateralVault, MockOracle, MockDStable, MockIssuerV2 } from "../../typechain-types";
+import { SMOHelper, RedeemerV2 } from "../../typechain-types";
+import { MockERC20, MockCollateralVault, MockOracle, MockDStable } from "../../typechain-types";
 
 describe("SMOHelper", function () {
   let smoHelper: SMOHelper;
   let dstable: MockDStable;
   let redeemer: RedeemerV2;
-  let mockIssuer: MockIssuerV2;
   let mockCollateral: MockERC20;
   let mockCollateralVault: MockCollateralVault;
   let mockOracle: MockOracle;
@@ -67,17 +66,11 @@ describe("SMOHelper", function () {
     );
     await redeemer.waitForDeployment();
 
-    // Deploy Mock Issuer
-    const MockIssuerFactory = await ethers.getContractFactory("MockIssuerV2");
-    mockIssuer = await MockIssuerFactory.deploy(await dstable.getAddress(), await mockCollateralVault.getAddress());
-    await mockIssuer.waitForDeployment();
-
     // Deploy SMOHelper
     const SMOHelperFactory = await ethers.getContractFactory("SMOHelper");
     smoHelper = await SMOHelperFactory.deploy(
       await dstable.getAddress(),
       await redeemer.getAddress(),
-      await mockIssuer.getAddress(),
       await mockUniswapRouter.getAddress(),
       operator.address,
     );
@@ -92,7 +85,6 @@ describe("SMOHelper", function () {
     it("Should set the correct initial values", async function () {
       expect(await smoHelper.getDStableToken()).to.equal(await dstable.getAddress());
       expect(await smoHelper.getRedeemer()).to.equal(await redeemer.getAddress());
-      expect(await smoHelper.getIssuer()).to.equal(await mockIssuer.getAddress());
       expect(await smoHelper.getUniswapRouter()).to.equal(await mockUniswapRouter.getAddress());
       expect(await smoHelper.hasRole(OPERATOR_ROLE, operator.address)).to.be.true;
     });
@@ -367,17 +359,16 @@ describe("SMOHelper", function () {
         collateralAsset: await mockCollateral.getAddress(),
         minCollateralAmount: ethers.parseEther("1"),
         minDStableReceived: ethers.parseEther("0.95"),
-        uniswapFee: 3000,
-        sqrtPriceLimitX96: 0,
         deadline: Math.floor(Date.now() / 1000) + 3600,
-        useMultirouting: false,
-        intermediateTokens: [],
-        intermediateFees: [],
+        slippageBps: 100,
+        profitTo: operator.address,
+        swapPath: "0x",
+        expectedAmountOut: ethers.parseEther("0.95"),
       };
 
       const data = ethers.AbiCoder.defaultAbiCoder().encode(
         [
-          "tuple(address collateralAsset,uint256 minCollateralAmount,uint256 minDStableReceived,uint24 uniswapFee,uint160 sqrtPriceLimitX96,uint256 deadline)",
+          "tuple(address collateralAsset,uint256 minCollateralAmount,uint256 minDStableReceived,uint256 deadline,uint256 slippageBps,address profitTo,bytes swapPath,uint256 expectedAmountOut)",
         ],
         [params],
       );
@@ -392,17 +383,16 @@ describe("SMOHelper", function () {
         collateralAsset: await mockCollateral.getAddress(),
         minCollateralAmount: ethers.parseEther("1"),
         minDStableReceived: ethers.parseEther("0.95"),
-        uniswapFee: 3000,
-        sqrtPriceLimitX96: 0,
         deadline: Math.floor(Date.now() / 1000) + 3600,
-        useMultirouting: false,
-        intermediateTokens: [],
-        intermediateFees: [],
+        slippageBps: 100,
+        profitTo: operator.address,
+        swapPath: "0x",
+        expectedAmountOut: ethers.parseEther("0.95"),
       };
 
       const data = ethers.AbiCoder.defaultAbiCoder().encode(
         [
-          "tuple(address collateralAsset,uint256 minCollateralAmount,uint256 minDStableReceived,uint24 uniswapFee,uint160 sqrtPriceLimitX96,uint256 deadline)",
+          "tuple(address collateralAsset,uint256 minCollateralAmount,uint256 minDStableReceived,uint256 deadline,uint256 slippageBps,address profitTo,bytes swapPath,uint256 expectedAmountOut)",
         ],
         [params],
       );
