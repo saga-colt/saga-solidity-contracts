@@ -73,3 +73,6 @@ export const STKD_ROUTER_ID = `${DSTAKE_ROUTER_ID_PREFIX}_stkD`;
 
 // RedeemerWithFees
 export const D_REDEEMER_WITH_FEES_CONTRACT_ID = "D_RedeemerWithFees";
+
+// SMO Helper
+export const D_SMO_HELPER_ID = "D_SmoHelper";

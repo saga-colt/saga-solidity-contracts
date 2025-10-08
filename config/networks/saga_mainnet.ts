@@ -56,6 +56,7 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
       USDC: usdcAddress,
       SAGA: sagaAddress,
     },
+    uniswapRouter: "0x346239972d1fa486FC4a521031BC81bFB7D6e8a4", // Uniswap V3 SwapRouter
     walletAddresses: {
       governanceMultisig: governanceSafeMultisig, // Created via Safe
       incentivesVault: "0x9CD17eA5Cf04BEEAa2C65d58F4478c7A230eD816", // Safe on Saga

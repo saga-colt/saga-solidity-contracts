@@ -33,5 +33,9 @@
   "transfer_dstable_roles_to_multisig": 1759894426,
   "transfer_oracle_roles_to_multisig": 1759894454,
   "transfer_dlend_roles_to_multisig": 1759894525,
-  "transfer_oracle_wrapper_roles_to_multisig": 1759894582
+  "transfer_oracle_wrapper_roles_to_multisig": 1759894582,
+  "D_SmoHelper": 1757995875,
+  "D_SmoHelperV2": 1758514174,
+  "D_SmoHelperV3": 1758615007,
+  "D_SmoHelperV4": 1758617214
 }

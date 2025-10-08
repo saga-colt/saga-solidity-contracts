@@ -55,11 +55,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     });
 
     // Get the deployed mock oracle contract
-    const mockOracleContract = await hre.ethers.getContractAt(
-      "MockChainlinkAggregatorV3",
-      mockOracle.address,
-      signer,
-    );
+    const mockOracleContract = await hre.ethers.getContractAt("MockChainlinkAggregatorV3", mockOracle.address, signer);
 
     // Convert price to int256 format expected by Tellor (18 decimals)
     const priceInWei = hre.ethers.parseUnits(feed.price, 18); // Tellor uses 18 decimals
@@ -69,9 +65,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     mockOracleNameToAddress[feed.name] = mockOracle.address;
     mockOracleNameToProvider[feed.name] = "TELLOR"; // Now using Tellor
 
-    console.log(
-      `Deployed ${mockOracleName} at ${mockOracle.address} with price ${feed.price}`,
-    );
+    console.log(`Deployed ${mockOracleName} at ${mockOracle.address} with price ${feed.price}`);
   }
 
   // Store the mock oracle deployments in JSON files for the config to use

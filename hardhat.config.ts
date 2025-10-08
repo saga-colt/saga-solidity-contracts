@@ -19,6 +19,15 @@ const wrapSigner = (signer: any, hre: HardhatRuntimeEnvironment) => {
   const originalSendTransaction = signer.sendTransaction;
 
   signer.sendTransaction = async (tx: any) => {
+    // For local Hardhat-style networks, force upcoming blocks to have zero base fee
+    if (!hre.network.live && "provider" in hre.network && hre.network.provider !== undefined) {
+      try {
+        await hre.network.provider.send("hardhat_setNextBlockBaseFeePerGas", ["0x0"]);
+      } catch {
+        // Some JSON-RPC providers (e.g. Anvil) don't support this method; ignore failures silently
+      }
+    }
+
     const result = await originalSendTransaction.apply(signer, [tx]);
 
     if (hre.network.live) {
@@ -60,6 +69,16 @@ const config: HardhatUserConfig = {
   // -----------------------------------------------------------------------
   solidity: {
     compilers: [
+      {
+        version: "0.7.6",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 999999,
+          },
+          ...(process.env.VIA_IR === "true" ? { viaIR: true } : {}),
+        },
+      },
       {
         version: "0.8.10",
         settings: {
@@ -114,6 +133,73 @@ const config: HardhatUserConfig = {
           viaIR: true,
         },
       },
+      // UniswapV3 contracts - force to use 0.7.6
+      "contracts/Uniswap/Uniswapv3/Libraries/TickBitmap.sol": {
+        version: "0.7.6",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 999999,
+          },
+        },
+      },
+      "contracts/Uniswap/Uniswapv3/UniswapV3Pool.sol": {
+        version: "0.7.6",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 999999,
+          },
+        },
+      },
+      "contracts/Uniswap/Uniswapv3/NoDelegateCall.sol": {
+        version: "0.7.6",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 999999,
+          },
+        },
+      },
+      // UniswapV3 interfaces - use 0.8.20
+      "contracts/Uniswap/Uniswapv3/interfaces/ISwapRouter.sol": {
+        version: "0.8.20",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+      },
+      "contracts/Uniswap/Uniswapv3/interfaces/IUniswapV3Pool.sol": {
+        version: "0.8.20",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+      },
+      "contracts/Uniswap/Uniswapv3/interfaces/IUniswapV3PoolDeployer.sol": {
+        version: "0.8.20",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+      },
+      // SMOHelper contract - use viaIR to avoid stack too deep errors
+      "contracts/dstable/SMOHelper.sol": {
+        version: "0.8.20",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+          viaIR: true,
+        },
+      },
     },
   },
   networks: {
@@ -121,6 +207,22 @@ const config: HardhatUserConfig = {
       deploy: ["deploy-mocks", "deploy"],
       allowUnlimitedContractSize: true,
       saveDeployments: false, // allow testing without needing to remove the previous deployments
+      // Forking configuration - can be overridden via environment variables
+      forking: process.env.FORK_URL
+        ? {
+            url: process.env.FORK_URL,
+            blockNumber: process.env.FORK_BLOCK_NUMBER ? parseInt(process.env.FORK_BLOCK_NUMBER) : undefined,
+            enabled: true,
+          }
+        : undefined,
+      // Configure hardfork for Saga network compatibility
+      hardfork: "london", // Use istanbul to avoid hardfork activation issues
+      // Set chain ID to match the forked network when forking
+      chainId: 5464,
+      // Set gas price to 0 for Saga network compatibility
+      gasPrice: 0,
+      // Keep the base fee aligned with Saga's zero-gas environment so tests accept 0 gas price
+      initialBaseFeePerGas: 0,
     },
     localhost: {
       deploy: ["deploy-mocks", "deploy"],
@@ -167,6 +269,7 @@ const config: HardhatUserConfig = {
   etherscan: {
     apiKey: {
       saga_mainnet: "empty",
+      sagaevm: "empty",
     },
     customChains: [
       {
