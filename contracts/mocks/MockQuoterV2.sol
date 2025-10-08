@@ -40,12 +40,7 @@ contract MockQuoterV2 is IQuoterV2 {
 
         gasEstimate = 200000; // Mock gas estimate
 
-        return (
-            amountOut,
-            sqrtPriceX96AfterList,
-            initializedTicksCrossedList,
-            gasEstimate
-        );
+        return (amountOut, sqrtPriceX96AfterList, initializedTicksCrossedList, gasEstimate);
     }
 
     function quoteExactInputSingle(
@@ -54,12 +49,7 @@ contract MockQuoterV2 is IQuoterV2 {
         external
         pure
         override
-        returns (
-            uint256 amountOut,
-            uint160 sqrtPriceX96After,
-            uint32 initializedTicksCrossed,
-            uint256 gasEstimate
-        )
+        returns (uint256 amountOut, uint160 sqrtPriceX96After, uint32 initializedTicksCrossed, uint256 gasEstimate)
     {
         // For single hop, return the standard rate
         amountOut = (params.amountIn * MOCK_QUOTE_RATIO) / 100;
@@ -69,12 +59,7 @@ contract MockQuoterV2 is IQuoterV2 {
         initializedTicksCrossed = 1; // Mock tick crosses
         gasEstimate = 150000; // Mock gas estimate
 
-        return (
-            amountOut,
-            sqrtPriceX96After,
-            initializedTicksCrossed,
-            gasEstimate
-        );
+        return (amountOut, sqrtPriceX96After, initializedTicksCrossed, gasEstimate);
     }
 
     function quoteExactOutput(
@@ -103,12 +88,7 @@ contract MockQuoterV2 is IQuoterV2 {
 
         gasEstimate = 200000; // Mock gas estimate
 
-        return (
-            amountIn,
-            sqrtPriceX96AfterList,
-            initializedTicksCrossedList,
-            gasEstimate
-        );
+        return (amountIn, sqrtPriceX96AfterList, initializedTicksCrossedList, gasEstimate);
     }
 
     function quoteExactOutputSingle(
@@ -117,12 +97,7 @@ contract MockQuoterV2 is IQuoterV2 {
         external
         pure
         override
-        returns (
-            uint256 amountIn,
-            uint160 sqrtPriceX96After,
-            uint32 initializedTicksCrossed,
-            uint256 gasEstimate
-        )
+        returns (uint256 amountIn, uint160 sqrtPriceX96After, uint32 initializedTicksCrossed, uint256 gasEstimate)
     {
         // For exact output single, calculate the required input
         amountIn = (params.amount * 100) / MOCK_QUOTE_RATIO;
@@ -132,11 +107,6 @@ contract MockQuoterV2 is IQuoterV2 {
         initializedTicksCrossed = 1; // Mock tick crosses
         gasEstimate = 150000; // Mock gas estimate
 
-        return (
-            amountIn,
-            sqrtPriceX96After,
-            initializedTicksCrossed,
-            gasEstimate
-        );
+        return (amountIn, sqrtPriceX96After, initializedTicksCrossed, gasEstimate);
     }
 }

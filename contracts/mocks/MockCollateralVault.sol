@@ -15,30 +15,18 @@ contract MockCollateralVault is AccessControl {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
-    function depositCollateral(
-        address collateralAsset,
-        uint256 amount
-    ) external {
+    function depositCollateral(address collateralAsset, uint256 amount) external {
         IERC20(collateralAsset).transferFrom(msg.sender, address(this), amount);
         collateralBalances[collateralAsset] += amount;
     }
 
-    function withdrawCollateral(
-        address collateralAsset,
-        address to,
-        uint256 amount
-    ) external {
-        require(
-            collateralBalances[collateralAsset] >= amount,
-            "Insufficient balance"
-        );
+    function withdrawCollateral(address collateralAsset, address to, uint256 amount) external {
+        require(collateralBalances[collateralAsset] >= amount, "Insufficient balance");
         collateralBalances[collateralAsset] -= amount;
         IERC20(collateralAsset).transfer(to, amount);
     }
 
-    function getCollateralBalance(
-        address collateralAsset
-    ) external view returns (uint256) {
+    function getCollateralBalance(address collateralAsset) external view returns (uint256) {
         return collateralBalances[collateralAsset];
     }
 }

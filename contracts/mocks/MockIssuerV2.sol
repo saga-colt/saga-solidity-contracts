@@ -18,11 +18,7 @@ contract MockIssuerV2 is AccessControl, ReentrancyGuard, Pausable {
     IERC20 public dstable;
     address public collateralVault;
 
-    event MockIssue(
-        uint256 collateralAmount,
-        address collateralAsset,
-        uint256 minDStable
-    );
+    event MockIssue(uint256 collateralAmount, address collateralAsset, uint256 minDStable);
 
     constructor(address _dstable, address _collateralVault) {
         dstable = IERC20(_dstable);
@@ -42,11 +38,7 @@ contract MockIssuerV2 is AccessControl, ReentrancyGuard, Pausable {
         uint256 minDStable
     ) external nonReentrant whenNotPaused {
         // Transfer collateral from caller to this contract (simulating vault transfer)
-        IERC20(collateralAsset).safeTransferFrom(
-            msg.sender,
-            address(this),
-            collateralAmount
-        );
+        IERC20(collateralAsset).safeTransferFrom(msg.sender, address(this), collateralAmount);
 
         // For testing purposes, mint 1:1 ratio (simplified)
         // In real implementation, this would use oracle pricing

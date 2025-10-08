@@ -25,18 +25,13 @@ contract MockUniswapRouter is ISwapRouter {
         return amountOut;
     }
 
-    function exactInput(
-        ExactInputParams calldata params
-    ) external payable override returns (uint256 amountOut) {
+    function exactInput(ExactInputParams calldata params) external payable override returns (uint256 amountOut) {
         // For multihop, we return a slightly worse rate to simulate real-world conditions
         // where multihop might be better for some paths but worse for others
         amountOut = (params.amountIn * MOCK_MULTIHOP_RATIO) / 100;
 
         // Enforce amountOutMinimum like the real router (revert on insufficient output)
-        require(
-            amountOut >= params.amountOutMinimum,
-            "INSUFFICIENT_OUTPUT_AMOUNT"
-        );
+        require(amountOut >= params.amountOutMinimum, "INSUFFICIENT_OUTPUT_AMOUNT");
 
         // In a real implementation, this would transfer tokens through multiple pools
         // For testing, we assume the tokens are already transferred

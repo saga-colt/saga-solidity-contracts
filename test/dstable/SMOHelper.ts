@@ -63,16 +63,13 @@ describe("SMOHelper", function () {
       await dstable.getAddress(),
       await mockOracle.getAddress(),
       deployer.address, // fee receiver
-      100 // 1% fee in basis points
+      100, // 1% fee in basis points
     );
     await redeemer.waitForDeployment();
 
     // Deploy Mock Issuer
     const MockIssuerFactory = await ethers.getContractFactory("MockIssuerV2");
-    mockIssuer = await MockIssuerFactory.deploy(
-      await dstable.getAddress(),
-      await mockCollateralVault.getAddress()
-    );
+    mockIssuer = await MockIssuerFactory.deploy(await dstable.getAddress(), await mockCollateralVault.getAddress());
     await mockIssuer.waitForDeployment();
 
     // Deploy SMOHelper
@@ -82,7 +79,7 @@ describe("SMOHelper", function () {
       await redeemer.getAddress(),
       await mockIssuer.getAddress(),
       await mockUniswapRouter.getAddress(),
-      operator.address
+      operator.address,
     );
     await smoHelper.waitForDeployment();
 
@@ -113,48 +110,33 @@ describe("SMOHelper", function () {
       const SMOHelperFactory = await ethers.getContractFactory("SMOHelper");
 
       await expect(
+        SMOHelperFactory.deploy(ethers.ZeroAddress, await redeemer.getAddress(), await mockUniswapRouter.getAddress(), operator.address),
+      ).to.be.revertedWithCustomError(smoHelper, "ZeroAddress");
+
+      await expect(
+        SMOHelperFactory.deploy(await dstable.getAddress(), ethers.ZeroAddress, await mockUniswapRouter.getAddress(), operator.address),
+      ).to.be.revertedWithCustomError(smoHelper, "ZeroAddress");
+
+      await expect(
+        SMOHelperFactory.deploy(await dstable.getAddress(), await redeemer.getAddress(), ethers.ZeroAddress, operator.address),
+      ).to.be.revertedWithCustomError(smoHelper, "ZeroAddress");
+
+      await expect(
         SMOHelperFactory.deploy(
+          await dstable.getAddress(),
+          await redeemer.getAddress(),
+          await mockUniswapRouter.getAddress(),
           ethers.ZeroAddress,
-          await redeemer.getAddress(),
-          await mockUniswapRouter.getAddress(),
-          operator.address
-        )
+        ),
       ).to.be.revertedWithCustomError(smoHelper, "ZeroAddress");
 
       await expect(
         SMOHelperFactory.deploy(
           await dstable.getAddress(),
+          await redeemer.getAddress(),
+          await mockUniswapRouter.getAddress(),
           ethers.ZeroAddress,
-          await mockUniswapRouter.getAddress(),
-          operator.address
-        )
-      ).to.be.revertedWithCustomError(smoHelper, "ZeroAddress");
-
-      await expect(
-        SMOHelperFactory.deploy(
-          await dstable.getAddress(),
-          await redeemer.getAddress(),
-          ethers.ZeroAddress,
-          operator.address
-        )
-      ).to.be.revertedWithCustomError(smoHelper, "ZeroAddress");
-
-      await expect(
-        SMOHelperFactory.deploy(
-          await dstable.getAddress(),
-          await redeemer.getAddress(),
-          await mockUniswapRouter.getAddress(),
-          ethers.ZeroAddress
-        )
-      ).to.be.revertedWithCustomError(smoHelper, "ZeroAddress");
-
-      await expect(
-        SMOHelperFactory.deploy(
-          await dstable.getAddress(),
-          await redeemer.getAddress(),
-          await mockUniswapRouter.getAddress(),
-          ethers.ZeroAddress
-        )
+        ),
       ).to.be.revertedWithCustomError(smoHelper, "ZeroAddress");
     });
   });
@@ -169,38 +151,37 @@ describe("SMOHelper", function () {
         slippageBps: 100, // 1% slippage
         profitTo: operator.address,
         swapPath: "0x", // Empty path for now
-        expectedAmountOut: ethers.parseEther("0.95")
+        expectedAmountOut: ethers.parseEther("0.95"),
       };
 
-      await expect(
-        smoHelper.connect(user1).executeSMO(ethers.parseEther("1"), params)
-      ).to.be.revertedWithCustomError(smoHelper, "AccessControlUnauthorizedAccount");
+      await expect(smoHelper.connect(user1).executeSMO(ethers.parseEther("1"), params)).to.be.revertedWithCustomError(
+        smoHelper,
+        "AccessControlUnauthorizedAccount",
+      );
     });
 
     it("Should only allow admin to grant operator role", async function () {
-      await expect(
-        smoHelper.connect(user1).grantRole(OPERATOR_ROLE, user2.address)
-      ).to.be.revertedWithCustomError(smoHelper, "AccessControlUnauthorizedAccount");
+      await expect(smoHelper.connect(user1).grantRole(OPERATOR_ROLE, user2.address)).to.be.revertedWithCustomError(
+        smoHelper,
+        "AccessControlUnauthorizedAccount",
+      );
     });
 
     it("Should only allow admin to pause/unpause", async function () {
-      await expect(
-        smoHelper.connect(user1).pause()
-      ).to.be.revertedWithCustomError(smoHelper, "AccessControlUnauthorizedAccount");
+      await expect(smoHelper.connect(user1).pause()).to.be.revertedWithCustomError(smoHelper, "AccessControlUnauthorizedAccount");
 
-      await expect(
-        smoHelper.connect(user1).unpause()
-      ).to.be.revertedWithCustomError(smoHelper, "AccessControlUnauthorizedAccount");
+      await expect(smoHelper.connect(user1).unpause()).to.be.revertedWithCustomError(smoHelper, "AccessControlUnauthorizedAccount");
     });
 
     it("Should only allow admin to rescue tokens", async function () {
       await expect(
-        smoHelper.connect(user1).rescueTokens(await mockCollateral.getAddress(), user2.address, ethers.parseEther("1"))
+        smoHelper.connect(user1).rescueTokens(await mockCollateral.getAddress(), user2.address, ethers.parseEther("1")),
       ).to.be.revertedWithCustomError(smoHelper, "AccessControlUnauthorizedAccount");
 
-      await expect(
-        smoHelper.connect(user1).rescueETH(user2.address, ethers.parseEther("1"))
-      ).to.be.revertedWithCustomError(smoHelper, "AccessControlUnauthorizedAccount");
+      await expect(smoHelper.connect(user1).rescueETH(user2.address, ethers.parseEther("1"))).to.be.revertedWithCustomError(
+        smoHelper,
+        "AccessControlUnauthorizedAccount",
+      );
     });
   });
 
@@ -246,15 +227,15 @@ describe("SMOHelper", function () {
         slippageBps: 100, // 1% slippage
         profitTo: operator.address,
         swapPath: "0x", // Empty path for now
-        expectedAmountOut: ethers.parseEther("0.95")
+        expectedAmountOut: ethers.parseEther("0.95"),
       };
 
-      await expect(
-        smoHelper.connect(operator).executeSMO(ethers.parseEther("1"), params)
-      ).to.be.revertedWithCustomError(smoHelper, "EnforcedPause");
+      await expect(smoHelper.connect(operator).executeSMO(ethers.parseEther("1"), params)).to.be.revertedWithCustomError(
+        smoHelper,
+        "EnforcedPause",
+      );
     });
   });
-
 
   describe("SMO Execution", function () {
     it("Should revert when deadline is exceeded", async function () {
@@ -266,12 +247,13 @@ describe("SMOHelper", function () {
         slippageBps: 100, // 1% slippage
         profitTo: operator.address,
         swapPath: "0x", // Empty path for now
-        expectedAmountOut: ethers.parseEther("0.95")
+        expectedAmountOut: ethers.parseEther("0.95"),
       };
 
-      await expect(
-        smoHelper.connect(operator).executeSMO(ethers.parseEther("1"), params)
-      ).to.be.revertedWithCustomError(smoHelper, "DeadlineExceeded");
+      await expect(smoHelper.connect(operator).executeSMO(ethers.parseEther("1"), params)).to.be.revertedWithCustomError(
+        smoHelper,
+        "DeadlineExceeded",
+      );
     });
 
     it("Should revert when slippage exceeds maximum allowed (20%)", async function () {
@@ -283,12 +265,11 @@ describe("SMOHelper", function () {
         slippageBps: 2500, // 25% slippage - exceeds 20% limit
         profitTo: operator.address,
         swapPath: "0x", // Empty path for now
-        expectedAmountOut: ethers.parseEther("0.95")
+        expectedAmountOut: ethers.parseEther("0.95"),
       };
 
-      await expect(
-        smoHelper.connect(operator).executeSMO(ethers.parseEther("1"), params)
-      ).to.be.revertedWithCustomError(smoHelper, "SlippageTooHigh")
+      await expect(smoHelper.connect(operator).executeSMO(ethers.parseEther("1"), params))
+        .to.be.revertedWithCustomError(smoHelper, "SlippageTooHigh")
         .withArgs(2500, 2000); // 25% requested, 20% max
     });
 
@@ -301,14 +282,12 @@ describe("SMOHelper", function () {
         slippageBps: 2000, // 20% slippage - exactly at limit
         profitTo: operator.address,
         swapPath: "0x", // Empty path for now
-        expectedAmountOut: ethers.parseEther("0.95")
+        expectedAmountOut: ethers.parseEther("0.95"),
       };
 
       // This will fail at redeemAsProtocol since it's not implemented in mock
       // but it will test the slippage validation passes
-      await expect(
-        smoHelper.connect(operator).executeSMO(ethers.parseEther("1"), params)
-      ).to.be.reverted; // Will revert at redeemAsProtocol, not at slippage validation
+      await expect(smoHelper.connect(operator).executeSMO(ethers.parseEther("1"), params)).to.be.reverted; // Will revert at redeemAsProtocol, not at slippage validation
     });
 
     it("Should allow zero slippage", async function () {
@@ -320,14 +299,12 @@ describe("SMOHelper", function () {
         slippageBps: 0, // 0% slippage
         profitTo: operator.address,
         swapPath: "0x", // Empty path for now
-        expectedAmountOut: ethers.parseEther("0.95")
+        expectedAmountOut: ethers.parseEther("0.95"),
       };
 
       // This will fail at redeemAsProtocol since it's not implemented in mock
       // but it will test the slippage validation passes
-      await expect(
-        smoHelper.connect(operator).executeSMO(ethers.parseEther("1"), params)
-      ).to.be.reverted; // Will revert at redeemAsProtocol, not at slippage validation
+      await expect(smoHelper.connect(operator).executeSMO(ethers.parseEther("1"), params)).to.be.reverted; // Will revert at redeemAsProtocol, not at slippage validation
     });
 
     it("Should revert when dSTABLE amount is zero", async function () {
@@ -339,12 +316,10 @@ describe("SMOHelper", function () {
         slippageBps: 100, // 1% slippage
         profitTo: operator.address,
         swapPath: "0x", // Empty path for now
-        expectedAmountOut: ethers.parseEther("0.95")
+        expectedAmountOut: ethers.parseEther("0.95"),
       };
 
-      await expect(
-        smoHelper.connect(operator).executeSMO(0, params)
-      ).to.be.revertedWithCustomError(smoHelper, "ZeroDStableAmount");
+      await expect(smoHelper.connect(operator).executeSMO(0, params)).to.be.revertedWithCustomError(smoHelper, "ZeroDStableAmount");
     });
 
     it("Should revert when flash loan amount exceeds maximum", async function () {
@@ -356,16 +331,14 @@ describe("SMOHelper", function () {
         slippageBps: 100, // 1% slippage
         profitTo: operator.address,
         swapPath: "0x", // Empty path for now
-        expectedAmountOut: ethers.parseEther("0.95")
+        expectedAmountOut: ethers.parseEther("0.95"),
       };
 
       // Use a very large amount that should exceed the maximum
       const excessiveAmount = ethers.parseEther("1000000000000000000000000000000"); // 1e30
 
       // This will fail at the flash loan validation step
-      await expect(
-        smoHelper.connect(operator).executeSMO(excessiveAmount, params)
-      ).to.be.reverted; // Will revert due to flash loan amount validation
+      await expect(smoHelper.connect(operator).executeSMO(excessiveAmount, params)).to.be.reverted; // Will revert due to flash loan amount validation
     });
 
     it("Should execute SMO successfully with mock setup", async function () {
@@ -378,15 +351,13 @@ describe("SMOHelper", function () {
         slippageBps: 500, // 5% slippage
         profitTo: operator.address,
         swapPath: "0x", // Empty path for now
-        expectedAmountOut: ethers.parseEther("1000")
+        expectedAmountOut: ethers.parseEther("1000"),
       };
 
       // Setup: Ensure the contract has the necessary tokens and approvals
       // Note: This test will fail at the redeemAsProtocol step since we don't have a real redeemer
       // but it will test the flash loan initiation
-      await expect(
-        smoHelper.connect(operator).executeSMO(dstableAmount, params)
-      ).to.be.reverted; // Will revert at redeemAsProtocol since it's not implemented in mock
+      await expect(smoHelper.connect(operator).executeSMO(dstableAmount, params)).to.be.reverted; // Will revert at redeemAsProtocol since it's not implemented in mock
     });
   });
 
@@ -401,22 +372,18 @@ describe("SMOHelper", function () {
         deadline: Math.floor(Date.now() / 1000) + 3600,
         useMultirouting: false,
         intermediateTokens: [],
-        intermediateFees: []
+        intermediateFees: [],
       };
 
       const data = ethers.AbiCoder.defaultAbiCoder().encode(
-        ["tuple(address collateralAsset,uint256 minCollateralAmount,uint256 minDStableReceived,uint24 uniswapFee,uint160 sqrtPriceLimitX96,uint256 deadline)"],
-        [params]
+        [
+          "tuple(address collateralAsset,uint256 minCollateralAmount,uint256 minDStableReceived,uint24 uniswapFee,uint160 sqrtPriceLimitX96,uint256 deadline)",
+        ],
+        [params],
       );
 
       await expect(
-        smoHelper.onFlashLoan(
-          await smoHelper.getAddress(),
-          await mockCollateral.getAddress(),
-          ethers.parseEther("1"),
-          0,
-          data
-        )
+        smoHelper.onFlashLoan(await smoHelper.getAddress(), await mockCollateral.getAddress(), ethers.parseEther("1"), 0, data),
       ).to.be.revertedWithCustomError(smoHelper, "UnauthorizedFlashLoan");
     });
 
@@ -430,12 +397,14 @@ describe("SMOHelper", function () {
         deadline: Math.floor(Date.now() / 1000) + 3600,
         useMultirouting: false,
         intermediateTokens: [],
-        intermediateFees: []
+        intermediateFees: [],
       };
 
       const data = ethers.AbiCoder.defaultAbiCoder().encode(
-        ["tuple(address collateralAsset,uint256 minCollateralAmount,uint256 minDStableReceived,uint24 uniswapFee,uint160 sqrtPriceLimitX96,uint256 deadline)"],
-        [params]
+        [
+          "tuple(address collateralAsset,uint256 minCollateralAmount,uint256 minDStableReceived,uint24 uniswapFee,uint160 sqrtPriceLimitX96,uint256 deadline)",
+        ],
+        [params],
       );
 
       // Mock the dSTABLE token to call the callback by directly calling the function
@@ -447,8 +416,8 @@ describe("SMOHelper", function () {
           await dstable.getAddress(),
           ethers.parseEther("1"),
           0,
-          data
-        )
+          data,
+        ),
       ).to.be.revertedWithCustomError(smoHelper, "UnauthorizedFlashLoan");
     });
   });
@@ -458,7 +427,7 @@ describe("SMOHelper", function () {
       // Send some ETH to the contract
       await deployer.sendTransaction({
         to: await smoHelper.getAddress(),
-        value: ethers.parseEther("1")
+        value: ethers.parseEther("1"),
       });
 
       const balanceBefore = await ethers.provider.getBalance(user1.address);
@@ -480,12 +449,10 @@ describe("SMOHelper", function () {
     });
 
     it("Should revert when rescuing to zero address", async function () {
-      await expect(
-        smoHelper.rescueETH(ethers.ZeroAddress, ethers.parseEther("1"))
-      ).to.be.revertedWithCustomError(smoHelper, "ZeroAddress");
+      await expect(smoHelper.rescueETH(ethers.ZeroAddress, ethers.parseEther("1"))).to.be.revertedWithCustomError(smoHelper, "ZeroAddress");
 
       await expect(
-        smoHelper.rescueTokens(await mockCollateral.getAddress(), ethers.ZeroAddress, ethers.parseEther("1"))
+        smoHelper.rescueTokens(await mockCollateral.getAddress(), ethers.ZeroAddress, ethers.parseEther("1")),
       ).to.be.revertedWithCustomError(smoHelper, "ZeroAddress");
     });
   });
@@ -507,8 +474,8 @@ describe("SMOHelper", function () {
       await expect(
         deployer.sendTransaction({
           to: await smoHelper.getAddress(),
-          value: ethers.parseEther("1")
-        })
+          value: ethers.parseEther("1"),
+        }),
       ).to.not.be.reverted;
 
       const balance = await ethers.provider.getBalance(await smoHelper.getAddress());
@@ -517,7 +484,6 @@ describe("SMOHelper", function () {
   });
 
   describe("Multirouting Functionality", function () {
-
     it("Should execute SMO with multirouting enabled", async function () {
       const dstableAmount = ethers.parseEther("1000");
       const params = {
@@ -528,14 +494,12 @@ describe("SMOHelper", function () {
         slippageBps: 500, // 5% slippage
         profitTo: operator.address,
         swapPath: "0x", // Empty path for now
-        expectedAmountOut: ethers.parseEther("1000")
+        expectedAmountOut: ethers.parseEther("1000"),
       };
 
       // This test will fail at the redeemAsProtocol step since we don't have a real redeemer
       // but it will test the multirouting logic
-      await expect(
-        smoHelper.connect(operator).executeSMO(dstableAmount, params)
-      ).to.be.reverted; // Will revert at redeemAsProtocol since it's not implemented in mock
+      await expect(smoHelper.connect(operator).executeSMO(dstableAmount, params)).to.be.reverted; // Will revert at redeemAsProtocol since it's not implemented in mock
     });
 
     it("Should execute SMO with multirouting disabled (fallback to single hop)", async function () {
@@ -548,14 +512,12 @@ describe("SMOHelper", function () {
         slippageBps: 500, // 5% slippage
         profitTo: operator.address,
         swapPath: "0x", // Empty path for now
-        expectedAmountOut: ethers.parseEther("1000")
+        expectedAmountOut: ethers.parseEther("1000"),
       };
 
       // This test will fail at the redeemAsProtocol step since we don't have a real redeemer
       // but it will test the single hop logic
-      await expect(
-        smoHelper.connect(operator).executeSMO(dstableAmount, params)
-      ).to.be.reverted; // Will revert at redeemAsProtocol since it's not implemented in mock
+      await expect(smoHelper.connect(operator).executeSMO(dstableAmount, params)).to.be.reverted; // Will revert at redeemAsProtocol since it's not implemented in mock
     });
   });
 
@@ -569,11 +531,11 @@ describe("SMOHelper", function () {
         slippageBps: 100, // 1% slippage
         profitTo: operator.address,
         swapPath: "0x", // Empty path for now
-        expectedAmountOut: 1 // 1 wei
+        expectedAmountOut: 1, // 1 wei
       };
 
       await expect(
-        smoHelper.connect(operator).executeSMO(1, params) // 1 wei
+        smoHelper.connect(operator).executeSMO(1, params), // 1 wei
       ).to.be.reverted; // Will revert at redeemAsProtocol since it's not implemented in mock
     });
 
@@ -586,12 +548,10 @@ describe("SMOHelper", function () {
         slippageBps: 2000, // Exactly 20% - should pass
         profitTo: operator.address,
         swapPath: "0x", // Empty path for now
-        expectedAmountOut: ethers.parseEther("0.95")
+        expectedAmountOut: ethers.parseEther("0.95"),
       };
 
-      await expect(
-        smoHelper.connect(operator).executeSMO(ethers.parseEther("1"), params)
-      ).to.be.reverted; // Will revert at redeemAsProtocol, not at slippage validation
+      await expect(smoHelper.connect(operator).executeSMO(ethers.parseEther("1"), params)).to.be.reverted; // Will revert at redeemAsProtocol, not at slippage validation
     });
 
     it("Should handle slippage just above maximum (20.01%)", async function () {
@@ -603,12 +563,11 @@ describe("SMOHelper", function () {
         slippageBps: 2001, // 20.01% - should fail
         profitTo: operator.address,
         swapPath: "0x", // Empty path for now
-        expectedAmountOut: ethers.parseEther("0.95")
+        expectedAmountOut: ethers.parseEther("0.95"),
       };
 
-      await expect(
-        smoHelper.connect(operator).executeSMO(ethers.parseEther("1"), params)
-      ).to.be.revertedWithCustomError(smoHelper, "SlippageTooHigh")
+      await expect(smoHelper.connect(operator).executeSMO(ethers.parseEther("1"), params))
+        .to.be.revertedWithCustomError(smoHelper, "SlippageTooHigh")
         .withArgs(2001, 2000);
     });
 
@@ -622,12 +581,10 @@ describe("SMOHelper", function () {
         slippageBps: 100, // 1% slippage
         profitTo: operator.address,
         swapPath: "0x", // Empty path for now
-        expectedAmountOut: largeAmount
+        expectedAmountOut: largeAmount,
       };
 
-      await expect(
-        smoHelper.connect(operator).executeSMO(largeAmount, params)
-      ).to.be.reverted; // Will revert at redeemAsProtocol since it's not implemented in mock
+      await expect(smoHelper.connect(operator).executeSMO(largeAmount, params)).to.be.reverted; // Will revert at redeemAsProtocol since it's not implemented in mock
     });
 
     it("Should handle deadline at current block timestamp", async function () {
@@ -640,12 +597,10 @@ describe("SMOHelper", function () {
         slippageBps: 100, // 1% slippage
         profitTo: operator.address,
         swapPath: "0x", // Empty path for now
-        expectedAmountOut: ethers.parseEther("0.95")
+        expectedAmountOut: ethers.parseEther("0.95"),
       };
 
-      await expect(
-        smoHelper.connect(operator).executeSMO(ethers.parseEther("1"), params)
-      ).to.be.reverted; // Will revert at redeemAsProtocol since it's not implemented in mock
+      await expect(smoHelper.connect(operator).executeSMO(ethers.parseEther("1"), params)).to.be.reverted; // Will revert at redeemAsProtocol since it's not implemented in mock
     });
   });
 
@@ -661,12 +616,10 @@ describe("SMOHelper", function () {
         slippageBps: 100, // 1% slippage
         profitTo: operator.address,
         swapPath: "0x", // Empty path for now
-        expectedAmountOut: ethers.parseEther("0.95")
+        expectedAmountOut: ethers.parseEther("0.95"),
       };
 
-      await expect(
-        smoHelper.connect(operator).executeSMO(ethers.parseEther("1"), params)
-      ).to.be.reverted; // Will revert at redeemAsProtocol, not at slippage validation
+      await expect(smoHelper.connect(operator).executeSMO(ethers.parseEther("1"), params)).to.be.reverted; // Will revert at redeemAsProtocol, not at slippage validation
     });
 
     it("Should calculate correct amount limit for 10% slippage", async function () {
@@ -678,12 +631,10 @@ describe("SMOHelper", function () {
         slippageBps: 1000, // 10% slippage
         profitTo: operator.address,
         swapPath: "0x", // Empty path for now
-        expectedAmountOut: ethers.parseEther("0.95")
+        expectedAmountOut: ethers.parseEther("0.95"),
       };
 
-      await expect(
-        smoHelper.connect(operator).executeSMO(ethers.parseEther("1"), params)
-      ).to.be.reverted; // Will revert at redeemAsProtocol, not at slippage validation
+      await expect(smoHelper.connect(operator).executeSMO(ethers.parseEther("1"), params)).to.be.reverted; // Will revert at redeemAsProtocol, not at slippage validation
     });
 
     it("Should calculate correct amount limit for 20% slippage", async function () {
@@ -695,12 +646,10 @@ describe("SMOHelper", function () {
         slippageBps: 2000, // 20% slippage - maximum allowed
         profitTo: operator.address,
         swapPath: "0x", // Empty path for now
-        expectedAmountOut: ethers.parseEther("0.95")
+        expectedAmountOut: ethers.parseEther("0.95"),
       };
 
-      await expect(
-        smoHelper.connect(operator).executeSMO(ethers.parseEther("1"), params)
-      ).to.be.reverted; // Will revert at redeemAsProtocol, not at slippage validation
+      await expect(smoHelper.connect(operator).executeSMO(ethers.parseEther("1"), params)).to.be.reverted; // Will revert at redeemAsProtocol, not at slippage validation
     });
   });
 });
