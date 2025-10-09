@@ -6,6 +6,7 @@ import { DLendConfig } from "./dlend/types";
 export interface Config {
   readonly MOCK_ONLY?: MockConfig;
   readonly tokenAddresses: TokenAddresses;
+  readonly uniswapRouter: string;
   readonly walletAddresses: WalletAddresses;
   readonly safeConfig?: SafeConfig;
   readonly oracleAggregators: {

@@ -15,6 +15,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     return true;
   }
 
+  const wethAddress = config.tokenAddresses.SAGA;
+
+  if (!wethAddress) {
+    console.log("SAGA is not configured for this network.");
+    return false;
+  }
+
   // Get the Aave price oracle address
   const priceOracle = await deployments.get(PRICE_ORACLE_ID);
 
@@ -29,7 +36,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Then deploy UiPoolDataProvider
   await deploy(UI_POOL_DATA_PROVIDER_ID, {
     from: deployer,
-    args: [priceOracle.address, config.tokenAddresses.WSAGA], // Use price oracle and WSAGA token address
+    args: [priceOracle.address, wethAddress], // Use price oracle and WSAGA (or SAGA as fallback)
     log: true,
     waitConfirmations: 1,
   });

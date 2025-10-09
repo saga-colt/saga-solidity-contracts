@@ -5,6 +5,13 @@ import { ONE_PERCENT_BPS } from "../../typescript/common/bps_constants";
 import { D_TOKEN_ID } from "../../typescript/deploy-ids";
 import { ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT, ORACLE_AGGREGATOR_PRICE_DECIMALS } from "../../typescript/oracle_aggregator/constants";
 import { fetchTokenInfo } from "../../typescript/token/utils";
+import {
+  rateStrategyHighLiquidityStable,
+  rateStrategyHighLiquidityVolatile,
+  rateStrategyMediumLiquidityStable,
+  rateStrategyMediumLiquidityVolatile,
+} from "../dlend/interest-rate-strategies";
+import { strategyD, strategySAGA } from "../dlend/reserves-params";
 import { Config } from "../types";
 
 /**
@@ -17,11 +24,12 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
   const dDeployment = await _hre.deployments.getOrNull(D_TOKEN_ID);
   const usdtAddress = "0xC8fe3C1de344854f4429bB333AFFAeF97eF88CEa";
   const usdcAddress = "0xfc960C233B8E98e0Cf282e29BDE8d3f105fc24d5";
+  const sagaAddress = "0xa19377761fed745723b90993988e04d641c2cffe";
 
   const governanceSafeMultisig = "0xf19cf8881237CA819Fd50C9C22cb258e9DB8644e"; // Safe on Saga
 
   // TODO: will be deployed in a later PR
-  // // Fetch deployed dLend StaticATokenLM wrapper, aToken and RewardsController (may be undefined prior to deployment)
+  // Fetch deployed dLend StaticATokenLM wrapper, aToken and RewardsController (may be undefined prior to deployment)
   // const dLendATokenWrapperDDeployment = await _hre.deployments.getOrNull(
   //   "dLend_ATokenWrapper_D",
   // );
@@ -46,7 +54,9 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
       D: emptyStringIfUndefined(dDeployment?.address),
       USDT: usdtAddress,
       USDC: usdcAddress,
+      SAGA: sagaAddress,
     },
+    uniswapRouter: "0x346239972d1fa486FC4a521031BC81bFB7D6e8a4", // Uniswap V3 SwapRouter
     walletAddresses: {
       governanceMultisig: governanceSafeMultisig, // Created via Safe
       incentivesVault: "0x9CD17eA5Cf04BEEAa2C65d58F4478c7A230eD816", // Safe on Saga
@@ -80,27 +90,32 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
               lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
               fixedPrice: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
             },
+            [sagaAddress]: {
+              feed: "0xaA43df021149C34ca3654F387C9aeB9AcABa012a", // Saga/USD Tellor price feed
+              lowerThreshold: 0n,
+              fixedPrice: 0n,
+            },
           },
         },
       },
     },
-    // TODO: will be deployed in a later PR
-    // dLend: {
-    // providerID: 1, // Arbitrary as long as we don't repeat
-    // flashLoanPremium: {
-    //   total: 0.0005e4, // 0.05%
-    //   protocol: 0.0004e4, // 0.04%
-    // },
-    // rateStrategies: [
-    //   rateStrategyHighLiquidityVolatile,
-    //   rateStrategyMediumLiquidityVolatile,
-    //   rateStrategyHighLiquidityStable,
-    //   rateStrategyMediumLiquidityStable,
-    // ],
-    // reservesConfig: {
-    //   D: strategyD,
-    // },
-    // },
+    dLend: {
+      providerID: 1, // Arbitrary as long as we don't repeat
+      flashLoanPremium: {
+        total: 0.0005e4, // 0.05%
+        protocol: 0.0004e4, // 0.04%
+      },
+      rateStrategies: [
+        rateStrategyHighLiquidityVolatile,
+        rateStrategyMediumLiquidityVolatile,
+        rateStrategyHighLiquidityStable,
+        rateStrategyMediumLiquidityStable,
+      ],
+      reservesConfig: {
+        D: strategyD,
+        SAGA: strategySAGA,
+      },
+    },
     dStake: {
       // TODO: will be deployed in a later PR
       // stkD: {
