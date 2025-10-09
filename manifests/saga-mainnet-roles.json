@@ -1,0 +1,38 @@
+{
+  "version": 2,
+  "network": "saga_mainnet",
+  "deployer": "0x0f5e3D9AEe7Ab5fDa909Af1ef147D98a7f4B3022",
+  "governance": "0xf19cf8881237CA819Fd50C9C22cb258e9DB8644e",
+  "defaults": {
+    "ownable": {
+      "newOwner": "{{governance}}",
+      "execution": "direct"
+    },
+    "defaultAdmin": {
+      "newAdmin": "{{governance}}",
+      "grantExecution": "direct",
+      "remove": {
+        "address": "{{deployer}}",
+        "strategy": "renounce",
+        "execution": "direct",
+        "enabled": true
+      }
+    }
+  },
+  "autoInclude": {
+    "ownable": true,
+    "defaultAdmin": true
+  },
+  "exclusions": [],
+  "overrides": [],
+  "safe": {
+    "safeAddress": "0xf19cf8881237CA819Fd50C9C22cb258e9DB8644e",
+    "threshold": 2,
+    "chainId": 5464,
+    "rpcUrl": "https://sagaevm.jsonrpc.sagarpc.io/",
+    "description": "Saga mainnet governance Safe"
+  },
+  "output": {
+    "json": "reports/roles/saga-mainnet-latest.json"
+  }
+}
