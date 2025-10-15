@@ -27,7 +27,6 @@ import { IBaseUniswapV3Adapter } from "./IBaseUniswapV3Adapter.sol";
 interface IUniswapV3LiquiditySwapAdapter is IBaseUniswapV3Adapter {
     /**
      * @notice Structure for liquidity swap parameters
-     * @param user The user address performing the swap
      * @param collateralAsset The current collateral asset address
      * @param newCollateralAsset The new collateral asset address
      * @param collateralAmountToSwap The amount of current collateral to swap
@@ -37,7 +36,6 @@ interface IUniswapV3LiquiditySwapAdapter is IBaseUniswapV3Adapter {
      * @param deadline The swap deadline timestamp
      */
     struct LiquiditySwapParams {
-        address user;
         address collateralAsset;
         address newCollateralAsset;
         uint256 collateralAmountToSwap;

@@ -157,14 +157,14 @@ contract UniswapV3LiquiditySwapAdapter is
         _supply(
             liquiditySwapParams.newCollateralAsset,
             amountReceived,
-            liquiditySwapParams.user,
+            msg.sender,
             REFERRER
         );
 
         // pulls flashLoanAmount amount of flash-borrowed asset from the user
         _pullATokenAndWithdraw(
             flashLoanAsset,
-            liquiditySwapParams.user,
+            msg.sender,
             flashLoanAmount,
             collateralATokenPermit
         );
@@ -190,7 +190,7 @@ contract UniswapV3LiquiditySwapAdapter is
     ) internal returns (uint256) {
         _pullATokenAndWithdraw(
             liquiditySwapParams.collateralAsset,
-            liquiditySwapParams.user,
+            msg.sender,
             liquiditySwapParams.collateralAmountToSwap,
             collateralATokenPermit
         );
@@ -210,7 +210,7 @@ contract UniswapV3LiquiditySwapAdapter is
         _supply(
             liquiditySwapParams.newCollateralAsset,
             amountReceived,
-            liquiditySwapParams.user,
+            msg.sender,
             REFERRER
         );
 

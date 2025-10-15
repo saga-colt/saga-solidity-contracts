@@ -27,7 +27,6 @@ import { IBaseUniswapV3Adapter } from "./IBaseUniswapV3Adapter.sol";
 interface IUniswapV3DebtSwapAdapter is IBaseUniswapV3Adapter {
     /**
      * @notice Structure for debt swap parameters
-     * @param user The user address performing the swap
      * @param debtAsset The current debt asset address
      * @param newDebtAsset The new debt asset address
      * @param maxNewDebtAmount The maximum amount of new debt to borrow for the swap
@@ -37,7 +36,6 @@ interface IUniswapV3DebtSwapAdapter is IBaseUniswapV3Adapter {
      * @param deadline The swap deadline timestamp
      */
     struct DebtSwapParams {
-        address user;
         address debtAsset;
         address newDebtAsset;
         uint256 maxNewDebtAmount;

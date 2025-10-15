@@ -89,7 +89,7 @@ contract UniswapV3WithdrawSwapAdapter is
         // pulls liquidity asset from the user and withdraw
         _pullATokenAndWithdraw(
             withdrawSwapParams.oldAsset,
-            withdrawSwapParams.user,
+            msg.sender,
             withdrawSwapParams.oldAssetAmount,
             permitInput
         );
@@ -105,7 +105,7 @@ contract UniswapV3WithdrawSwapAdapter is
         );
 
         // transfer new asset to the user
-        IERC20(withdrawSwapParams.newAsset).safeTransfer(withdrawSwapParams.user, amountReceived);
+        IERC20(withdrawSwapParams.newAsset).safeTransfer(msg.sender, amountReceived);
     }
 
 

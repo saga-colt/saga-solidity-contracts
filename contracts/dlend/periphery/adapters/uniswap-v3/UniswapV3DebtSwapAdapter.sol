@@ -151,7 +151,7 @@ contract UniswapV3DebtSwapAdapter is
 
         // repay the old debt
         _conditionalRenewAllowance(debtSwapParams.debtAsset, debtSwapParams.debtRepayAmount);
-        POOL.repay(debtSwapParams.debtAsset, debtSwapParams.debtRepayAmount, 2, debtSwapParams.user);
+        POOL.repay(debtSwapParams.debtAsset, debtSwapParams.debtRepayAmount, 2, msg.sender);
 
         // flashloan repayment - allowance already set in constructor
         _conditionalRenewAllowance(flashLoanAsset, flashLoanAmount + flashLoanPremium);
@@ -171,7 +171,7 @@ contract UniswapV3DebtSwapAdapter is
         DebtSwapParams memory debtSwapParams
     ) internal returns (uint256) {
         // borrow the new debt asset
-        POOL.borrow(debtSwapParams.newDebtAsset, debtSwapParams.maxNewDebtAmount, 2, REFERRER, debtSwapParams.user);
+        POOL.borrow(debtSwapParams.newDebtAsset, debtSwapParams.maxNewDebtAmount, 2, REFERRER, msg.sender);
 
         // buy(exact out) old debt with new debt
         uint256 amountSpent = _buyOnUniswapV3(
@@ -185,12 +185,12 @@ contract UniswapV3DebtSwapAdapter is
 
         // repay the old debt
         _conditionalRenewAllowance(debtSwapParams.debtAsset, debtSwapParams.debtRepayAmount);
-        POOL.repay(debtSwapParams.debtAsset, debtSwapParams.debtRepayAmount, 2, debtSwapParams.user);
+        POOL.repay(debtSwapParams.debtAsset, debtSwapParams.debtRepayAmount, 2, msg.sender);
 
         // transfer any leftover new debt asset to the user
         uint256 newDebtBalance = IERC20(debtSwapParams.newDebtAsset).balanceOf(address(this));
         if (newDebtBalance > 0) {
-            IERC20(debtSwapParams.newDebtAsset).safeTransfer(debtSwapParams.user, newDebtBalance);
+            IERC20(debtSwapParams.newDebtAsset).safeTransfer(msg.sender, newDebtBalance);
         }
 
         return amountSpent;
@@ -219,7 +219,7 @@ contract UniswapV3DebtSwapAdapter is
             assets,
             amounts,
             interestRateModes,
-            debtSwapParams.user,
+            msg.sender,
             flashParams,
             REFERRER
         );

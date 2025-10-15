@@ -27,7 +27,6 @@ import { IBaseUniswapV3Adapter } from "./IBaseUniswapV3Adapter.sol";
 interface IUniswapV3RepayAdapter is IBaseUniswapV3Adapter {
     /**
      * @notice Structure for repay with collateral parameters
-     * @param user The user address performing the repay
      * @param collateralAsset The collateral asset address to swap from
      * @param debtRepayAsset The debt asset address to repay
      * @param maxCollateralAmountToSwap The maximum amount of collateral to swap
@@ -37,7 +36,6 @@ interface IUniswapV3RepayAdapter is IBaseUniswapV3Adapter {
      * @param deadline The swap deadline timestamp
      */
     struct RepayParams {
-        address user;
         address collateralAsset;
         address debtRepayAsset;
         uint256 maxCollateralAmountToSwap;

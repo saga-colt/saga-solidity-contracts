@@ -27,7 +27,6 @@ import { IBaseUniswapV3Adapter } from "./IBaseUniswapV3Adapter.sol";
 interface IUniswapV3WithdrawSwapAdapter is IBaseUniswapV3Adapter {
     /**
      * @notice Structure for withdraw swap parameters
-     * @param user The user address performing the withdraw and swap
      * @param oldAsset The collateral asset address to withdraw
      * @param newAsset The asset to swap to
      * @param oldAssetAmount The amount of collateral to withdraw
@@ -36,7 +35,6 @@ interface IUniswapV3WithdrawSwapAdapter is IBaseUniswapV3Adapter {
      * @param deadline The swap deadline timestamp
      */
     struct WithdrawSwapParams {
-        address user;
         address oldAsset;
         address newAsset;
         uint256 oldAssetAmount;

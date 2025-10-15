@@ -108,7 +108,7 @@ contract UniswapV3RepayAdapter is
                 : 0;
             if (collateralExcess > 0) {
                 _conditionalRenewAllowance(repayParams.collateralAsset, collateralExcess);
-                _supply(repayParams.collateralAsset, collateralExcess, repayParams.user, REFERRER);
+                _supply(repayParams.collateralAsset, collateralExcess, msg.sender, REFERRER);
             }
         } else {
             // flashloan of the current collateral asset to use for repayment
@@ -166,7 +166,7 @@ contract UniswapV3RepayAdapter is
 
         // repay the debt
         _conditionalRenewAllowance(repayParams.debtRepayAsset, repayParams.debtRepayAmount);
-        POOL.repay(repayParams.debtRepayAsset, repayParams.debtRepayAmount, 2, repayParams.user);
+        POOL.repay(repayParams.debtRepayAsset, repayParams.debtRepayAmount, 2, msg.sender);
 
         // pulls only the amount needed from the user for the flashloan repayment
         // flashLoanAmount - amountSpent = excess in the contract from swap
@@ -177,7 +177,7 @@ contract UniswapV3RepayAdapter is
         // flashLoanPremium + amountSpent
         _pullATokenAndWithdraw(
             flashLoanAsset,
-            repayParams.user,
+            msg.sender,
             flashLoanPremium + amountSpent,
             collateralATokenPermit
         );
@@ -203,7 +203,7 @@ contract UniswapV3RepayAdapter is
     ) internal returns (uint256) {
         uint256 collateralAmountReceived = _pullATokenAndWithdraw(
             repayParams.collateralAsset,
-            repayParams.user,
+            msg.sender,
             repayParams.maxCollateralAmountToSwap,
             collateralATokenPermit
         );
@@ -220,7 +220,7 @@ contract UniswapV3RepayAdapter is
 
         // repay the debt with the bought asset (debtRepayAsset) from the swap
         _conditionalRenewAllowance(repayParams.debtRepayAsset, repayParams.debtRepayAmount);
-        POOL.repay(repayParams.debtRepayAsset, repayParams.debtRepayAmount, 2, repayParams.user);
+        POOL.repay(repayParams.debtRepayAsset, repayParams.debtRepayAmount, 2, msg.sender);
 
         return amountSpent;
     }
