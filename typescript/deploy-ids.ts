@@ -76,3 +76,9 @@ export const D_REDEEMER_WITH_FEES_CONTRACT_ID = "D_RedeemerWithFees";
 
 // SMO Helper
 export const D_SMO_HELPER_ID = "D_SmoHelper";
+
+// Uniswap V3 Swap Adapters
+export const UNISWAP_V3_LIQUIDITY_SWAP_ADAPTER_ID = "UniswapV3LiquiditySwapAdapter";
+export const UNISWAP_V3_DEBT_SWAP_ADAPTER_ID = "UniswapV3DebtSwapAdapter";
+export const UNISWAP_V3_REPAY_ADAPTER_ID = "UniswapV3RepayAdapter";
+export const UNISWAP_V3_WITHDRAW_SWAP_ADAPTER_ID = "UniswapV3WithdrawSwapAdapter";

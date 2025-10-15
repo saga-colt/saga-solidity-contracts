@@ -99,6 +99,7 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
       USDS: emptyStringIfUndefined(USDSDeployment?.address),
       frxUSD: emptyStringIfUndefined(frxUSDDeployment?.address),
     },
+    uniswapRouter: "0x346239972d1fa486FC4a521031BC81bFB7D6e8a4", // Uniswap V3 SwapRouter (same on testnet)
     walletAddresses: {
       governanceMultisig: "0xd2f775Ff2cD41bfe43C7A8c016eD10393553fe44", // Actually just the testnet deployer address
       incentivesVault: "0xd2f775Ff2cD41bfe43C7A8c016eD10393553fe44", // Actually just the testnet deployer address
