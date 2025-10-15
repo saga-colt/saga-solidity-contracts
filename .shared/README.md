@@ -46,13 +46,11 @@ node_modules/.bin/ts-node .shared/scripts/setup.ts --package-scripts --configs
 ### Manual Installation
 
 1. Clone this repository into your project:
-
 ```bash
 git clone https://github.com/dtrinity/shared-hardhat-tools.git .shared
 ```
 
 2. Add to package.json:
-
 ```json
 {
   "dependencies": {
@@ -62,7 +60,6 @@ git clone https://github.com/dtrinity/shared-hardhat-tools.git .shared
 ```
 
 3. Install dependencies:
-
 ```bash
 npm install
 
@@ -191,20 +188,20 @@ npm run --prefix .shared lint:all
 ### Using in TypeScript Code
 
 ```typescript
-import { configLoader, logger, validateHardhatProject } from "@dtrinity/shared-hardhat-tools";
+import { configLoader, logger, validateHardhatProject } from '@dtrinity/shared-hardhat-tools';
 
 // Load configuration
-const slitherConfig = configLoader.loadConfig("slither", { network: "mainnet" });
+const slitherConfig = configLoader.loadConfig('slither', { network: 'mainnet' });
 
 // Validate project setup
 const validation = validateHardhatProject();
 if (!validation.valid) {
-  logger.error("Project validation failed:", validation.errors);
+  logger.error('Project validation failed:', validation.errors);
 }
 
 // Run analysis programmatically
-import { runSlither } from "@dtrinity/shared-hardhat-tools/scripts/analysis/slither";
-const success = runSlither({ network: "mainnet", failOnHigh: true });
+import { runSlither } from '@dtrinity/shared-hardhat-tools/scripts/analysis/slither';
+const success = runSlither({ network: 'mainnet', failOnHigh: true });
 ```
 
 ### Manifest-Driven Role Transfers
@@ -274,8 +271,11 @@ Each command performs a guarded dry-run first, printing the planned changes and 
 ### Setting Up Git Hooks
 
 ```bash
-# Install just the shared hooks (skips configs/CI/package scripts)
+# Install the default shared hook (pre-push only; skips configs/CI/package scripts)
 node_modules/.bin/ts-node .shared/scripts/setup.ts --hooks
+
+# Opt into the optional pre-commit hook as well
+node_modules/.bin/ts-node .shared/scripts/setup.ts --hooks --include-pre-commit-hook
 
 # Force overwrite existing hooks
 node_modules/.bin/ts-node .shared/scripts/setup.ts --hooks --force
@@ -285,10 +285,13 @@ The shared pre-commit hook runs the guardrail suite (Prettier, ESLint, Solhint) 
 `console.log` or lingering `.only`. Prettier runs by default—set `SHARED_HARDHAT_PRE_COMMIT_PRETTIER=0` to skip it
 temporarily. Contract compilation is also enabled unless you opt out (`SHARED_HARDHAT_PRE_COMMIT_COMPILE=0`).
 
-The pre-push hook reruns guardrails (Prettier disabled unless `SHARED_HARDHAT_PRE_PUSH_PRETTIER=1`), optionally
-executes tests, and requires Slither only on long-lived branches (`main`, `master`, `develop`). Enable automated test
-runs with `SHARED_HARDHAT_PRE_PUSH_TEST=1` or customize the command via
-`SHARED_HARDHAT_PRE_PUSH_TEST_CMD="yarn test --runInBand"`.
+The pre-push hook reruns guardrails (Prettier enabled by default—set
+`SHARED_HARDHAT_PRE_PUSH_PRETTIER=0` to skip), executes tests by default (opt out with
+`SHARED_HARDHAT_PRE_PUSH_TEST=0`), and requires Slither only on long-lived branches (`main`, `master`, `develop`).
+Customize the test command via `SHARED_HARDHAT_PRE_PUSH_TEST_CMD="yarn test --runInBand"`.
+
+By default only the pre-push hook is installed; re-run the setup command with `--include-pre-commit-hook` whenever you
+want the additional pre-commit automation.
 
 ### Updating Shared Tools
 
@@ -394,7 +397,6 @@ Each network repository should:
 4. Commit subtree updates intentionally
 
 Example integration:
-
 ```bash
 # Sonic network
 npm run --prefix .shared slither -- --network sonic
@@ -448,7 +450,6 @@ To contribute to shared tools:
 ### Subtree conflicts
 
 If you encounter merge conflicts when updating:
-
 ```bash
 git status  # Check conflicting files
 git add -A  # Stage resolved conflicts
@@ -458,7 +459,6 @@ git commit  # Complete the merge
 ### Missing dependencies
 
 Ensure shared tools are installed:
-
 ```bash
 npm install file:./.shared
 ```
@@ -466,7 +466,6 @@ npm install file:./.shared
 ### Yarn install fails with ENOENT inside node_modules
 
 If a previous `npm install` populated `node_modules`, Yarn 4 may fail with errors like `ENOENT: no such file or directory, lstat '.../node_modules/cacache/node_modules/glob/dist'`. Remove the stale folder and reinstall with Yarn:
-
 ```bash
 rm -rf node_modules
 yarn install
@@ -475,7 +474,6 @@ yarn install
 ### Hook permissions
 
 Make hooks executable:
-
 ```bash
 chmod +x .git/hooks/pre-commit
 chmod +x .git/hooks/pre-push
