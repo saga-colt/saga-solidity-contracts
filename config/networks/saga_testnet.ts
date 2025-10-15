@@ -130,6 +130,10 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
         hardDStablePeg: 1n * ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
         priceDecimals: ORACLE_AGGREGATOR_PRICE_DECIMALS,
         baseCurrency: ZeroAddress, // Note that USD is represented by the zero address, per Aave's convention
+        tellorOracleAssets: {
+          plainTellorOracleWrappers: {},
+          tellorOracleWrappersWithThresholding: {},
+        },
         redstoneOracleAssets: {
           // Moved from API3
           plainRedstoneOracleWrappers: {
@@ -139,30 +143,30 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
           redstoneOracleWrappersWithThresholding: {
             ...(USDCDeployment?.address && mockOracleNameToAddress["USDC_USD"]
               ? {
-                  [USDCDeployment.address]: {
-                    feed: mockOracleNameToAddress["USDC_USD"], // Changed from proxy
-                    lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-                    fixedPrice: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-                  },
-                }
+                [USDCDeployment.address]: {
+                  feed: mockOracleNameToAddress["USDC_USD"], // Changed from proxy
+                  lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
+                  fixedPrice: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
+                },
+              }
               : {}),
             ...(USDSDeployment?.address && mockOracleNameToAddress["USDS_USD"]
               ? {
-                  [USDSDeployment.address]: {
-                    feed: mockOracleNameToAddress["USDS_USD"], // Changed from proxy
-                    lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-                    fixedPrice: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-                  },
-                }
+                [USDSDeployment.address]: {
+                  feed: mockOracleNameToAddress["USDS_USD"], // Changed from proxy
+                  lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
+                  fixedPrice: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
+                },
+              }
               : {}),
             ...(frxUSDDeployment?.address && mockOracleNameToAddress["frxUSD_USD"]
               ? {
-                  [frxUSDDeployment.address]: {
-                    feed: mockOracleNameToAddress["frxUSD_USD"], // Changed from proxy
-                    lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-                    fixedPrice: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-                  },
-                }
+                [frxUSDDeployment.address]: {
+                  feed: mockOracleNameToAddress["frxUSD_USD"], // Changed from proxy
+                  lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
+                  fixedPrice: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
+                },
+              }
               : {}),
           },
           // Moved from API3
@@ -170,30 +174,30 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
             // sUSDS composite feed (sUSDS/USDS * USDS/USD)
             ...(sUSDSDeployment?.address && mockOracleNameToAddress["sUSDS_USDS"] && mockOracleNameToAddress["USDS_USD"]
               ? {
-                  [sUSDSDeployment.address]: {
-                    feedAsset: sUSDSDeployment.address,
-                    feed1: mockOracleNameToAddress["sUSDS_USDS"], // Changed from proxy1
-                    feed2: mockOracleNameToAddress["USDS_USD"], // Changed from proxy2
-                    lowerThresholdInBase1: 0n, // No threshold for sUSDS/USDS
-                    fixedPriceInBase1: 0n,
-                    lowerThresholdInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT, // Threshold for USDS/USD
-                    fixedPriceInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-                  },
-                }
+                [sUSDSDeployment.address]: {
+                  feedAsset: sUSDSDeployment.address,
+                  feed1: mockOracleNameToAddress["sUSDS_USDS"], // Changed from proxy1
+                  feed2: mockOracleNameToAddress["USDS_USD"], // Changed from proxy2
+                  lowerThresholdInBase1: 0n, // No threshold for sUSDS/USDS
+                  fixedPriceInBase1: 0n,
+                  lowerThresholdInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT, // Threshold for USDS/USD
+                  fixedPriceInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
+                },
+              }
               : {}),
             // sfrxUSD composite feed (sfrxUSD/frxUSD * frxUSD/USD)
             ...(sfrxUSDDeployment?.address && mockOracleNameToAddress["sfrxUSD_frxUSD"] && mockOracleNameToAddress["frxUSD_USD"]
               ? {
-                  [sfrxUSDDeployment.address]: {
-                    feedAsset: sfrxUSDDeployment.address,
-                    feed1: mockOracleNameToAddress["sfrxUSD_frxUSD"], // Changed from proxy1
-                    feed2: mockOracleNameToAddress["frxUSD_USD"], // Changed from proxy2
-                    lowerThresholdInBase1: 0n, // No threshold for sfrxUSD/frxUSD
-                    fixedPriceInBase1: 0n,
-                    lowerThresholdInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT, // Threshold for frxUSD/USD
-                    fixedPriceInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-                  },
-                }
+                [sfrxUSDDeployment.address]: {
+                  feedAsset: sfrxUSDDeployment.address,
+                  feed1: mockOracleNameToAddress["sfrxUSD_frxUSD"], // Changed from proxy1
+                  feed2: mockOracleNameToAddress["frxUSD_USD"], // Changed from proxy2
+                  lowerThresholdInBase1: 0n, // No threshold for sfrxUSD/frxUSD
+                  fixedPriceInBase1: 0n,
+                  lowerThresholdInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT, // Threshold for frxUSD/USD
+                  fixedPriceInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
+                },
+              }
               : {}),
           },
         },
