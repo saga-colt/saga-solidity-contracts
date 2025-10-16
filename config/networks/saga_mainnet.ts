@@ -25,6 +25,8 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
   const usdtAddress = "0xC8fe3C1de344854f4429bB333AFFAeF97eF88CEa";
   const usdcAddress = "0xfc960C233B8E98e0Cf282e29BDE8d3f105fc24d5";
   const sagaAddress = "0xa19377761fed745723b90993988e04d641c2cffe";
+  const sfrxUSDAddress = "0x55F937DEF274C6CBd9444f0857639757C5A2a3E9";
+  const usdnAddress = "0xE9A5C89eCff4323344cFaA4c659EFa42C80FE6cc";
 
   const governanceSafeMultisig = "0xf19cf8881237CA819Fd50C9C22cb258e9DB8644e"; // Safe on Saga
 
@@ -55,6 +57,8 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
       USDT: usdtAddress,
       USDC: usdcAddress,
       SAGA: sagaAddress,
+      sfrxUSD: sfrxUSDAddress,
+      USDN: usdnAddress,
     },
     uniswapRouter: "0x346239972d1fa486FC4a521031BC81bFB7D6e8a4", // Uniswap V3 SwapRouter
     walletAddresses: {
@@ -63,7 +67,7 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
     },
     dStables: {
       D: {
-        collaterals: [usdcAddress, usdtAddress],
+        collaterals: [usdcAddress, usdtAddress, sfrxUSDAddress, usdnAddress],
         initialFeeReceiver: governanceSafeMultisig, // governanceMultisig
         initialRedemptionFeeBps: 0.4 * ONE_PERCENT_BPS, // Default for stablecoins
         collateralRedemptionFees: {
@@ -94,6 +98,16 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
               feed: "0xaA43df021149C34ca3654F387C9aeB9AcABa012a", // Saga/USD Tellor price feed
               lowerThreshold: 0n,
               fixedPrice: 0n,
+            },
+            [sfrxUSDAddress]: {
+              feed: "0xDff5F0aE4C062EF32E170EeB8dc0f30CBeDB505f", // sfrxUSD/USD Tellor price feed
+              lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
+              fixedPrice: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
+            },
+            [usdnAddress]: {
+              feed: "0x7C42Ab8a4c44793D495AB9829c0E72f1404e57ac", // USDN/USD Tellor price feed
+              lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
+              fixedPrice: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
             },
           },
         },
