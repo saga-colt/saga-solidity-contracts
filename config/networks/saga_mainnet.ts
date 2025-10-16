@@ -65,6 +65,13 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
       governanceMultisig: governanceSafeMultisig, // Created via Safe
       incentivesVault: "0x9CD17eA5Cf04BEEAa2C65d58F4478c7A230eD816", // Safe on Saga
     },
+    safeConfig: {
+      safeAddress: governanceSafeMultisig,
+      owners: [], // Will be fetched from the Safe contract by SafeManager
+      threshold: 1, // Will be fetched from the Safe contract by SafeManager
+      chainId: 5464, // Saga mainnet chain ID
+      rpcUrl: "https://sagaevm.jsonrpc.sagarpc.io/",
+    },
     dStables: {
       D: {
         collaterals: [usdcAddress, usdtAddress, sfrxUSDAddress, usdnAddress],
