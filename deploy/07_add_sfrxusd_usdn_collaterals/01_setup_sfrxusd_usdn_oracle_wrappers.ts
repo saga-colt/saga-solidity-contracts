@@ -6,11 +6,6 @@ import { USD_TELLOR_WRAPPER_WITH_THRESHOLDING_ID } from "../../typescript/deploy
 import { setupTellorSimpleFeedsForAssets } from "../../typescript/dlend/setup-tellor-oracle";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Promise<boolean> {
-  if (hre.network.name !== "saga_mainnet") {
-    console.log(`[oracle-setup] Skipping sfrxUSD/USDN Tellor wrapper deployment on network ${hre.network.name}`);
-    return false;
-  }
-
   const { deployer } = await hre.getNamedAccounts();
   const config = await getConfig(hre);
 
