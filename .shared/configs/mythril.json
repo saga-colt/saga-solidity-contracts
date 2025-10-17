@@ -6,5 +6,9 @@
   "maxDepth": 10,
   "loopBound": 3,
   "enableCoverage": false,
-  "excludePaths": ["test", "mocks", "interfaces"]
+  "excludePaths": [
+    "test",
+    "mocks",
+    "interfaces"
+  ]
 }
