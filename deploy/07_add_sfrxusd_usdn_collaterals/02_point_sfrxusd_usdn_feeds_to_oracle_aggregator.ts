@@ -1,13 +1,18 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-import { SafeTransactionData } from "@dtrinity/shared-hardhat-tools";
 
 import { getConfig } from "../../config/config";
 import { USD_ORACLE_AGGREGATOR_ID, USD_TELLOR_WRAPPER_WITH_THRESHOLDING_ID } from "../../typescript/deploy-ids";
-import { GovernanceExecutor } from "../../typescript/hardhat/governance";
+import { SagaGovernanceExecutor } from "../../typescript/hardhat/saga-governance";
+import { SafeTransactionData } from "../../typescript/hardhat/saga-safe-manager";
 
 /**
  * Build a Safe transaction payload to set an oracle in the OracleAggregator
+ *
+ * @param oracleAggregatorAddress
+ * @param assetAddress
+ * @param oracleAddress
+ * @param oracleAggregatorInterface
  */
 function createSetOracleTransaction(
   oracleAggregatorAddress: string,
@@ -27,8 +32,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const config = await getConfig(hre);
   const deployerSigner = await hre.ethers.getSigner(deployer);
 
-  // Initialize governance executor
-  const executor = new GovernanceExecutor(hre, deployerSigner, config.safeConfig);
+  // Initialize Saga governance executor
+  const executor = new SagaGovernanceExecutor(hre, deployerSigner, config.safeConfig);
   await executor.initialize();
 
   console.log(`\n≻ ${__filename.split("/").slice(-2).join("/")}: executing...`);

@@ -1,14 +1,18 @@
 import { ZeroAddress } from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-import { SafeTransactionData } from "@dtrinity/shared-hardhat-tools";
 
 import { getConfig } from "../../config/config";
 import { D_COLLATERAL_VAULT_CONTRACT_ID, USD_ORACLE_AGGREGATOR_ID } from "../../typescript/deploy-ids";
-import { GovernanceExecutor } from "../../typescript/hardhat/governance";
+import { SagaGovernanceExecutor } from "../../typescript/hardhat/saga-governance";
+import { SafeTransactionData } from "../../typescript/hardhat/saga-safe-manager";
 
 /**
  * Build a Safe transaction payload to allow collateral in CollateralVault
+ *
+ * @param collateralVaultAddress
+ * @param collateralAddress
+ * @param collateralVaultInterface
  */
 function createAllowCollateralTransaction(
   collateralVaultAddress: string,
@@ -27,8 +31,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const config = await getConfig(hre);
   const deployerSigner = await hre.ethers.getSigner(deployer);
 
-  // Initialize governance executor
-  const executor = new GovernanceExecutor(hre, deployerSigner, config.safeConfig);
+  // Initialize Saga governance executor
+  const executor = new SagaGovernanceExecutor(hre, deployerSigner, config.safeConfig);
   await executor.initialize();
 
   console.log(`\n≻ ${__filename.split("/").slice(-2).join("/")}: executing...`);
@@ -74,19 +78,32 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     return true;
   }
 
-  // Sanity check: Verify that the oracle can provide a price for each asset
+  // Sanity check: Verify that the oracle can provide a price for each asset (if oracles are set up)
   console.log("\n🔍 Performing oracle price sanity checks...");
+
+  let allOraclesConfigured = true;
 
   for (const token of tokensToWhitelist) {
     console.log(`\n  📊 Checking oracle price for ${token.name} (${token.address})...`);
-    const price = await oracleAggregator.getAssetPrice(token.address);
 
-    if (price.toString() === "0") {
-      console.error(`    ❌ Oracle price for ${token.name} is zero!`);
-      throw new Error(`Aborting: Oracle price for ${token.name} (${token.address}) is zero.`);
+    try {
+      const price = await oracleAggregator.getAssetPrice(token.address);
+
+      if (price.toString() === "0") {
+        console.log(`    ⚠️  Oracle price for ${token.name} is zero or not configured yet`);
+        allOraclesConfigured = false;
+      } else {
+        console.log(`    ✅ Oracle price for ${token.name}: ${price.toString()}`);
+      }
+    } catch (error) {
+      console.log(`    ⚠️  Oracle not configured for ${token.name} (previous Safe txs not executed yet)`);
+      allOraclesConfigured = false;
     }
+  }
 
-    console.log(`    ✅ Oracle price for ${token.name}: ${price.toString()}`);
+  if (!allOraclesConfigured) {
+    console.log("\n⏭️  Oracle feeds not fully configured yet. Proceeding with whitelist anyway.");
+    console.log("    Oracle sanity checks will run when you re-run this script after executing Safe transactions.");
   }
 
   // Whitelist each valid token

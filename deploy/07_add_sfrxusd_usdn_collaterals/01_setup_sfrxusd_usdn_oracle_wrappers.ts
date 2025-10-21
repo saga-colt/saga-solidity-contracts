@@ -1,14 +1,19 @@
 import { ZeroAddress } from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
-import { SafeTransactionData } from "@dtrinity/shared-hardhat-tools";
 
 import { getConfig } from "../../config/config";
 import { USD_TELLOR_WRAPPER_WITH_THRESHOLDING_ID } from "../../typescript/deploy-ids";
-import { GovernanceExecutor } from "../../typescript/hardhat/governance";
+import { SagaGovernanceExecutor } from "../../typescript/hardhat/saga-governance";
+import { SafeTransactionData } from "../../typescript/hardhat/saga-safe-manager";
 
 /**
  * Build a Safe transaction payload to set a Tellor feed
+ *
+ * @param tellorWrapperAddress
+ * @param assetAddress
+ * @param feedAddress
+ * @param tellorWrapperInterface
  */
 function createSetFeedTransaction(
   tellorWrapperAddress: string,
@@ -25,6 +30,12 @@ function createSetFeedTransaction(
 
 /**
  * Build a Safe transaction payload to set threshold configuration
+ *
+ * @param tellorWrapperAddress
+ * @param assetAddress
+ * @param lowerThreshold
+ * @param fixedPrice
+ * @param tellorWrapperInterface
  */
 function createSetThresholdConfigTransaction(
   tellorWrapperAddress: string,
@@ -45,8 +56,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Pr
   const config = await getConfig(hre);
   const deployerSigner = await hre.ethers.getSigner(deployer);
 
-  // Initialize governance executor
-  const executor = new GovernanceExecutor(hre, deployerSigner, config.safeConfig);
+  // Initialize Saga governance executor
+  const executor = new SagaGovernanceExecutor(hre, deployerSigner, config.safeConfig);
   await executor.initialize();
 
   console.log(`\n≻ ${__filename.split("/").slice(-2).join("/")}: executing...`);
@@ -126,9 +137,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Pr
     }
 
     // Set threshold configuration if thresholds are specified
+    let thresholdOpComplete = true; // Default to true if no threshold config needed
+
     if (feedConfig.lowerThreshold !== undefined && feedConfig.fixedPrice !== undefined) {
       console.log(`\n  🔧 Setting threshold config for ${asset.name}...`);
-      const thresholdOpComplete = await executor.tryOrQueue(
+      thresholdOpComplete = await executor.tryOrQueue(
         async () => {
           await tellorWrapper.setThresholdConfig(asset.address, feedConfig.lowerThreshold, feedConfig.fixedPrice);
           console.log(`    ✅ Set threshold config for ${asset.name}`);
@@ -148,9 +161,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Pr
       }
     }
 
-    // Perform sanity check if feed was set successfully
-    if (feedOpComplete) {
+    // Perform sanity check ONLY if BOTH feed and threshold were set successfully (direct execution, not queued to Safe)
+    if (feedOpComplete && thresholdOpComplete) {
       console.log(`\n  🔍 Performing sanity check for ${asset.name}...`);
+
       try {
         const price = await tellorWrapper.getAssetPrice(asset.address);
         const normalizedPrice = Number(price) / Number(baseCurrencyUnit);
@@ -169,6 +183,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Pr
         console.error(`    ❌ Error performing sanity check for ${asset.name}:`, error);
         throw new Error(`Error performing sanity check for ${asset.name}: ${error}`);
       }
+    } else if (!feedOpComplete || !thresholdOpComplete) {
+      console.log(`\n  ⏭️  Skipping sanity check for ${asset.name} (operations queued to Safe, will be verified after execution)`);
     }
   }
 
@@ -182,6 +198,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Pr
       }
       console.log("\n⏳ Oracle feed setup requires governance signatures to complete.");
       console.log("   The deployment script will exit and can be re-run after governance executes the transactions.");
+      console.log("\n📋 After executing Safe transactions:");
+      console.log("   1. Execute all pending Safe transactions in order (by nonce)");
+      console.log("   2. Re-run this deployment to verify oracle prices");
+      console.log("   3. Sanity checks will run automatically once feeds are active");
       console.log(`\n≻ ${__filename.split("/").slice(-2).join("/")}: pending governance ⏳`);
       return false; // Fail idempotently - script can be re-run
     } else {
