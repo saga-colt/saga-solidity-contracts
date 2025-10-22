@@ -84,11 +84,13 @@ export class SagaSafeManager {
 
     try {
       console.log(`\n📦 Creating Safe transactions: ${batch.description}`);
-      console.log(`   - Number of transactions: ${batch.transactions.length}`);
+      console.log(`   - Requested transactions: ${batch.transactions.length}`);
 
       // Get Safe info for initial nonce
       const safeInfo = await this.apiKit.getSafeInfo(this.config.safeAddress);
       let nonce = Number(safeInfo.nonce);
+
+      const pendingTxIdentities = new Set<string>();
 
       // Check for pending transactions and adjust nonce accordingly
       try {
@@ -102,18 +104,59 @@ export class SagaSafeManager {
             nonce = maxPendingNonce + 1;
             console.log(`   - Found ${pendingTxs.results.length} pending transactions, starting from nonce ${nonce}`);
           }
+
+          for (const pendingTx of pendingTxs.results) {
+            const identity = this.buildTransactionIdentity({
+              to: pendingTx.to,
+              value: pendingTx.value ?? "0",
+              data: pendingTx.data ?? "0x",
+              operation: typeof pendingTx.operation === "number" ? pendingTx.operation : Number(pendingTx.operation ?? 0),
+            });
+
+            pendingTxIdentities.add(identity);
+          }
         }
       } catch (error) {
         console.log(`   - Could not fetch pending transactions, using current nonce ${nonce}`);
       }
 
+      const uniqueTransactions: SafeTransactionData[] = [];
+      const batchIdentities = new Set<string>();
+
+      for (const tx of batch.transactions) {
+        const identity = this.buildTransactionIdentity(tx);
+
+        if (batchIdentities.has(identity)) {
+          console.log(`   - Skipping duplicate transaction already present in batch (to=${tx.to})`);
+          continue;
+        }
+
+        if (pendingTxIdentities.has(identity)) {
+          console.log(`   - Skipping transaction already pending in Safe queue (to=${tx.to})`);
+          continue;
+        }
+
+        batchIdentities.add(identity);
+        uniqueTransactions.push(tx);
+      }
+
+      if (uniqueTransactions.length === 0) {
+        console.log(`   - No new transactions to propose (all already pending or duplicates)`);
+        return {
+          success: true,
+          safeTxHash: undefined,
+        };
+      }
+
+      console.log(`   - Unique new transactions: ${uniqueTransactions.length}`);
+
       const proposedTxs: string[] = [];
 
       // Create and propose each transaction individually
-      for (let i = 0; i < batch.transactions.length; i++) {
-        const tx = batch.transactions[i];
+      for (let i = 0; i < uniqueTransactions.length; i++) {
+        const tx = uniqueTransactions[i];
 
-        console.log(`\n   [${i + 1}/${batch.transactions.length}] Proposing transaction to ${tx.to.slice(0, 10)}...`);
+        console.log(`\n   [${i + 1}/${uniqueTransactions.length}] Proposing transaction to ${tx.to.slice(0, 10)}...`);
 
         // Create the Safe transaction
         const safeTx = {
@@ -151,7 +194,7 @@ export class SagaSafeManager {
         nonce++;
       }
 
-      console.log(`\n✅ All ${batch.transactions.length} Safe transactions proposed successfully`);
+      console.log(`\n✅ All ${uniqueTransactions.length} Safe transactions proposed successfully`);
       console.log(`   - View in Safe UI: https://app.safe.global/transactions/queue?safe=saga:${this.config.safeAddress}`);
 
       return {
@@ -216,6 +259,18 @@ export class SagaSafeManager {
     const safeTxHash = ethers.TypedDataEncoder.hash(domain, types, message);
 
     return safeTxHash;
+  }
+
+  /**
+   * Build a deterministic identity string for a Safe transaction payload
+   */
+  private buildTransactionIdentity(tx: Pick<SafeTransactionData, "to" | "value" | "data" | "operation">): string {
+    const to = ethers.getAddress(tx.to);
+    const value = BigInt(tx.value ?? "0").toString();
+    const data = (tx.data ?? "0x").toLowerCase();
+    const operation = tx.operation ?? 0;
+
+    return `${to}|${value}|${data}|${operation}`;
   }
 
   /**
