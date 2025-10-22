@@ -224,6 +224,8 @@ export class SagaSafeManager {
 
   /**
    * Encode multiple transactions into MultiSend format
+   *
+   * @param transactions
    */
   private encodeMultiSendData(transactions: SafeTransactionData[]): string {
     // MultiSend encodes transactions as: [operation(1)][to(20)][value(32)][dataLength(32)][data(dataLength)]
@@ -240,9 +242,7 @@ export class SagaSafeManager {
     }
 
     // Encode as MultiSendCallOnly.multiSend(bytes)
-    const multiSendInterface = new ethers.Interface([
-      "function multiSend(bytes memory transactions) public payable",
-    ]);
+    const multiSendInterface = new ethers.Interface(["function multiSend(bytes memory transactions) public payable"]);
 
     return multiSendInterface.encodeFunctionData("multiSend", [encodedTxs]);
   }
@@ -300,6 +300,8 @@ export class SagaSafeManager {
 
   /**
    * Build a deterministic identity string for a Safe transaction payload
+   *
+   * @param tx
    */
   private buildTransactionIdentity(tx: Pick<SafeTransactionData, "to" | "value" | "data" | "operation">): string {
     const to = ethers.getAddress(tx.to);
