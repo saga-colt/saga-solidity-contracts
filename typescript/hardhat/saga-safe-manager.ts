@@ -72,8 +72,7 @@ export class SagaSafeManager {
   }
 
   /**
-   * Create individual transactions and propose them to the Safe
-   * Instead of using MultiSend, we create separate Safe transactions
+   * Create a batch transaction using MultiSendCallOnly and propose it to the Safe
    *
    * @param batch
    */
@@ -83,10 +82,10 @@ export class SagaSafeManager {
     }
 
     try {
-      console.log(`\n📦 Creating Safe transactions: ${batch.description}`);
+      console.log(`\n📦 Creating Safe batch transaction: ${batch.description}`);
       console.log(`   - Number of transactions: ${batch.transactions.length}`);
 
-      // Get Safe info for initial nonce
+      // Get Safe info for nonce
       const safeInfo = await this.apiKit.getSafeInfo(this.config.safeAddress);
       let nonce = Number(safeInfo.nonce);
 
@@ -100,71 +99,93 @@ export class SagaSafeManager {
 
           if (maxPendingNonce >= nonce) {
             nonce = maxPendingNonce + 1;
-            console.log(`   - Found ${pendingTxs.results.length} pending transactions, starting from nonce ${nonce}`);
+            console.log(`   - Found ${pendingTxs.results.length} pending transactions, using nonce ${nonce}`);
           }
         }
       } catch (error) {
         console.log(`   - Could not fetch pending transactions, using current nonce ${nonce}`);
       }
 
-      const proposedTxs: string[] = [];
+      // MultiSendCallOnly contract address on Saga (Safe 1.4.1)
+      const MULTISEND_CALL_ONLY_ADDRESS = "0x9641d764fc13c8B624c04430C7356C1C7C8102e2";
 
-      // Create and propose each transaction individually
-      for (let i = 0; i < batch.transactions.length; i++) {
-        const tx = batch.transactions[i];
+      // Encode all transactions into MultiSend format
+      const multiSendData = this.encodeMultiSendData(batch.transactions);
 
-        console.log(`\n   [${i + 1}/${batch.transactions.length}] Proposing transaction to ${tx.to.slice(0, 10)}...`);
+      console.log(`   - Safe nonce: ${nonce}`);
+      console.log(`   - MultiSendCallOnly address: ${MULTISEND_CALL_ONLY_ADDRESS}`);
 
-        // Create the Safe transaction
-        const safeTx = {
-          to: tx.to,
-          value: tx.value,
-          data: tx.data,
-          operation: tx.operation ?? 0, // Call by default
-          safeTxGas: "0",
-          baseGas: "0",
-          gasPrice: "0",
-          gasToken: ethers.ZeroAddress,
-          refundReceiver: ethers.ZeroAddress,
-          nonce: nonce,
-        };
+      // Create the Safe transaction calling MultiSendCallOnly
+      const safeTx = {
+        to: MULTISEND_CALL_ONLY_ADDRESS,
+        value: "0",
+        data: multiSendData,
+        operation: 1, // DelegateCall for MultiSend
+        safeTxGas: "0",
+        baseGas: "0",
+        gasPrice: "0",
+        gasToken: ethers.ZeroAddress,
+        refundReceiver: ethers.ZeroAddress,
+        nonce: nonce,
+      };
 
-        // Calculate Safe transaction hash
-        const safeTxHash = await this.calculateSafeTxHash(safeTx);
+      // Calculate Safe transaction hash
+      const safeTxHash = await this.calculateSafeTxHash(safeTx);
 
-        // Sign the transaction
-        const signature = await this.signSafeTransaction(safeTxHash);
+      console.log(`   - Safe transaction hash: ${safeTxHash.slice(0, 20)}...`);
 
-        // Propose the transaction to the Safe service
-        await this.apiKit.proposeTransaction({
-          safeAddress: this.config.safeAddress,
-          safeTransactionData: safeTx,
-          safeTxHash: safeTxHash,
-          senderAddress: this.signerAddress,
-          senderSignature: signature,
-        });
+      // Sign the transaction
+      const signature = await this.signSafeTransaction(safeTxHash);
 
-        proposedTxs.push(safeTxHash);
-        console.log(`      ✅ Proposed with hash: ${safeTxHash.slice(0, 20)}...`);
+      // Propose the transaction to the Safe service
+      await this.apiKit.proposeTransaction({
+        safeAddress: this.config.safeAddress,
+        safeTransactionData: safeTx,
+        safeTxHash: safeTxHash,
+        senderAddress: this.signerAddress,
+        senderSignature: signature,
+      });
 
-        // Increment nonce for next transaction
-        nonce++;
-      }
-
-      console.log(`\n✅ All ${batch.transactions.length} Safe transactions proposed successfully`);
+      console.log(`\n✅ Safe batch transaction proposed successfully`);
+      console.log(`   - Batched ${batch.transactions.length} operations into 1 Safe transaction`);
       console.log(`   - View in Safe UI: https://app.safe.global/transactions/queue?safe=saga:${this.config.safeAddress}`);
 
       return {
         success: true,
-        safeTxHash: proposedTxs[0], // Return first tx hash
+        safeTxHash: safeTxHash,
       };
     } catch (error) {
-      console.error(`❌ Failed to create Safe transactions:`, error);
+      console.error(`❌ Failed to create Safe batch transaction:`, error);
       return {
         success: false,
         error: error instanceof Error ? error.message : String(error),
       };
     }
+  }
+
+  /**
+   * Encode multiple transactions into MultiSend format
+   */
+  private encodeMultiSendData(transactions: SafeTransactionData[]): string {
+    // MultiSend encodes transactions as: [operation(1)][to(20)][value(32)][dataLength(32)][data(dataLength)]
+    let encodedTxs = "0x";
+
+    for (const tx of transactions) {
+      const operation = (tx.operation ?? 0).toString(16).padStart(2, "0");
+      const to = tx.to.slice(2).padStart(40, "0");
+      const value = BigInt(tx.value).toString(16).padStart(64, "0");
+      const data = tx.data.slice(2);
+      const dataLength = (data.length / 2).toString(16).padStart(64, "0");
+
+      encodedTxs += operation + to + value + dataLength + data;
+    }
+
+    // Encode as MultiSendCallOnly.multiSend(bytes)
+    const multiSendInterface = new ethers.Interface([
+      "function multiSend(bytes memory transactions) public payable",
+    ]);
+
+    return multiSendInterface.encodeFunctionData("multiSend", [encodedTxs]);
   }
 
   /**
