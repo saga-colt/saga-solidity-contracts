@@ -83,11 +83,13 @@ export class SagaSafeManager {
 
     try {
       console.log(`\n📦 Creating Safe batch transaction: ${batch.description}`);
-      console.log(`   - Number of transactions: ${batch.transactions.length}`);
+      console.log(`   - Requested transactions: ${batch.transactions.length}`);
 
       // Get Safe info for nonce
       const safeInfo = await this.apiKit.getSafeInfo(this.config.safeAddress);
       let nonce = Number(safeInfo.nonce);
+
+      const pendingTxIdentities = new Set<string>();
 
       // Check for pending transactions and adjust nonce accordingly
       try {
@@ -101,16 +103,58 @@ export class SagaSafeManager {
             nonce = maxPendingNonce + 1;
             console.log(`   - Found ${pendingTxs.results.length} pending transactions, using nonce ${nonce}`);
           }
+
+          for (const pendingTx of pendingTxs.results) {
+            const identity = this.buildTransactionIdentity({
+              to: pendingTx.to,
+              value: pendingTx.value ?? "0",
+              data: pendingTx.data ?? "0x",
+              operation: typeof pendingTx.operation === "number" ? pendingTx.operation : Number(pendingTx.operation ?? 0),
+            });
+
+            pendingTxIdentities.add(identity);
+          }
         }
       } catch (error) {
         console.log(`   - Could not fetch pending transactions, using current nonce ${nonce}`);
       }
 
+      // Filter out duplicate and already-pending transactions
+      const uniqueTransactions: SafeTransactionData[] = [];
+      const batchIdentities = new Set<string>();
+
+      for (const tx of batch.transactions) {
+        const identity = this.buildTransactionIdentity(tx);
+
+        if (batchIdentities.has(identity)) {
+          console.log(`   - Skipping duplicate transaction already present in batch (to=${tx.to})`);
+          continue;
+        }
+
+        if (pendingTxIdentities.has(identity)) {
+          console.log(`   - Skipping transaction already pending in Safe queue (to=${tx.to})`);
+          continue;
+        }
+
+        batchIdentities.add(identity);
+        uniqueTransactions.push(tx);
+      }
+
+      if (uniqueTransactions.length === 0) {
+        console.log(`   - No new transactions to propose (all already pending or duplicates)`);
+        return {
+          success: true,
+          safeTxHash: undefined,
+        };
+      }
+
+      console.log(`   - Unique new transactions: ${uniqueTransactions.length}`);
+
       // MultiSendCallOnly contract address on Saga (Safe 1.4.1)
       const MULTISEND_CALL_ONLY_ADDRESS = "0x9641d764fc13c8B624c04430C7356C1C7C8102e2";
 
-      // Encode all transactions into MultiSend format
-      const multiSendData = this.encodeMultiSendData(batch.transactions);
+      // Encode unique transactions into MultiSend format
+      const multiSendData = this.encodeMultiSendData(uniqueTransactions);
 
       console.log(`   - Safe nonce: ${nonce}`);
       console.log(`   - MultiSendCallOnly address: ${MULTISEND_CALL_ONLY_ADDRESS}`);
@@ -147,7 +191,7 @@ export class SagaSafeManager {
       });
 
       console.log(`\n✅ Safe batch transaction proposed successfully`);
-      console.log(`   - Batched ${batch.transactions.length} operations into 1 Safe transaction`);
+      console.log(`   - Batched ${uniqueTransactions.length} operations into 1 Safe transaction`);
       console.log(`   - View in Safe UI: https://app.safe.global/transactions/queue?safe=saga:${this.config.safeAddress}`);
 
       return {
@@ -237,6 +281,18 @@ export class SagaSafeManager {
     const safeTxHash = ethers.TypedDataEncoder.hash(domain, types, message);
 
     return safeTxHash;
+  }
+
+  /**
+   * Build a deterministic identity string for a Safe transaction payload
+   */
+  private buildTransactionIdentity(tx: Pick<SafeTransactionData, "to" | "value" | "data" | "operation">): string {
+    const to = ethers.getAddress(tx.to);
+    const value = BigInt(tx.value ?? "0").toString();
+    const data = (tx.data ?? "0x").toLowerCase();
+    const operation = tx.operation ?? 0;
+
+    return `${to}|${value}|${data}|${operation}`;
   }
 
   /**
