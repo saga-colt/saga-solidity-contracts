@@ -1,14 +1,22 @@
-import { SafeConfig } from "@dtrinity/shared-hardhat-tools";
 import { Address } from "hardhat-deploy/types";
 
 import { DLendConfig } from "./dlend/types";
+
+/**
+ * Saga-specific Safe configuration (simplified from @dtrinity/shared-hardhat-tools)
+ */
+export interface SagaSafeConfig {
+  readonly safeAddress: string;
+  readonly chainId: number;
+  readonly txServiceUrl: string;
+}
 
 export interface Config {
   readonly MOCK_ONLY?: MockConfig;
   readonly tokenAddresses: TokenAddresses;
   readonly uniswapRouter: string;
   readonly walletAddresses: WalletAddresses;
-  readonly safeConfig?: SafeConfig;
+  readonly safeConfig?: SagaSafeConfig;
   readonly oracleAggregators: {
     [key: string]: OracleAggregatorConfig;
   };
