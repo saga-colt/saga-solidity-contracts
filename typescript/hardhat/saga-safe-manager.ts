@@ -156,6 +156,21 @@ export class SagaSafeManager {
       // Encode unique transactions into MultiSend format
       const multiSendData = this.encodeMultiSendData(uniqueTransactions);
 
+      // Skip if an identical MultiSend transaction is already pending
+      const multiSendIdentity = this.buildTransactionIdentity({
+        to: MULTISEND_CALL_ONLY_ADDRESS,
+        value: "0",
+        data: multiSendData,
+        operation: 1,
+      });
+
+      if (pendingTxIdentities.has(multiSendIdentity)) {
+        console.log(`   - Matching MultiSend transaction already pending. Skipping proposal.`);
+        return {
+          success: true,
+        };
+      }
+
       console.log(`   - Safe nonce: ${nonce}`);
       console.log(`   - MultiSendCallOnly address: ${MULTISEND_CALL_ONLY_ADDRESS}`);
 

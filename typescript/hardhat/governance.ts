@@ -88,6 +88,12 @@ export class GovernanceExecutor {
     };
 
     const res = await this.safeManager.createBatchTransaction(batch);
-    return res.success;
+
+    if (!res.success) {
+      const reason = res.error ? `: ${res.error}` : "";
+      throw new Error(`Failed to create Safe transactions${reason}`);
+    }
+
+    return true;
   }
 }
