@@ -26,7 +26,6 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
   const usdcAddress = "0xfc960C233B8E98e0Cf282e29BDE8d3f105fc24d5";
   const sagaAddress = "0xa19377761fed745723b90993988e04d641c2cffe";
   const sfrxUSDAddress = "0x1E81CF7FDD4c9149024454fCEc34a1A5D5431230"; // CORRECTED sfrxUSD address
-  const sfrxUSDAddressWrong = "0x55F937DEF274C6CBd9444f0857639757C5A2a3E9"; // WRONG sfrxUSD address (deployed by mistake)
   const usdnAddress = "0xE9A5C89eCff4323344cFaA4c659EFa42C80FE6cc";
 
   const governanceSafeMultisig = "0xf19cf8881237CA819Fd50C9C22cb258e9DB8644e"; // Safe on Saga
@@ -59,7 +58,6 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
       USDC: usdcAddress,
       SAGA: sagaAddress,
       sfrxUSD: sfrxUSDAddress,
-      sfrxUSDWrong: sfrxUSDAddressWrong, // For fix scripts in deploy/08_fix_sfrxusd_address/
       USDN: usdnAddress,
     },
     uniswapRouter: "0x346239972d1fa486FC4a521031BC81bFB7D6e8a4", // Uniswap V3 SwapRouter

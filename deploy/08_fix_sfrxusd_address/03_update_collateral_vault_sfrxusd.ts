@@ -5,6 +5,7 @@ import { getConfig } from "../../config/config";
 import { D_COLLATERAL_VAULT_CONTRACT_ID, USD_ORACLE_AGGREGATOR_ID } from "../../typescript/deploy-ids";
 import { SagaGovernanceExecutor } from "../../typescript/hardhat/saga-governance";
 import { SafeTransactionData } from "../../typescript/hardhat/saga-safe-manager";
+import { WRONG_SFRXUSD_ADDRESS } from "./constants";
 
 /**
  * Build a Safe transaction payload to disallow collateral
@@ -58,8 +59,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const deployerSigner = await hre.ethers.getSigner(deployer);
 
   // Get addresses from config
-  const oldSfrxUSDAddress = config.tokenAddresses.sfrxUSDWrong;
   const correctSfrxUSDAddress = config.tokenAddresses.sfrxUSD;
+  const oldSfrxUSDAddress = WRONG_SFRXUSD_ADDRESS;
 
   if (!oldSfrxUSDAddress || !correctSfrxUSDAddress) {
     throw new Error("sfrxUSD addresses not found in config");
