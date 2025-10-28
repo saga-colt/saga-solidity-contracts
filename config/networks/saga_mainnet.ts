@@ -25,7 +25,7 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
   const usdtAddress = "0xC8fe3C1de344854f4429bB333AFFAeF97eF88CEa";
   const usdcAddress = "0xfc960C233B8E98e0Cf282e29BDE8d3f105fc24d5";
   const sagaAddress = "0xa19377761fed745723b90993988e04d641c2cffe";
-  const sfrxUSDAddress = "0x55F937DEF274C6CBd9444f0857639757C5A2a3E9";
+  const sfrxUSDAddress = "0x1E81CF7FDD4c9149024454fCEc34a1A5D5431230"; // CORRECTED sfrxUSD address
   const usdnAddress = "0xE9A5C89eCff4323344cFaA4c659EFa42C80FE6cc";
 
   const governanceSafeMultisig = "0xf19cf8881237CA819Fd50C9C22cb258e9DB8644e"; // Safe on Saga

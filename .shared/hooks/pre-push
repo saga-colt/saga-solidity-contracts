@@ -159,6 +159,79 @@ run_slither_if_required() {
   return 0
 }
 
+run_deploy_id_sanity() {
+  if [ "${SHARED_HARDHAT_PRE_PUSH_DEPLOY_IDS:-1}" = "0" ]; then
+    echo "${YELLOW}Skipping deploy ID sanity check (set SHARED_HARDHAT_PRE_PUSH_DEPLOY_IDS=1 to re-enable).${NC}"
+    return 0
+  fi
+
+  tmp_report=$(mktemp 2>/dev/null || printf '%s' "/tmp/deploy-ids-$$.json")
+  cleanup() {
+    rm -f "$tmp_report" 2>/dev/null || true
+  }
+
+  trap cleanup EXIT
+
+  if [ -f "$SHARED_DIR/scripts/deployments/find-hardcoded-deploy-ids.ts" ]; then
+    echo "Running deploy ID sanity check..."
+    if run_ts_node_script "$SHARED_DIR/scripts/deployments/find-hardcoded-deploy-ids.ts" --report "$tmp_report"; then
+      trap - EXIT
+      cleanup
+      return 0
+    fi
+    status=$?
+    if [ "$status" -ne 127 ]; then
+      trap - EXIT
+      cleanup
+      return $status
+    fi
+    echo "${YELLOW}ts-node not available; attempting npm fallback for deploy ID check.${NC}"
+  fi
+
+  if command -v npm >/dev/null 2>&1 && node -e "const pkg=require('./package.json');process.exit(pkg && pkg.scripts && pkg.scripts['sanity:deploy-ids'] ? 0 : 1)"; then
+    echo "Running npm deploy ID sanity check..."
+    if npm run sanity:deploy-ids -- --report "$tmp_report"; then
+      trap - EXIT
+      cleanup
+      return 0
+    fi
+    trap - EXIT
+    cleanup
+    echo "${RED}Deploy ID sanity check failed.${NC}"
+    return 1
+  fi
+
+  trap - EXIT
+  cleanup
+  echo "${YELLOW}No deploy ID sanity checker configured; skipping.${NC}"
+  return 0
+}
+
+run_compile() {
+  if [ "${SHARED_HARDHAT_PRE_PUSH_COMPILE:-1}" = "0" ]; then
+    echo "${YELLOW}Skipping Hardhat compile (set SHARED_HARDHAT_PRE_PUSH_COMPILE=1 to re-enable).${NC}"
+    return 0
+  fi
+
+  if ! command -v npx >/dev/null 2>&1; then
+    echo "${YELLOW}Skipping Hardhat compile: npx not available.${NC}"
+    return 0
+  fi
+
+  if [ ! -f "hardhat.config.ts" ] && [ ! -f "hardhat.config.js" ] && [ ! -f "hardhat.config.cjs" ] && [ ! -f "hardhat.config.mjs" ]; then
+    echo "${YELLOW}Skipping Hardhat compile: config not found in repository root.${NC}"
+    return 0
+  fi
+
+  echo "Running Hardhat compile..."
+  if npx hardhat compile; then
+    return 0
+  fi
+
+  echo "${RED}Hardhat compile failed. Fix issues or set SHARED_HARDHAT_PRE_PUSH_COMPILE=0 to skip this step.${NC}"
+  return 1
+}
+
 check_sensitive_information() {
   staged=$(git diff --cached --name-only || true)
   if [ -z "$staged" ]; then
@@ -240,6 +313,14 @@ echo "Running shared pre-push checks..."
 
 if ! run_guardrails; then
   echo "${RED}Shared guardrail checks failed.${NC}"
+  exit 1
+fi
+
+if ! run_deploy_id_sanity; then
+  exit 1
+fi
+
+if ! run_compile; then
   exit 1
 fi
 
