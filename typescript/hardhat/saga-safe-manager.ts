@@ -87,6 +87,7 @@ export class SagaSafeManager {
 
       // Get Safe info for nonce
       const safeInfo = await this.apiKit.getSafeInfo(this.config.safeAddress);
+      await this.sleep(1000);
       let nonce = Number(safeInfo.nonce);
 
       const pendingTxIdentities = new Set<string>();
@@ -94,6 +95,7 @@ export class SagaSafeManager {
       // Check for pending transactions and adjust nonce accordingly
       try {
         const pendingTxs = await this.apiKit.getPendingTransactions(this.config.safeAddress);
+        await this.sleep(1000);
 
         if (pendingTxs.results && pendingTxs.results.length > 0) {
           // Find the highest nonce among pending transactions
@@ -197,6 +199,7 @@ export class SagaSafeManager {
       const signature = await this.signSafeTransaction(safeTxHash);
 
       // Propose the transaction to the Safe service
+      await this.sleep(1000);
       await this.apiKit.proposeTransaction({
         safeAddress: this.config.safeAddress,
         safeTransactionData: safeTx,
@@ -326,5 +329,14 @@ export class SagaSafeManager {
     signatureBytes[signatureBytes.length - 1] += 4;
 
     return ethers.hexlify(signatureBytes);
+  }
+
+  /**
+   * Pause execution for the specified number of milliseconds.
+   *
+   * @param ms
+   */
+  private async sleep(ms: number): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
