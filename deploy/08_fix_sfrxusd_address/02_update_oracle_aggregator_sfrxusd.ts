@@ -5,7 +5,7 @@ import { getConfig } from "../../config/config";
 import { USD_ORACLE_AGGREGATOR_ID, USD_TELLOR_WRAPPER_WITH_THRESHOLDING_ID } from "../../typescript/deploy-ids";
 import { SagaGovernanceExecutor } from "../../typescript/hardhat/saga-governance";
 import { SafeTransactionData } from "../../typescript/hardhat/saga-safe-manager";
-import { WRONG_SFRXUSD_ADDRESS } from "./constants";
+import { WRONG_SFRXUSD_ADDRESS } from "../../typescript/constants/legacy-addresses";
 
 /**
  * Build a Safe transaction payload to remove an oracle
