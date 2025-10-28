@@ -5,7 +5,9 @@ import { getConfig } from "../../config/config";
 import { USD_ORACLE_AGGREGATOR_ID, USD_TELLOR_WRAPPER_WITH_THRESHOLDING_ID } from "../../typescript/deploy-ids";
 import { SagaGovernanceExecutor } from "../../typescript/hardhat/saga-governance";
 import { SafeTransactionData } from "../../typescript/hardhat/saga-safe-manager";
-import { WRONG_SFRXUSD_ADDRESS } from "../../typescript/constants/legacy-addresses";
+
+// Legacy sfrxUSD address deployed in error prior to this remediation
+const WRONG_SFRXUSD_ADDRESS = "0x55F937DEF274C6CBd9444f0857639757C5A2a3E9";
 
 /**
  * Build a Safe transaction payload to remove an oracle
