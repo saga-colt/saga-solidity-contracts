@@ -28,29 +28,6 @@ function createSetFeedTransaction(
   };
 }
 
-/**
- * Build a Safe transaction payload to set threshold configuration
- *
- * @param tellorWrapperAddress
- * @param assetAddress
- * @param lowerThreshold
- * @param fixedPrice
- * @param tellorWrapperInterface
- */
-function createSetThresholdConfigTransaction(
-  tellorWrapperAddress: string,
-  assetAddress: string,
-  lowerThreshold: bigint,
-  fixedPrice: bigint,
-  tellorWrapperInterface: any,
-): SafeTransactionData {
-  return {
-    to: tellorWrapperAddress,
-    value: "0",
-    data: tellorWrapperInterface.encodeFunctionData("setThresholdConfig", [assetAddress, lowerThreshold, fixedPrice]),
-  };
-}
-
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Promise<boolean> {
   // This script is ONLY for saga_mainnet (network-specific fix)
   const networkName = hre.network.name;
@@ -110,8 +87,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Pr
   console.log(`\n📝 Configuring oracle feed for correct sfrxUSD...`);
   console.log(`   - Asset: ${correctSfrxUSDAddress}`);
   console.log(`   - Feed: ${sfrxUSDOracleConfig.feed}`);
-  console.log(`   - Lower Threshold: ${sfrxUSDOracleConfig.lowerThreshold}`);
-  console.log(`   - Fixed Price: ${sfrxUSDOracleConfig.fixedPrice}`);
+  console.log(`   - Note: No threshold (sfrxUSD is yield-bearing, price not capped)`);
 
   let allOperationsComplete = true;
 
@@ -129,38 +105,18 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Pr
     allOperationsComplete = false;
   }
 
-  // Set threshold configuration
-  console.log(`\n🔧 Setting threshold config for correct sfrxUSD...`);
-  const thresholdOpComplete = await executor.tryOrQueue(
-    async () => {
-      await tellorWrapper.setThresholdConfig(correctSfrxUSDAddress, sfrxUSDOracleConfig.lowerThreshold, sfrxUSDOracleConfig.fixedPrice);
-      console.log(`  ✅ Set threshold config for correct sfrxUSD`);
-    },
-    () =>
-      createSetThresholdConfigTransaction(
-        tellorWrapperAddress,
-        correctSfrxUSDAddress,
-        sfrxUSDOracleConfig.lowerThreshold,
-        sfrxUSDOracleConfig.fixedPrice,
-        tellorWrapper.interface,
-      ),
-  );
-
-  if (!thresholdOpComplete) {
-    allOperationsComplete = false;
-  }
-
-  // Perform sanity check if both operations completed
-  if (feedOpComplete && thresholdOpComplete) {
+  // Perform sanity check if operation completed
+  if (feedOpComplete) {
     console.log(`\n🔍 Performing sanity check for correct sfrxUSD...`);
 
     try {
       const price = await tellorWrapper.getAssetPrice(correctSfrxUSDAddress);
       const normalizedPrice = Number(price) / Number(baseCurrencyUnit);
 
-      if (normalizedPrice < 0.95 || normalizedPrice > 1.05) {
-        console.error(`  ❌ Sanity check failed: Price ${normalizedPrice} outside range [0.95, 1.05]`);
-        throw new Error(`Sanity check failed: Price ${normalizedPrice} outside range [0.95, 1.05]`);
+      // sfrxUSD is yield-bearing and should trade above $1, typically between $1.00 and $2.00
+      if (normalizedPrice < 1.0 || normalizedPrice >= 2.0) {
+        console.error(`  ❌ Sanity check failed: Price ${normalizedPrice} outside range [1.0, 2.0)`);
+        throw new Error(`Sanity check failed: Price ${normalizedPrice} outside range [1.0, 2.0)`);
       } else {
         console.log(`  ✅ Sanity check passed: Normalized price is ${normalizedPrice}`);
       }
@@ -168,13 +124,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Pr
       console.error(`  ❌ Error performing sanity check:`, error);
       throw error;
     }
-  } else if (!feedOpComplete || !thresholdOpComplete) {
+  } else {
     console.log(`\n⏭️ Skipping sanity check (operations queued to Safe)`);
   }
 
   // Handle governance operations if needed
   if (!allOperationsComplete) {
-    const flushed = await executor.flush(`Setup oracle for correct sfrxUSD: governance operations`);
+    const flushed = await executor.flush(`Setup oracle feed for correct sfrxUSD`);
 
     if (executor.useSafe) {
       if (!flushed) {
