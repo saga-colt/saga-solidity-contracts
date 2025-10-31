@@ -17,8 +17,8 @@
 
 pragma solidity ^0.8.20;
 
-import "../interface/liquidityV2/BaseLiquidityV2Wrapper.sol";
-import "../interface/liquidityV2/ILiquidityV2OracleAggregatorV3Interface.sol";
+import "../interface/liquidityV2/BaseLiquityV2Wrapper.sol";
+import "../interface/liquidityV2/ILiquityV2OracleAggregatorV3Interface.sol";
 import "usingtellor/contracts/UsingTellor.sol";
 
 /**
@@ -27,7 +27,7 @@ import "usingtellor/contracts/UsingTellor.sol";
  * Supports both Chainlink-like interface (LiquityV2OracleAggregatorV3Interface) and native Tellor integration
  * Uses Tellor's recommended safety pattern with dispute protection when using native Tellor
  */
-contract TellorWrapper is BaseLiquidityV2Wrapper, UsingTellor {
+contract TellorWrapper is BaseLiquityV2Wrapper, UsingTellor {
     /* State */
     
     /// @notice Mapping from asset address to Chainlink-like feed
@@ -53,7 +53,7 @@ contract TellorWrapper is BaseLiquidityV2Wrapper, UsingTellor {
         address baseCurrency,
         uint256 _baseCurrencyUnit,
         address payable tellorOracle
-    ) BaseLiquidityV2Wrapper(baseCurrency, _baseCurrencyUnit) UsingTellor(tellorOracle) {}
+    ) BaseLiquityV2Wrapper(baseCurrency, _baseCurrencyUnit) UsingTellor(tellorOracle) {}
 
     /**
      * @notice Gets the price information for an asset
