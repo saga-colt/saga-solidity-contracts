@@ -29,7 +29,7 @@ contract TellorWrapperWithThresholding is TellorWrapper, ThresholdingUtils {
     event ThresholdConfigSet(address indexed asset, uint256 lowerThresholdInBase, uint256 fixedPriceInBase);
     event ThresholdConfigRemoved(address indexed asset);
 
-    constructor(address baseCurrency, uint256 _baseCurrencyUnit) TellorWrapper(baseCurrency, _baseCurrencyUnit) {}
+    constructor(address baseCurrency, uint256 _baseCurrencyUnit, address payable tellorOracle) TellorWrapper(baseCurrency, _baseCurrencyUnit, tellorOracle) {}
 
     function getPriceInfo(address asset) public view override returns (uint256 price, bool isAlive) {
         (price, isAlive) = super.getPriceInfo(asset);
