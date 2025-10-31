@@ -156,12 +156,12 @@ contract OracleAggregator is AccessControl, IOracleWrapper {
         // Check if asset is frozen
         if (isFrozen[asset]) {
             PriceOverride memory override_ = priceOverrides[asset];
-            
+
             // Check if override exists and is not expired
             if (override_.expiresAt > block.timestamp && override_.price > 0) {
                 return (override_.price, false); // Return override price with isAlive = false
             }
-            
+
             // Asset is frozen but no valid override
             revert NoPriceOverride(asset);
         }
@@ -227,11 +227,7 @@ contract OracleAggregator is AccessControl, IOracleWrapper {
      * @param price The override price
      * @param expirationTime The expiration timestamp
      */
-    function setPriceOverride(
-        address asset,
-        uint256 price,
-        uint256 expirationTime
-    ) external {
+    function setPriceOverride(address asset, uint256 price, uint256 expirationTime) external {
         if (!isFrozen[asset]) {
             revert AssetNotFrozen(asset);
         }

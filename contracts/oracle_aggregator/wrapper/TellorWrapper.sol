@@ -29,21 +29,21 @@ import "usingtellor/contracts/UsingTellor.sol";
  */
 contract TellorWrapper is BaseLiquityV2Wrapper, UsingTellor {
     /* State */
-    
+
     /// @notice Mapping from asset address to Chainlink-like feed
     mapping(address => LiquityV2OracleAggregatorV3Interface) public assetToFeed;
-    
+
     /// @notice Mapping from asset address to Tellor queryId (for native Tellor integration)
     mapping(address => bytes32) public assetToQueryId;
-    
+
     /// @notice Mapping from asset address to last stored timestamp (prevents dispute attacks)
     mapping(address => uint256) public lastStoredTimestamp;
-    
+
     /// @notice Dispute window in seconds (default 15 minutes)
     uint256 public disputeWindow = 15 minutes;
 
     /* Errors */
-    
+
     error QueryIdNotSet(address asset);
     error DataTooOld(address asset, uint256 timestampRetrieved, uint256 maxAge);
     error TimestampNotNewer(address asset, uint256 timestampRetrieved, uint256 lastStored);
@@ -64,12 +64,12 @@ contract TellorWrapper is BaseLiquityV2Wrapper, UsingTellor {
      */
     function getPriceInfo(address asset) public view virtual override returns (uint256 price, bool isAlive) {
         bytes32 queryId = assetToQueryId[asset];
-        
+
         // If queryId is set, use native Tellor pattern
         if (queryId != bytes32(0)) {
             return _getTellorPrice(asset, queryId);
         }
-        
+
         // Otherwise, use Chainlink-like interface
         LiquityV2OracleAggregatorV3Interface feed = assetToFeed[asset];
         if (address(feed) == address(0)) {
@@ -98,10 +98,7 @@ contract TellorWrapper is BaseLiquityV2Wrapper, UsingTellor {
      */
     function _getTellorPrice(address asset, bytes32 queryId) internal view returns (uint256 price, bool isAlive) {
         // Retrieve data at least disputeWindow old to allow time for disputes
-        (bytes memory value, uint256 timestampRetrieved) = _getDataBefore(
-            queryId,
-            block.timestamp - disputeWindow
-        );
+        (bytes memory value, uint256 timestampRetrieved) = _getDataBefore(queryId, block.timestamp - disputeWindow);
 
         // If timestampRetrieved is 0, no data was found
         if (timestampRetrieved == 0) {
@@ -122,7 +119,7 @@ contract TellorWrapper is BaseLiquityV2Wrapper, UsingTellor {
 
         // Decode the price value
         price = abi.decode(value, (uint256));
-        
+
         // Validate price is positive
         if (price == 0) {
             return (0, false);
@@ -130,7 +127,7 @@ contract TellorWrapper is BaseLiquityV2Wrapper, UsingTellor {
 
         // Price is valid
         isAlive = true;
-        
+
         // Convert to base currency unit
         price = _convertToBaseCurrencyUnit(price);
     }
@@ -141,31 +138,31 @@ contract TellorWrapper is BaseLiquityV2Wrapper, UsingTellor {
      *      - If queryId is provided (non-zero), uses native Tellor pattern with dispute protection (recommended)
      *      - If queryId is zero and feed is provided, uses Chainlink-like interface as fallback
      *      - Both queryId and feed can be set; queryId takes priority if both are non-zero
-     * 
+     *
      * ## How to Generate Query IDs:
-     * 
+     *
      * ### For SpotPrice queries (most common):
      * ```solidity
      * // Example: ETH/USD
      * bytes memory queryData = abi.encode("SpotPrice", abi.encode("eth", "usd"));
      * bytes32 queryId = keccak256(queryData);
-     * 
+     *
      * // Example: BTC/USD
      * bytes memory queryData = abi.encode("SpotPrice", abi.encode("btc", "usd"));
      * bytes32 queryId = keccak256(queryData);
      * ```
-     * 
+     *
      * ### For custom queries:
      * ```solidity
      * bytes memory params = abi.encode(param1, param2, ...);
      * bytes memory queryData = abi.encode("QueryType", params);
      * bytes32 queryId = keccak256(queryData);
      * ```
-     * 
+     *
      * ### Using JavaScript/TypeScript (ethers.js):
      * ```javascript
      * const { ethers } = require("ethers");
-     * 
+     *
      * // SpotPrice query
      * const queryData = ethers.AbiCoder.defaultAbiCoder().encode(
      *   ["string", "bytes"],
@@ -176,12 +173,12 @@ contract TellorWrapper is BaseLiquityV2Wrapper, UsingTellor {
      * );
      * const queryId = ethers.keccak256(queryData);
      * ```
-     * 
+     *
      * ### Common Query IDs:
      * - ETH/USD: keccak256(abi.encode("SpotPrice", abi.encode("eth", "usd")))
      * - BTC/USD: keccak256(abi.encode("SpotPrice", abi.encode("btc", "usd")))
      * - AVAX/USD: keccak256(abi.encode("SpotPrice", abi.encode("avax", "usd")))
-     * 
+     *
      * @param asset The address of the asset
      * @param queryId The Tellor queryId (bytes32) for native Tellor. Use bytes32(0) to only set feed.
      *                Generate using keccak256(abi.encode(queryType, abi.encode(params)))
