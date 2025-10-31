@@ -47,6 +47,7 @@ contract TellorWrapper is BaseLiquidityV2Wrapper, UsingTellor {
     error QueryIdNotSet(address asset);
     error DataTooOld(address asset, uint256 timestampRetrieved, uint256 maxAge);
     error TimestampNotNewer(address asset, uint256 timestampRetrieved, uint256 lastStored);
+    error MustProvideQueryIdOrFeed();
 
     constructor(
         address baseCurrency,
@@ -135,35 +136,78 @@ contract TellorWrapper is BaseLiquidityV2Wrapper, UsingTellor {
     }
 
     /**
-     * @notice Sets the Tellor oracle feed for an asset (Chainlink-like interface)
-     * @dev Validates that the feed decimals match the base currency decimals
+     * @notice Sets the Tellor configuration for an asset
+     * @dev Configures Tellor integration. Supports both native queryId pattern (recommended) and Chainlink-like feed fallback.
+     *      - If queryId is provided (non-zero), uses native Tellor pattern with dispute protection (recommended)
+     *      - If queryId is zero and feed is provided, uses Chainlink-like interface as fallback
+     *      - Both queryId and feed can be set; queryId takes priority if both are non-zero
+     * 
+     * ## How to Generate Query IDs:
+     * 
+     * ### For SpotPrice queries (most common):
+     * ```solidity
+     * // Example: ETH/USD
+     * bytes memory queryData = abi.encode("SpotPrice", abi.encode("eth", "usd"));
+     * bytes32 queryId = keccak256(queryData);
+     * 
+     * // Example: BTC/USD
+     * bytes memory queryData = abi.encode("SpotPrice", abi.encode("btc", "usd"));
+     * bytes32 queryId = keccak256(queryData);
+     * ```
+     * 
+     * ### For custom queries:
+     * ```solidity
+     * bytes memory params = abi.encode(param1, param2, ...);
+     * bytes memory queryData = abi.encode("QueryType", params);
+     * bytes32 queryId = keccak256(queryData);
+     * ```
+     * 
+     * ### Using JavaScript/TypeScript (ethers.js):
+     * ```javascript
+     * const { ethers } = require("ethers");
+     * 
+     * // SpotPrice query
+     * const queryData = ethers.AbiCoder.defaultAbiCoder().encode(
+     *   ["string", "bytes"],
+     *   [
+     *     "SpotPrice",
+     *     ethers.AbiCoder.defaultAbiCoder().encode(["string", "string"], ["eth", "usd"])
+     *   ]
+     * );
+     * const queryId = ethers.keccak256(queryData);
+     * ```
+     * 
+     * ### Common Query IDs:
+     * - ETH/USD: keccak256(abi.encode("SpotPrice", abi.encode("eth", "usd")))
+     * - BTC/USD: keccak256(abi.encode("SpotPrice", abi.encode("btc", "usd")))
+     * - AVAX/USD: keccak256(abi.encode("SpotPrice", abi.encode("avax", "usd")))
+     * 
      * @param asset The address of the asset
-     * @param feed The address of the Tellor oracle feed
+     * @param queryId The Tellor queryId (bytes32) for native Tellor. Use bytes32(0) to only set feed.
+     *                Generate using keccak256(abi.encode(queryType, abi.encode(params)))
+     * @param feed The address of the Chainlink-like Tellor feed (fallback). Use address(0) to only set queryId.
      */
-    function setFeed(address asset, address feed) external onlyRole(ORACLE_MANAGER_ROLE) {
-        LiquityV2OracleAggregatorV3Interface feedInterface = LiquityV2OracleAggregatorV3Interface(feed);
-
-        // Validate that feed decimals match expected decimals
-        uint8 feedDecimals = feedInterface.decimals();
-        if (feedDecimals != BASE_CURRENCY_DECIMALS) {
-            revert DecimalsMismatch(feed, feedDecimals, BASE_CURRENCY_DECIMALS);
+    function setAssetConfig(address asset, bytes32 queryId, address feed) external onlyRole(ORACLE_MANAGER_ROLE) {
+        // Validate that at least one source is provided
+        if (queryId == bytes32(0) && feed == address(0)) {
+            revert MustProvideQueryIdOrFeed();
         }
 
-        assetToFeed[asset] = feedInterface;
-        // Clear queryId if switching to Chainlink-like feed
-        assetToQueryId[asset] = bytes32(0);
-    }
+        // If feed is provided, validate decimals
+        if (feed != address(0)) {
+            LiquityV2OracleAggregatorV3Interface feedInterface = LiquityV2OracleAggregatorV3Interface(feed);
+            uint8 feedDecimals = feedInterface.decimals();
+            if (feedDecimals != BASE_CURRENCY_DECIMALS) {
+                revert DecimalsMismatch(feed, feedDecimals, BASE_CURRENCY_DECIMALS);
+            }
+            assetToFeed[asset] = feedInterface;
+        } else {
+            // Clear feed if not provided
+            assetToFeed[asset] = LiquityV2OracleAggregatorV3Interface(address(0));
+        }
 
-    /**
-     * @notice Sets the Tellor oracle configuration for an asset (native Tellor integration)
-     * @dev Configures native Tellor integration with queryId
-     * @param asset The address of the asset
-     * @param queryId The Tellor queryId for the asset
-     */
-    function setTellorOracle(address asset, bytes32 queryId) external onlyRole(ORACLE_MANAGER_ROLE) {
+        // Set queryId (can be zero)
         assetToQueryId[asset] = queryId;
-        // Clear Chainlink-like feed if switching to native Tellor
-        assetToFeed[asset] = LiquityV2OracleAggregatorV3Interface(address(0));
     }
 
     /**

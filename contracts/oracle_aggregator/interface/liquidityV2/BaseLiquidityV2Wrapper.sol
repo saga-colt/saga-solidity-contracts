@@ -31,7 +31,7 @@ abstract contract BaseLiquidityV2Wrapper is IOracleWrapper, AccessControl {
 
     uint256 public constant LIQUIDITY_V2_BASE_CURRENCY_UNIT = 10 ** 18;
     uint8 public constant BASE_CURRENCY_DECIMALS = 18; // Decimals matching LIQUIDITY_V2_BASE_CURRENCY_UNIT
-    uint256 public feedHeartbeat = 4 hours;
+    uint256 public feedHeartbeat = 24 hours;
     address private immutable _baseCurrency;
     uint256 public immutable BASE_CURRENCY_UNIT;
     uint256 public heartbeatStaleTimeLimit = 30 minutes;
