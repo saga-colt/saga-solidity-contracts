@@ -53,7 +53,8 @@
     "solidity-coverage": "^0.8.14",
     "ts-node": "^10.9.2",
     "typechain": "^8.3.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "usingtellor": "^5.0.5"
   },
   "scripts": {
     "analyze:shared": "ts-node .shared/scripts/analysis/run-all.ts",
