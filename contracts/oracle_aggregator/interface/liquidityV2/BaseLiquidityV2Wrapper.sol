@@ -18,20 +18,20 @@
 pragma solidity ^0.8.20;
 
 import "../IOracleWrapper.sol";
-import "./ILiquityV2OracleAggregatorV3Interface.sol";
+import "./ILiquidityV2OracleAggregatorV3Interface.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 /**
- * @title BaseLiquityV2Wrapper
+ * @title BaseLiquidityV2Wrapper
  * @dev Abstract contract that implements the IOracleWrapper interface for Liquity V2 oracles
  * Provides common functionality for all Liquity V2-compatible oracle wrappers
  */
-abstract contract BaseLiquityV2Wrapper is IOracleWrapper, AccessControl {
+abstract contract BaseLiquidityV2Wrapper is IOracleWrapper, AccessControl {
     /* Core state */
 
-    uint256 public constant LIQUITY_V2_BASE_CURRENCY_UNIT = 10 ** 18;
-    uint8 public constant BASE_CURRENCY_DECIMALS = 18; // Decimals matching LIQUITY_V2_BASE_CURRENCY_UNIT
-    uint256 public constant LIQUITY_V2_HEARTBEAT = 4 hours;
+    uint256 public constant LIQUIDITY_V2_BASE_CURRENCY_UNIT = 10 ** 18;
+    uint8 public constant BASE_CURRENCY_DECIMALS = 18; // Decimals matching LIQUIDITY_V2_BASE_CURRENCY_UNIT
+    uint256 public feedHeartbeat = 4 hours;
     address private immutable _baseCurrency;
     uint256 public immutable BASE_CURRENCY_UNIT;
     uint256 public heartbeatStaleTimeLimit = 30 minutes;
@@ -94,7 +94,7 @@ abstract contract BaseLiquityV2Wrapper is IOracleWrapper, AccessControl {
      * @return The price in base currency decimals
      */
     function _convertToBaseCurrencyUnit(uint256 price) internal view returns (uint256) {
-        return (price * BASE_CURRENCY_UNIT) / LIQUITY_V2_BASE_CURRENCY_UNIT;
+        return (price * BASE_CURRENCY_UNIT) / LIQUIDITY_V2_BASE_CURRENCY_UNIT;
     }
 
     /**
@@ -103,5 +103,13 @@ abstract contract BaseLiquityV2Wrapper is IOracleWrapper, AccessControl {
      */
     function setHeartbeatStaleTimeLimit(uint256 _newHeartbeatStaleTimeLimit) external onlyRole(ORACLE_MANAGER_ROLE) {
         heartbeatStaleTimeLimit = _newHeartbeatStaleTimeLimit;
+    }
+
+    /**
+     * @notice Sets the price feed heartbeat duration
+     * @param _newHeartbeat The new heartbeat duration in seconds
+     */
+    function setFeedHeartbeat(uint256 _newHeartbeat) external onlyRole(ORACLE_MANAGER_ROLE) {
+        feedHeartbeat = _newHeartbeat;
     }
 }
