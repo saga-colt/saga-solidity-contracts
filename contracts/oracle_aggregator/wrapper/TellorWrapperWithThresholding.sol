@@ -19,7 +19,6 @@ pragma solidity ^0.8.20;
 
 import "./TellorWrapper.sol";
 import "./ThresholdingUtils.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract TellorWrapperWithThresholding is TellorWrapper, ThresholdingUtils {
     /* State */
