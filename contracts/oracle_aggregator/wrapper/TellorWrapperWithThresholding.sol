@@ -19,7 +19,6 @@ pragma solidity ^0.8.20;
 
 import "./TellorWrapper.sol";
 import "./ThresholdingUtils.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract TellorWrapperWithThresholding is TellorWrapper, ThresholdingUtils {
     /* State */
@@ -31,9 +30,8 @@ contract TellorWrapperWithThresholding is TellorWrapper, ThresholdingUtils {
 
     constructor(
         address baseCurrency,
-        uint256 _baseCurrencyUnit,
-        address payable tellorOracle
-    ) TellorWrapper(baseCurrency, _baseCurrencyUnit, tellorOracle) {}
+        uint256 _baseCurrencyUnit
+    ) TellorWrapper(baseCurrency, _baseCurrencyUnit) {}
 
     function getPriceInfo(address asset) public view override returns (uint256 price, bool isAlive) {
         (price, isAlive) = super.getPriceInfo(asset);
