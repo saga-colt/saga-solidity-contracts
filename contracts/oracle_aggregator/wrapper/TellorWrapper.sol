@@ -17,8 +17,8 @@
 
 pragma solidity ^0.8.20;
 
-import "../interface/liquidityV2/BaseLiquityV2Wrapper.sol";
-import "../interface/liquidityV2/ILiquityV2OracleAggregatorV3Interface.sol";
+import "../interface/liquityV2/BaseLiquityV2Wrapper.sol";
+import "../interface/liquityV2/ILiquityV2OracleAggregatorV3Interface.sol";
 
 /**
  * @title TellorWrapper
