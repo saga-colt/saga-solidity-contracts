@@ -14,7 +14,7 @@ export interface SagaSafeConfig {
 export interface Config {
   readonly MOCK_ONLY?: MockConfig;
   readonly tokenAddresses: TokenAddresses;
-  readonly uniswapRouter: string;
+  readonly uniswapRouter?: string;
   readonly walletAddresses: WalletAddresses;
   readonly safeConfig?: SagaSafeConfig;
   readonly oracleAggregators: {

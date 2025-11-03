@@ -7,12 +7,12 @@ import { SagaGovernanceExecutor } from "../../typescript/hardhat/saga-governance
 import { SafeTransactionData } from "../../typescript/hardhat/saga-safe-manager";
 
 /**
- * Build a Safe transaction payload to set an oracle in the OracleAggregator
+ * Build a Safe transaction payload to set an oracle in the OracleAggregator.
  *
- * @param oracleAggregatorAddress
- * @param assetAddress
- * @param oracleAddress
- * @param oracleAggregatorInterface
+ * @param oracleAggregatorAddress - OracleAggregator contract address
+ * @param assetAddress - Asset that needs an oracle
+ * @param oracleAddress - Oracle contract that should serve the asset
+ * @param oracleAggregatorInterface - OracleAggregator interface used to encode calldata
  */
 function createSetOracleTransaction(
   oracleAggregatorAddress: string,
