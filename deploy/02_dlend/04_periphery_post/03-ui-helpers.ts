@@ -15,10 +15,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     return true;
   }
 
-  const wethAddress = config.tokenAddresses.SAGA;
+  const sagaAddress = config.tokenAddresses.SAGA || config.tokenAddresses.WSAGA; // WSAGA as fallback for other environments
 
-  if (!wethAddress) {
-    console.log("SAGA is not configured for this network.");
+  if (!sagaAddress) {
+    console.log("Neither SAGA nor WSAGA is configured for this network.");
     return false;
   }
 
@@ -26,7 +26,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const priceOracle = await deployments.get(PRICE_ORACLE_ID);
 
   // Deploy UiIncentiveDataProvider first
-  const _uiIncentiveDataProvider = await deploy(UI_INCENTIVE_DATA_PROVIDER_ID, {
+  await deploy(UI_INCENTIVE_DATA_PROVIDER_ID, {
     from: deployer,
     args: [], // No constructor arguments needed
     log: true,
@@ -36,7 +36,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Then deploy UiPoolDataProvider
   await deploy(UI_POOL_DATA_PROVIDER_ID, {
     from: deployer,
-    args: [priceOracle.address, wethAddress], // Use price oracle and WSAGA (or SAGA as fallback)
+    args: [priceOracle.address, sagaAddress], // Use price oracle and SAGA or WSAGA
     log: true,
     waitConfirmations: 1,
   });

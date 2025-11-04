@@ -84,11 +84,11 @@ export function getPrivateKeyFromEnv(envNamePostfix: string): string {
  */
 export function getStandardNamedAccounts(): {
   [name: string]:
-    | string
-    | number
-    | {
-        [network: string]: string | number | null;
-      };
+  | string
+  | number
+  | {
+    [network: string]: string | number | null;
+  };
 } {
   return {
     /* eslint-disable camelcase -- Use camelcase for network config  */
@@ -96,8 +96,9 @@ export function getStandardNamedAccounts(): {
     deployer: {
       hardhat: 0,
       localhost: 0,
-      sonic_testnet: 0,
-      sonic_mainnet: 0,
+      
+      saga_testnet: 0,
+      saga_mainnet: 0,
     },
     // For testing ONLY
     user1: {
