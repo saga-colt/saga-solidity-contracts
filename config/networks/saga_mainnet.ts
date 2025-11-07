@@ -60,7 +60,7 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
       SAGA: sagaAddress,
       sfrxUSD: sfrxUSDAddress,
       USDN: usdnAddress,
-      yUSD: yUSDAddress
+      yUSD: yUSDAddress,
     },
     uniswapRouter: "0x346239972d1fa486FC4a521031BC81bFB7D6e8a4", // Uniswap V3 SwapRouter
     walletAddresses: {
