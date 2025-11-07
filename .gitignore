@@ -37,3 +37,9 @@ reports/mythril/
 
 # Role automation reports
 reports/roles/*.json
+
+# AI toolkits
+.ai-devkit.json
+AGENTS.md
+docs/ai/
+.cursor/
