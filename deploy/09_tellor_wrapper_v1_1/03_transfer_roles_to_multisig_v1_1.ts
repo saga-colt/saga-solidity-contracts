@@ -29,8 +29,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Get the configuration from the network
   const config = await getConfig(hre);
 
-  // Get the governance multisig address
-  const { governanceMultisig } = config.walletAddresses;
+  // Get the governance multisig address (allow override via env var for testing)
+  const testMultisig = process.env.TEST_GOVERNANCE_MULTISIG;
+  const governanceMultisig = testMultisig || config.walletAddresses.governanceMultisig;
+
+  if (testMultisig) {
+    console.log(`⚠️  Using TEST governance multisig: ${governanceMultisig} (from TEST_GOVERNANCE_MULTISIG env var)`);
+  } else {
+    console.log(`📋 Using governance multisig from config: ${governanceMultisig}`);
+  }
 
   console.log(`\n🔑 ${__filename.split("/").slice(-2).join("/")}: Transferring TellorWrapper v1.1 roles to governance multisig`);
 

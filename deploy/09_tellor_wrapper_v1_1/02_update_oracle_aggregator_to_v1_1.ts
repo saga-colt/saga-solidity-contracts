@@ -36,14 +36,30 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Pr
   const config = await getConfig(hre);
   const deployerSigner = await hre.ethers.getSigner(deployer);
 
-  // Initialize Saga governance executor
-  const executor = new SagaGovernanceExecutor(hre, deployerSigner, config.safeConfig);
-  await executor.initialize();
-
   console.log(`\n≻ ${__filename.split("/").slice(-2).join("/")}: Updating OracleAggregator to point to TellorWrapper v1.1...`);
 
-  const governanceMultisig = config.walletAddresses.governanceMultisig;
-  console.log(`🔐 Governance multisig: ${governanceMultisig}`);
+  // Get the governance multisig address (allow override via env var for testing)
+  const testMultisig = process.env.TEST_GOVERNANCE_MULTISIG;
+  const governanceMultisig = testMultisig || config.walletAddresses.governanceMultisig;
+
+  if (testMultisig) {
+    console.log(`⚠️  Using TEST governance multisig: ${governanceMultisig} (from TEST_GOVERNANCE_MULTISIG env var)`);
+  } else {
+    console.log(`🔐 Governance multisig: ${governanceMultisig}`);
+  }
+
+  // Override Safe config for testing if TEST_GOVERNANCE_MULTISIG is set
+  const safeConfig = testMultisig && config.safeConfig
+    ? {
+      safeAddress: governanceMultisig,
+      chainId: config.safeConfig.chainId,
+      txServiceUrl: config.safeConfig.txServiceUrl,
+    }
+    : config.safeConfig;
+
+  // Initialize Saga governance executor with potentially overridden Safe config
+  const executor = new SagaGovernanceExecutor(hre, deployerSigner, safeConfig);
+  await executor.initialize();
 
   // Get USD OracleAggregator contract
   const oracleAggregatorDeployment = await hre.deployments.get(USD_ORACLE_AGGREGATOR_ID);
@@ -152,7 +168,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Pr
 };
 
 func.tags = ["usd-oracle", "oracle-aggregator", "oracle-wrapper", "usd-tellor-wrapper", "tellor-wrapper-v1.1"];
-func.dependencies = ["deploy-tellor-wrapper-v1.1", "transfer_tellor_wrapper_v1_1_roles_to_multisig", USD_ORACLE_AGGREGATOR_ID];
+func.dependencies = ["deploy-tellor-wrapper-v1.1", "transfer_tellor_wrapper_v1_1_roles_to_multisig", "deploy-usd-oracle-aggregator"];
 func.id = "update-oracle-aggregator-to-tellor-wrapper-v1.1";
 
 export default func;

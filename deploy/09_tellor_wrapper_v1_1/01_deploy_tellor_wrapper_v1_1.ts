@@ -43,7 +43,6 @@ async function performOracleSanityChecks(
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Promise<boolean> {
   const { deployer } = await hre.getNamedAccounts();
-
   const config = await getConfig(hre);
   const baseCurrencyUnit = BigInt(10) ** BigInt(config.oracleAggregators.USD.priceDecimals);
   const baseCurrency = config.oracleAggregators.USD.baseCurrency;
