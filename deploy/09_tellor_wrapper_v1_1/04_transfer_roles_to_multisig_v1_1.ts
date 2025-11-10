@@ -5,6 +5,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 import { getConfig } from "../../config/config";
 import {
   USD_ORACLE_AGGREGATOR_ID,
+  USD_TELLOR_COMPOSITE_WRAPPER_ID,
   USD_TELLOR_ORACLE_WRAPPER_ID,
   USD_TELLOR_WRAPPER_WITH_THRESHOLDING_ID,
 } from "../../typescript/deploy-ids";
@@ -95,6 +96,32 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     hre,
     USD_TELLOR_WRAPPER_WITH_THRESHOLDING_ID,
     "USD TellorWrapperWithThresholding v1.1",
+    DEFAULT_ADMIN_ROLE,
+    "DEFAULT_ADMIN_ROLE",
+    deployerSigner,
+    governanceMultisig,
+    deployer,
+  );
+
+  // Transfer roles for USD TellorCompositeWrapper v1.1
+  console.log(`\n📄 Transferring roles for TellorCompositeWrapper v1.1...`);
+
+  if (ORACLE_MANAGER_ROLE) {
+    await transferRole(
+      hre,
+      USD_TELLOR_COMPOSITE_WRAPPER_ID,
+      "USD TellorCompositeWrapper v1.1",
+      ORACLE_MANAGER_ROLE,
+      "ORACLE_MANAGER_ROLE",
+      deployerSigner,
+      governanceMultisig,
+      deployer,
+    );
+  }
+  await transferRole(
+    hre,
+    USD_TELLOR_COMPOSITE_WRAPPER_ID,
+    "USD TellorCompositeWrapper v1.1",
     DEFAULT_ADMIN_ROLE,
     "DEFAULT_ADMIN_ROLE",
     deployerSigner,

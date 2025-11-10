@@ -97,6 +97,16 @@ export interface OracleAggregatorConfig {
         fixedPrice: bigint;
       };
     };
+    compositeTellorOracleWrappers: {
+      [key: string]: {
+        feed1: string;
+        feed2: string;
+        lowerThresholdInBase1: bigint;
+        fixedPriceInBase1: bigint;
+        lowerThresholdInBase2: bigint;
+        fixedPriceInBase2: bigint;
+      };
+    };
   };
 }
 

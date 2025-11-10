@@ -28,6 +28,7 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
   const sfrxUSDAddress = "0x1E81CF7FDD4c9149024454fCEc34a1A5D5431230";
   const usdnAddress = "0xE9A5C89eCff4323344cFaA4c659EFa42C80FE6cc";
   const yUSDAddress = "0x839e7e610108Cf3DCc9b40329db33b6E6bc9baCE";
+  const vyUSDAddress = "0x704a58f888f18506C9Fc199e53AE220B5fdCaEd8";
 
   const governanceSafeMultisig = "0xf19cf8881237CA819Fd50C9C22cb258e9DB8644e"; // Safe on Saga
 
@@ -61,6 +62,7 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
       sfrxUSD: sfrxUSDAddress,
       USDN: usdnAddress,
       yUSD: yUSDAddress,
+      vyUSD: vyUSDAddress,
     },
     uniswapRouter: "0x346239972d1fa486FC4a521031BC81bFB7D6e8a4", // Uniswap V3 SwapRouter
     walletAddresses: {
@@ -74,13 +76,14 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
     },
     dStables: {
       D: {
-        collaterals: [usdcAddress, usdtAddress, usdnAddress, yUSDAddress],
+        collaterals: [usdcAddress, usdtAddress, usdnAddress, yUSDAddress, vyUSDAddress],
         initialFeeReceiver: governanceSafeMultisig, // governanceMultisig
         initialRedemptionFeeBps: 0.4 * ONE_PERCENT_BPS, // Default for stablecoins
         collateralRedemptionFees: {
           // Stablecoins by default already: 0.4%
           // Future yield bearing stablecoins should be 0.5%
           [yUSDAddress]: 0.5 * ONE_PERCENT_BPS,
+          [vyUSDAddress]: 0.5 * ONE_PERCENT_BPS,
         },
       },
     },
@@ -90,8 +93,24 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
         hardDStablePeg: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
         priceDecimals: ORACLE_AGGREGATOR_PRICE_DECIMALS,
         tellorOracleAssets: {
-          plainTellorOracleWrappers: {
-            [yUSDAddress]: "0xB3EF672462111BF0a487f62D2A8C405B430bdeDF", // yUSD/USD Tellor price feed (plain wrapper)
+          plainTellorOracleWrappers: {},
+          compositeTellorOracleWrappers: {
+            [yUSDAddress]: {
+              feed1: "0xB3EF672462111BF0a487f62D2A8C405B430bdeDF", // yUSD/USDC Tellor price feed
+              feed2: "0xa04Bf6AEDCc24c16D243E39a5b35443A749c2349", // USDC/USD Tellor price feed
+              lowerThresholdInBase1: 0n, // No threshold for yUSD/USDC
+              fixedPriceInBase1: 0n,
+              lowerThresholdInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT, // Threshold for USDC/USD at 1.0
+              fixedPriceInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT, // Fix USDC at $1.00
+            },
+            [vyUSDAddress]: {
+              feed1: "0x43790B86579CBE3f6b5A1D470777E55363F9f8F0", // vyUSD/USDC Tellor price feed
+              feed2: "0xa04Bf6AEDCc24c16D243E39a5b35443A749c2349", // USDC/USD Tellor price feed
+              lowerThresholdInBase1: 0n, // No threshold for vyUSD/USDC
+              fixedPriceInBase1: 0n,
+              lowerThresholdInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT, // Threshold for USDC/USD at 1.0
+              fixedPriceInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT, // Fix USDC at $1.00
+            },
           },
           tellorOracleWrappersWithThresholding: {
             [usdcAddress]: {

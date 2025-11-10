@@ -2,7 +2,11 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 
 import { getConfig } from "../../config/config";
-import { USD_TELLOR_ORACLE_WRAPPER_ID, USD_TELLOR_WRAPPER_WITH_THRESHOLDING_ID } from "../../typescript/deploy-ids";
+import {
+  USD_TELLOR_COMPOSITE_WRAPPER_ID,
+  USD_TELLOR_ORACLE_WRAPPER_ID,
+  USD_TELLOR_WRAPPER_WITH_THRESHOLDING_ID,
+} from "../../typescript/deploy-ids";
 
 // Helper function to perform sanity checks on oracle wrappers
 /**
@@ -133,12 +137,68 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Pr
   await performOracleSanityChecks(tellorWrapperWithThresholding, thresholdFeeds, baseCurrencyUnit, "Tellor feeds with thresholding");
   console.log(`✅ All thresholded Tellor feed sanity checks passed`);
 
+  // Deploy TellorCompositeWrapper v1.1 for composite feeds
+  const tellorCompositeWrapperDeployment = await hre.deployments.deploy(USD_TELLOR_COMPOSITE_WRAPPER_ID, {
+    from: deployer,
+    args: [baseCurrency, baseCurrencyUnit],
+    contract: "TellorCompositeWrapper",
+    autoMine: true,
+    log: true,
+  });
+
+  console.log(`✅ TellorCompositeWrapper v1.1 deployed at: ${tellorCompositeWrapperDeployment.address}`);
+
+  const tellorCompositeWrapper = await hre.ethers.getContractAt("TellorCompositeWrapper", tellorCompositeWrapperDeployment.address);
+
+  // Set composite feeds (e.g., yUSD/USDC * USDC/USD = yUSD/USD)
+  const compositeFeeds = config.oracleAggregators.USD.tellorOracleAssets?.compositeTellorOracleWrappers || {};
+
+  console.log(`\n📝 Configuring ${Object.keys(compositeFeeds).length} composite Tellor feeds...`);
+
+  for (const [assetAddress, feedConfig] of Object.entries(compositeFeeds)) {
+    if (!assetAddress || !/^0x[0-9a-fA-F]{40}$/.test(assetAddress)) {
+      console.error(`[oracle-setup] Invalid or missing assetAddress in compositeFeeds: '${assetAddress}'`);
+      throw new Error(`[oracle-setup] Invalid or missing assetAddress in compositeFeeds: '${assetAddress}'`);
+    }
+
+    if (!feedConfig.feed1 || !/^0x[0-9a-fA-F]{40}$/.test(feedConfig.feed1)) {
+      console.error(`[oracle-setup] Invalid or missing feed1 address in compositeFeeds for asset ${assetAddress}: '${feedConfig.feed1}'`);
+      throw new Error(`[oracle-setup] Invalid or missing feed1 address in compositeFeeds for asset ${assetAddress}: '${feedConfig.feed1}'`);
+    }
+
+    if (!feedConfig.feed2 || !/^0x[0-9a-fA-F]{40}$/.test(feedConfig.feed2)) {
+      console.error(`[oracle-setup] Invalid or missing feed2 address in compositeFeeds for asset ${assetAddress}: '${feedConfig.feed2}'`);
+      throw new Error(`[oracle-setup] Invalid or missing feed2 address in compositeFeeds for asset ${assetAddress}: '${feedConfig.feed2}'`);
+    }
+
+    // STRICT: If addCompositeFeed fails, error propagates and stops deployment
+    await tellorCompositeWrapper.addCompositeFeed(
+      assetAddress,
+      feedConfig.feed1,
+      feedConfig.feed2,
+      feedConfig.lowerThresholdInBase1,
+      feedConfig.fixedPriceInBase1,
+      feedConfig.lowerThresholdInBase2,
+      feedConfig.fixedPriceInBase2,
+    );
+    console.log(`  ✅ Set composite Tellor feed for asset ${assetAddress}`);
+    console.log(`     Feed1: ${feedConfig.feed1}`);
+    console.log(`     Feed2: ${feedConfig.feed2}`);
+  }
+
+  // Sanity check for composite Tellor feeds - STRICT: throws error if any check fails
+  console.log(`\n🔍 Performing sanity checks on composite Tellor feeds...`);
+  await performOracleSanityChecks(tellorCompositeWrapper, compositeFeeds, baseCurrencyUnit, "composite Tellor feeds");
+  console.log(`✅ All composite Tellor feed sanity checks passed`);
+
   console.log(`\n🔮 ${__filename.split("/").slice(-2).join("/")}: ✅`);
   console.log(`\n📋 Deployment Summary:`);
   console.log(`   - TellorWrapper v1.1: ${tellorWrapperDeployment.address}`);
   console.log(`   - TellorWrapperWithThresholding v1.1: ${tellorWrapperWithThresholdingDeployment.address}`);
+  console.log(`   - TellorCompositeWrapper v1.1: ${tellorCompositeWrapperDeployment.address}`);
   console.log(`   - Plain feeds configured: ${Object.keys(plainFeeds).length}`);
   console.log(`   - Thresholded feeds configured: ${Object.keys(thresholdFeeds).length}`);
+  console.log(`   - Composite feeds configured: ${Object.keys(compositeFeeds).length}`);
   console.log(`   - All sanity checks passed ✅\n`);
 
   // Return true to indicate deployment success

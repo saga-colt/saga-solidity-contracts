@@ -4,6 +4,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 import { getConfig } from "../../config/config";
 import {
   USD_ORACLE_AGGREGATOR_ID,
+  USD_TELLOR_COMPOSITE_WRAPPER_ID,
   USD_TELLOR_ORACLE_WRAPPER_ID,
   USD_TELLOR_WRAPPER_WITH_THRESHOLDING_ID,
 } from "../../typescript/deploy-ids";
@@ -73,16 +74,26 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Pr
   const tellorWrapperWithThresholdingDeployment = await hre.deployments.get(USD_TELLOR_WRAPPER_WITH_THRESHOLDING_ID);
   const tellorWrapperWithThresholdingAddress = tellorWrapperWithThresholdingDeployment.address;
 
+  const tellorCompositeWrapperDeployment = await hre.deployments.get(USD_TELLOR_COMPOSITE_WRAPPER_ID);
+  const tellorCompositeWrapperAddress = tellorCompositeWrapperDeployment.address;
+
   console.log(`\n🔗 Oracle Aggregator: ${oracleAggregatorDeployment.address}`);
   console.log(`🔗 TellorWrapper v1.1 (plain): ${tellorWrapperAddress}`);
   console.log(`🔗 TellorWrapperWithThresholding v1.1: ${tellorWrapperWithThresholdingAddress}`);
+  console.log(`🔗 TellorCompositeWrapper v1.1: ${tellorCompositeWrapperAddress}`);
 
   // Get all Tellor feed configurations
   const plainFeeds = config.oracleAggregators.USD.tellorOracleAssets?.plainTellorOracleWrappers || {};
   const thresholdFeeds = config.oracleAggregators.USD.tellorOracleAssets?.tellorOracleWrappersWithThresholding || {};
+  const compositeFeeds = config.oracleAggregators.USD.tellorOracleAssets?.compositeTellorOracleWrappers || {};
 
   // Build list of all assets that need updating
-  const assetsToUpdate: Array<{ name: string; address: string; wrapperAddress: string; wrapperType: "plain" | "thresholded" }> = [];
+  const assetsToUpdate: Array<{
+    name: string;
+    address: string;
+    wrapperAddress: string;
+    wrapperType: "plain" | "thresholded" | "composite";
+  }> = [];
 
   // Add plain wrapper assets
   for (const [assetAddress] of Object.entries(plainFeeds)) {
@@ -104,6 +115,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Pr
     });
   }
 
+  // Add composite wrapper assets
+  for (const [assetAddress] of Object.entries(compositeFeeds)) {
+    assetsToUpdate.push({
+      name: `Asset ${assetAddress.slice(0, 10)}...`,
+      address: assetAddress,
+      wrapperAddress: tellorCompositeWrapperAddress,
+      wrapperType: "composite",
+    });
+  }
+
   if (assetsToUpdate.length === 0) {
     console.log("⚠️  No Tellor assets configured. Skipping OracleAggregator update.");
     return true;
@@ -112,6 +133,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Pr
   console.log(`\n📋 Found ${assetsToUpdate.length} assets to update:`);
   console.log(`   - Plain wrapper assets: ${Object.keys(plainFeeds).length}`);
   console.log(`   - Thresholded wrapper assets: ${Object.keys(thresholdFeeds).length}`);
+  console.log(`   - Composite wrapper assets: ${Object.keys(compositeFeeds).length}`);
 
   let allOperationsComplete = true;
 
