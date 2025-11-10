@@ -28,18 +28,21 @@ async function performOracleSanityChecks(
       const price = await wrapper.getAssetPrice(assetAddress);
       const normalizedPrice = Number(price) / Number(baseCurrencyUnit);
 
+      console.log(`\n  🔍 Sanity check for ${wrapperName}:`);
+      console.log(`     Asset: ${assetAddress}`);
+      console.log(`     Raw price: ${price.toString()}`);
+      console.log(`     Normalized price: $${normalizedPrice.toFixed(6)}`);
+
       if (normalizedPrice < 0.01 || normalizedPrice > 1e6) {
-        console.error(
-          `Sanity check failed for asset ${assetAddress} in ${wrapperName}: Normalized price ${normalizedPrice} is outside the range [0.01, 1e6]`,
-        );
+        console.error(`  ❌ Sanity check failed: Normalized price ${normalizedPrice} is outside the range [0.01, 1e6]`);
         throw new Error(
           `Sanity check failed for asset ${assetAddress} in ${wrapperName}: Normalized price ${normalizedPrice} is outside the range [0.01, 1e6]`,
         );
       } else {
-        console.log(`Sanity check passed for asset ${assetAddress} in ${wrapperName}: Normalized price is ${normalizedPrice}`);
+        console.log(`     ✅ Price is within valid range [0.01, 1e6]`);
       }
     } catch (error) {
-      console.error(`Error performing sanity check for asset ${assetAddress} in ${wrapperName}:`, error);
+      console.error(`  ❌ Error performing sanity check for asset ${assetAddress} in ${wrapperName}:`, error);
       throw new Error(`Error performing sanity check for asset ${assetAddress} in ${wrapperName}: ${error}`);
     }
   }

@@ -176,7 +176,8 @@ async function transferRole(
 
   // Grant role to multisig
   if (!(await contract.hasRole(role, governanceMultisig))) {
-    await contract.grantRole(role, governanceMultisig);
+    const grantTx = await contract.grantRole(role, governanceMultisig);
+    await grantTx.wait(); // Wait for transaction to be mined
     console.log(`    ➕ Granted ${roleName} to ${governanceMultisig}`);
   } else {
     console.log(`    ✓ ${roleName} already granted to ${governanceMultisig}`);
@@ -191,7 +192,8 @@ async function transferRole(
 
   // Revoke role from deployer
   if (await contract.hasRole(role, deployer)) {
-    await contract.revokeRole(role, deployer);
+    const revokeTx = await contract.revokeRole(role, deployer);
+    await revokeTx.wait(); // Wait for transaction to be mined
     console.log(`    ➖ Revoked ${roleName} from deployer`);
   } else {
     console.log(`    ✓ ${roleName} already revoked from deployer`);
