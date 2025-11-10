@@ -52,10 +52,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const safeConfig =
     testMultisig && config.safeConfig
       ? {
-        safeAddress: governanceMultisig,
-        chainId: config.safeConfig.chainId,
-        txServiceUrl: config.safeConfig.txServiceUrl,
-      }
+          safeAddress: governanceMultisig,
+          chainId: config.safeConfig.chainId,
+          txServiceUrl: config.safeConfig.txServiceUrl,
+        }
       : config.safeConfig;
 
   // Initialize Saga governance executor with potentially overridden Safe config
