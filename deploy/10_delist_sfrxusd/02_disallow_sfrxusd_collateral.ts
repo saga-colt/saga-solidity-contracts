@@ -4,6 +4,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 
 import { getConfig } from "../../config/config";
 import { D_COLLATERAL_VAULT_CONTRACT_ID } from "../../typescript/deploy-ids";
+import { isMainnet } from "../../typescript/hardhat/deploy";
 import { SagaGovernanceExecutor } from "../../typescript/hardhat/saga-governance";
 import { SafeTransactionData } from "../../typescript/hardhat/saga-safe-manager";
 
@@ -27,6 +28,12 @@ function createDisallowCollateralTransaction(
 }
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+  // This script is ONLY for saga_mainnet
+  if (!isMainnet(hre.network.name)) {
+    console.log(`\n≻ ${__filename.split("/").slice(-2).join("/")}: ⏭️  Skipping (only runs on saga_mainnet, current: ${hre.network.name})`);
+    return true;
+  }
+
   const { deployer } = await hre.getNamedAccounts();
   const config = await getConfig(hre);
   const deployerSigner = await hre.ethers.getSigner(deployer);
@@ -45,10 +52,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const safeConfig =
     testMultisig && config.safeConfig
       ? {
-          safeAddress: governanceMultisig,
-          chainId: config.safeConfig.chainId,
-          txServiceUrl: config.safeConfig.txServiceUrl,
-        }
+        safeAddress: governanceMultisig,
+        chainId: config.safeConfig.chainId,
+        txServiceUrl: config.safeConfig.txServiceUrl,
+      }
       : config.safeConfig;
 
   // Initialize Saga governance executor with potentially overridden Safe config
