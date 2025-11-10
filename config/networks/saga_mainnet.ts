@@ -74,7 +74,7 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
     },
     dStables: {
       D: {
-        collaterals: [usdcAddress, usdtAddress, sfrxUSDAddress, usdnAddress, yUSDAddress],
+        collaterals: [usdcAddress, usdtAddress, usdnAddress, yUSDAddress],
         initialFeeReceiver: governanceSafeMultisig, // governanceMultisig
         initialRedemptionFeeBps: 0.4 * ONE_PERCENT_BPS, // Default for stablecoins
         collateralRedemptionFees: {
@@ -109,11 +109,11 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
               lowerThreshold: 0n,
               fixedPrice: 0n,
             },
-            [sfrxUSDAddress]: {
-              feed: "0xDff5F0aE4C062EF32E170EeB8dc0f30CBeDB505f", // sfrxUSD/USD Tellor price feed
-              lowerThreshold: 0n,
-              fixedPrice: 0n,
-            },
+            // [sfrxUSDAddress]: {
+            //   feed: "0xDff5F0aE4C062EF32E170EeB8dc0f30CBeDB505f", // sfrxUSD/USD Tellor price feed
+            //   lowerThreshold: 0n,
+            //   fixedPrice: 0n,
+            // }, // Currently delisted, still keeping in config since we will re-add it later
             [usdnAddress]: {
               feed: "0x7C42Ab8a4c44793D495AB9829c0E72f1404e57ac", // USDN/USD Tellor price feed
               lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,

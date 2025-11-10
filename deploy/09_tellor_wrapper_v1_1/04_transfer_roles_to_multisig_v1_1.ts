@@ -177,6 +177,6 @@ async function transferRole(
 
 func.id = "transfer_tellor_wrapper_v1_1_roles_to_multisig";
 func.tags = ["governance", "roles", "tellor-wrapper-v1.1"];
-func.dependencies = ["deploy-tellor-wrapper-v1.1"]; // Depends on v1.1 deployment
+func.dependencies = ["deploy-tellor-wrapper-v1.1", "disallow-sfrxusd-collateral-v1.1"]; // Depends on v1.1 deployment and sfrxUSD delisting
 
 export default func;
