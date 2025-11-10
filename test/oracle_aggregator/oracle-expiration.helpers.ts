@@ -48,22 +48,22 @@ export async function getPastTime(secondsAgo: bigint): Promise<bigint> {
 
 /**
  * Creates a time scenario for testing expiration logic
- * @param setTime Timestamp when override/feed is set
- * @param checkTime Timestamp when we check expiration
+ * @param setTimestamp Timestamp when override/feed is set
+ * @param checkTimestamp Timestamp when we check expiration
  * @returns Object with setTime, checkTime, and helper to advance
  */
-export async function createTimeScenario(setTime: bigint, checkTime: bigint) {
+export async function createTimeScenario(setTimestamp: bigint, checkTimestamp: bigint) {
   return {
-    setTime,
-    checkTime,
+    setTime: setTimestamp,
+    checkTime: checkTimestamp,
     async setup() {
-      await setTime(setTime);
+      await setTime(setTimestamp);
     },
     async advance() {
-      await setTime(checkTime);
+      await setTime(checkTimestamp);
     },
     isExpired(): boolean {
-      return checkTime > setTime;
+      return checkTimestamp > setTimestamp;
     },
   };
 }
