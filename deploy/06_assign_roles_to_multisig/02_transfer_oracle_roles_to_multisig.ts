@@ -68,6 +68,7 @@ async function transferOracleAggregatorRoles(
       // Get roles
       const DEFAULT_ADMIN_ROLE = ZERO_BYTES_32;
       const ORACLE_MANAGER_ROLE = await oracleAggregator.ORACLE_MANAGER_ROLE();
+      const GUARDIAN_ROLE = await oracleAggregator.GUARDIAN_ROLE();
 
       // Grant DEFAULT_ADMIN_ROLE to multisig
       if (!(await oracleAggregator.hasRole(DEFAULT_ADMIN_ROLE, governanceMultisig))) {
@@ -85,10 +86,24 @@ async function transferOracleAggregatorRoles(
         console.log(`    ✓ ORACLE_MANAGER_ROLE already granted to ${governanceMultisig}`);
       }
 
+      // Grant GUARDIAN_ROLE to multisig
+      if (!(await oracleAggregator.hasRole(GUARDIAN_ROLE, governanceMultisig))) {
+        await oracleAggregator.grantRole(GUARDIAN_ROLE, governanceMultisig);
+        console.log(`    ➕ Granted GUARDIAN_ROLE to ${governanceMultisig}`);
+      } else {
+        console.log(`    ✓ GUARDIAN_ROLE already granted to ${governanceMultisig}`);
+      }
+
       // Revoke ORACLE_MANAGER_ROLE from deployer first
       if (await oracleAggregator.hasRole(ORACLE_MANAGER_ROLE, deployer)) {
         await oracleAggregator.revokeRole(ORACLE_MANAGER_ROLE, deployer);
         console.log(`    ➖ Revoked ORACLE_MANAGER_ROLE from deployer`);
+      }
+
+      // Revoke GUARDIAN_ROLE before admin
+      if (await oracleAggregator.hasRole(GUARDIAN_ROLE, deployer)) {
+        await oracleAggregator.revokeRole(GUARDIAN_ROLE, deployer);
+        console.log(`    ➖ Revoked GUARDIAN_ROLE from deployer`);
       }
 
       // Revoke DEFAULT_ADMIN_ROLE last
