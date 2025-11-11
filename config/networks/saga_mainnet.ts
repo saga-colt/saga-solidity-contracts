@@ -25,8 +25,10 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
   const usdtAddress = "0xC8fe3C1de344854f4429bB333AFFAeF97eF88CEa";
   const usdcAddress = "0xfc960C233B8E98e0Cf282e29BDE8d3f105fc24d5";
   const sagaAddress = "0xa19377761fed745723b90993988e04d641c2cffe";
-  const sfrxUSDAddress = "0x1E81CF7FDD4c9149024454fCEc34a1A5D5431230"; // CORRECTED sfrxUSD address
+  const sfrxUSDAddress = "0x1E81CF7FDD4c9149024454fCEc34a1A5D5431230";
   const usdnAddress = "0xE9A5C89eCff4323344cFaA4c659EFa42C80FE6cc";
+  const yUSDAddress = "0x839e7e610108Cf3DCc9b40329db33b6E6bc9baCE";
+  const vyUSDAddress = "0x704a58f888f18506C9Fc199e53AE220B5fdCaEd8";
 
   const governanceSafeMultisig = "0xf19cf8881237CA819Fd50C9C22cb258e9DB8644e"; // Safe on Saga
 
@@ -59,6 +61,8 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
       SAGA: sagaAddress,
       sfrxUSD: sfrxUSDAddress,
       USDN: usdnAddress,
+      yUSD: yUSDAddress,
+      vyUSD: vyUSDAddress,
     },
     uniswapRouter: "0x346239972d1fa486FC4a521031BC81bFB7D6e8a4", // Uniswap V3 SwapRouter
     walletAddresses: {
@@ -72,12 +76,14 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
     },
     dStables: {
       D: {
-        collaterals: [usdcAddress, usdtAddress, sfrxUSDAddress, usdnAddress],
+        collaterals: [usdcAddress, usdtAddress, usdnAddress, yUSDAddress, vyUSDAddress],
         initialFeeReceiver: governanceSafeMultisig, // governanceMultisig
         initialRedemptionFeeBps: 0.4 * ONE_PERCENT_BPS, // Default for stablecoins
         collateralRedemptionFees: {
           // Stablecoins by default already: 0.4%
           // Future yield bearing stablecoins should be 0.5%
+          [yUSDAddress]: 0.5 * ONE_PERCENT_BPS,
+          [vyUSDAddress]: 0.5 * ONE_PERCENT_BPS,
         },
       },
     },
@@ -87,30 +93,33 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
         hardDStablePeg: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
         priceDecimals: ORACLE_AGGREGATOR_PRICE_DECIMALS,
         tellorOracleAssets: {
-          plainTellorOracleWrappers: {},
+          plainTellorOracleWrappers: {
+            [yUSDAddress]: "0xc6a0F156f1c6905661d69F437e1ba753C4145528", // yUSD/USD Tellor price feed (plain wrapper)
+            [vyUSDAddress]: "0x6926a216A7C284c87f56423E776CF8ea51625811", // vyUSD/USD Tellor price feed (plain wrapper)
+          },
           tellorOracleWrappersWithThresholding: {
             [usdcAddress]: {
-              feed: "0x6c85266a8D3Ce564058667dc5c7E9d58da454ecc", // USDC/USD Tellor price feed
+              feed: "0x4bAF1D89679A31DE142D4855BE01cb9c9D1158A4", // USDC/USD Tellor price feed
               lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
               fixedPrice: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
             },
             [usdtAddress]: {
-              feed: "0x62E537964E2452aD6F08976dA251C4B33c04B96C", // USDT/USD Tellor price feed
+              feed: "0x5bca2d1C43328568169258D608e66D2A9bF0BB1D", // USDT/USD Tellor price feed
               lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
               fixedPrice: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
             },
             [sagaAddress]: {
-              feed: "0xaA43df021149C34ca3654F387C9aeB9AcABa012a", // Saga/USD Tellor price feed
+              feed: "0x96e6662856D9B6cdaAd4876f39989CC538Faa0B1", // Saga/USD Tellor price feed
               lowerThreshold: 0n,
               fixedPrice: 0n,
             },
-            [sfrxUSDAddress]: {
-              feed: "0xDff5F0aE4C062EF32E170EeB8dc0f30CBeDB505f", // sfrxUSD/USD Tellor price feed
-              lowerThreshold: 0n,
-              fixedPrice: 0n,
-            },
+            // [sfrxUSDAddress]: {
+            //   feed: "0x40EA5EE6f4acB6DccDC940E2835a50C8E57574e2", // sfrxUSD/USD Tellor price feed
+            //   lowerThreshold: 0n,
+            //   fixedPrice: 0n,
+            // }, // Currently delisted, still keeping in config since we will re-add it later
             [usdnAddress]: {
-              feed: "0x7C42Ab8a4c44793D495AB9829c0E72f1404e57ac", // USDN/USD Tellor price feed
+              feed: "0xF1518c56916EAFc80FDe8CB142eA785B7850e580", // USDN/USD Tellor price feed
               lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
               fixedPrice: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
             },

@@ -17,15 +17,18 @@
 
 pragma solidity ^0.8.20;
 
-import "../interface/liquidityV2/BaseLiquidityV2Wrapper.sol";
-import "../interface/liquidityV2/ILiquityV2OracleAggregatorV3Interface.sol";
+import "../interface/liquityV2/BaseLiquityV2Wrapper.sol";
+import "../interface/liquityV2/ILiquityV2OracleAggregatorV3Interface.sol";
 
 /**
  * @title TellorWrapper
  * @dev Implementation of BaseLiquityV2Wrapper for Tellor oracle feeds
- * Compatible with LiquityV2OracleAggregatorV3Interface (Tellor feeds that follow this interface)
+ * Uses Chainlink-like interface (LiquityV2OracleAggregatorV3Interface) to read prices directly from feeds
  */
 contract TellorWrapper is BaseLiquityV2Wrapper {
+    /* State */
+
+    /// @notice Mapping from asset address to Chainlink-like feed
     mapping(address => LiquityV2OracleAggregatorV3Interface) public assetToFeed;
 
     constructor(
@@ -33,6 +36,13 @@ contract TellorWrapper is BaseLiquityV2Wrapper {
         uint256 _baseCurrencyUnit
     ) BaseLiquityV2Wrapper(baseCurrency, _baseCurrencyUnit) {}
 
+    /**
+     * @notice Gets the price information for an asset
+     * @dev Reads price directly from Chainlink-like feed using latestRoundData()
+     * @param asset The address of the asset to get the price for
+     * @return price The price of the asset in base currency units
+     * @return isAlive Whether the price feed is considered active/valid
+     */
     function getPriceInfo(address asset) public view virtual override returns (uint256 price, bool isAlive) {
         LiquityV2OracleAggregatorV3Interface feed = assetToFeed[asset];
         if (address(feed) == address(0)) {
@@ -47,18 +57,22 @@ contract TellorWrapper is BaseLiquityV2Wrapper {
         }
 
         price = uint256(answer);
-        isAlive = updatedAt + LIQUITY_V2_HEARTBEAT + heartbeatStaleTimeLimit > block.timestamp;
+        isAlive = updatedAt + feedHeartbeat + heartbeatStaleTimeLimit > block.timestamp;
 
         price = _convertToBaseCurrencyUnit(price);
     }
 
     /**
      * @notice Sets the Tellor oracle feed for an asset
-     * @dev Validates that the feed decimals match the base currency decimals
+     * @dev Validates that the feed is not zero address and that feed decimals match the base currency decimals
      * @param asset The address of the asset
-     * @param feed The address of the Tellor oracle feed
+     * @param feed The address of the Tellor oracle feed implementing LiquityV2OracleAggregatorV3Interface
      */
     function setFeed(address asset, address feed) external onlyRole(ORACLE_MANAGER_ROLE) {
+        if (feed == address(0)) {
+            revert FeedNotSet(asset);
+        }
+
         LiquityV2OracleAggregatorV3Interface feedInterface = LiquityV2OracleAggregatorV3Interface(feed);
 
         // Validate that feed decimals match expected decimals

@@ -14,7 +14,7 @@ export interface SagaSafeConfig {
 export interface Config {
   readonly MOCK_ONLY?: MockConfig;
   readonly tokenAddresses: TokenAddresses;
-  readonly uniswapRouter: string;
+  readonly uniswapRouter?: string;
   readonly walletAddresses: WalletAddresses;
   readonly safeConfig?: SagaSafeConfig;
   readonly oracleAggregators: {
@@ -95,6 +95,16 @@ export interface OracleAggregatorConfig {
         feed: string;
         lowerThreshold: bigint;
         fixedPrice: bigint;
+      };
+    };
+    compositeTellorOracleWrappers?: {
+      [key: string]: {
+        feed1: string;
+        feed2: string;
+        lowerThresholdInBase1: bigint;
+        fixedPriceInBase1: bigint;
+        lowerThresholdInBase2: bigint;
+        fixedPriceInBase2: bigint;
       };
     };
   };
