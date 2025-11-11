@@ -93,48 +93,33 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
         hardDStablePeg: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
         priceDecimals: ORACLE_AGGREGATOR_PRICE_DECIMALS,
         tellorOracleAssets: {
-          plainTellorOracleWrappers: {},
-          compositeTellorOracleWrappers: {
-            [yUSDAddress]: {
-              feed1: "0xB3EF672462111BF0a487f62D2A8C405B430bdeDF", // yUSD/USDC Tellor price feed
-              feed2: "0xa04Bf6AEDCc24c16D243E39a5b35443A749c2349", // USDC/USD Tellor price feed
-              lowerThresholdInBase1: 0n, // No threshold for yUSD/USDC
-              fixedPriceInBase1: 0n,
-              lowerThresholdInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT, // Threshold for USDC/USD at 1.0
-              fixedPriceInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT, // Fix USDC at $1.00
-            },
-            [vyUSDAddress]: {
-              feed1: "0x43790B86579CBE3f6b5A1D470777E55363F9f8F0", // vyUSD/USDC Tellor price feed
-              feed2: "0xa04Bf6AEDCc24c16D243E39a5b35443A749c2349", // USDC/USD Tellor price feed
-              lowerThresholdInBase1: 0n, // No threshold for vyUSD/USDC
-              fixedPriceInBase1: 0n,
-              lowerThresholdInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT, // Threshold for USDC/USD at 1.0
-              fixedPriceInBase2: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT, // Fix USDC at $1.00
-            },
+          plainTellorOracleWrappers: {
+            [yUSDAddress]: "0xc6a0F156f1c6905661d69F437e1ba753C4145528", // yUSD/USD Tellor price feed (plain wrapper)
+            [vyUSDAddress]: "0x6926a216A7C284c87f56423E776CF8ea51625811", // vyUSD/USD Tellor price feed (plain wrapper)
           },
           tellorOracleWrappersWithThresholding: {
             [usdcAddress]: {
-              feed: "0xa04Bf6AEDCc24c16D243E39a5b35443A749c2349", // USDC/USD Tellor price feed
+              feed: "0x4bAF1D89679A31DE142D4855BE01cb9c9D1158A4", // USDC/USD Tellor price feed
               lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
               fixedPrice: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
             },
             [usdtAddress]: {
-              feed: "0x23386534d60AE5ECCc4fE84065B264CFD8522204", // USDT/USD Tellor price feed
+              feed: "0x5bca2d1C43328568169258D608e66D2A9bF0BB1D", // USDT/USD Tellor price feed
               lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
               fixedPrice: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
             },
             [sagaAddress]: {
-              feed: "0xaA43df021149C34ca3654F387C9aeB9AcABa012a", // Saga/USD Tellor price feed
+              feed: "0x96e6662856D9B6cdaAd4876f39989CC538Faa0B1", // Saga/USD Tellor price feed
               lowerThreshold: 0n,
               fixedPrice: 0n,
             },
             // [sfrxUSDAddress]: {
-            //   feed: "0xDff5F0aE4C062EF32E170EeB8dc0f30CBeDB505f", // sfrxUSD/USD Tellor price feed
+            //   feed: "0x40EA5EE6f4acB6DccDC940E2835a50C8E57574e2", // sfrxUSD/USD Tellor price feed
             //   lowerThreshold: 0n,
             //   fixedPrice: 0n,
             // }, // Currently delisted, still keeping in config since we will re-add it later
             [usdnAddress]: {
-              feed: "0x7C42Ab8a4c44793D495AB9829c0E72f1404e57ac", // USDN/USD Tellor price feed
+              feed: "0xF1518c56916EAFc80FDe8CB142eA785B7850e580", // USDN/USD Tellor price feed
               lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
               fixedPrice: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
             },
