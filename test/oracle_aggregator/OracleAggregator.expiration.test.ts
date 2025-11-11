@@ -181,24 +181,23 @@ async function runTestsForCurrency(
         expect(override.expiresAt).to.be.gte(expectedExpiresAt);
       });
 
-      it("should return override price with isAlive = false", async function () {
+      it("should return override price with isAlive = true", async function () {
         const guardianSigner = await ethers.getSigner(guardian);
         await oracleAggregator.connect(guardianSigner).freezeAsset(testAsset);
         await oracleAggregator.setPriceOverride(testAsset, overridePrice);
 
         const [price, isAlive] = await oracleAggregator.getPriceInfo(testAsset);
         expect(price).to.equal(overridePrice);
-        expect(isAlive).to.be.false; // Overrides always return isAlive = false
+        expect(isAlive).to.be.true; // Frozen override should be treated as authoritative price
       });
 
-      it("should revert getAssetPrice for frozen asset (override has isAlive = false)", async function () {
+      it("should return override price from getAssetPrice while frozen", async function () {
         const guardianSigner = await ethers.getSigner(guardian);
         await oracleAggregator.connect(guardianSigner).freezeAsset(testAsset);
         await oracleAggregator.setPriceOverride(testAsset, overridePrice);
 
-        await expect(oracleAggregator.getAssetPrice(testAsset))
-          .to.be.revertedWithCustomError(oracleAggregator, "PriceNotAlive")
-          .withArgs(testAsset);
+        const price = await oracleAggregator.getAssetPrice(testAsset);
+        expect(price).to.equal(overridePrice);
       });
 
       it("should only allow setting override when asset is frozen", async function () {
@@ -262,7 +261,7 @@ async function runTestsForCurrency(
         // Override should be valid initially
         const [price, isAlive] = await oracleAggregator.getPriceInfo(testAsset);
         expect(price).to.equal(overridePrice);
-        expect(isAlive).to.be.false;
+        expect(isAlive).to.be.true;
 
         // Advance time past expiration
         await advanceTime(61n); // 1 minute + 1 second

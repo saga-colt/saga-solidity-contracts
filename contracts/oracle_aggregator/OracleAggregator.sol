@@ -159,7 +159,7 @@ contract OracleAggregator is AccessControl, IOracleWrapper {
 
             // Check if override exists and is not expired
             if (override_.expiresAt > block.timestamp && override_.price > 0) {
-                return (override_.price, false); // Return override price with isAlive = false
+                return (override_.price, true); // Frozen override acts as authoritative price
             }
 
             // Asset is frozen but no valid override

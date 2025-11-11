@@ -197,7 +197,9 @@ async function runTestsForCurrency(currency: string, { deployer, guardian }: { d
         // Should return override price, not TellorWrapper price
         [price, isAlive] = await oracleAggregator.getPriceInfo(testAsset);
         expect(price).to.equal(overridePrice);
-        expect(isAlive).to.be.false; // Overrides always return isAlive = false
+        expect(isAlive).to.be.true;
+        const assetPrice = await oracleAggregator.getAssetPrice(testAsset);
+        expect(assetPrice).to.equal(overridePrice);
       });
 
       it("should ignore TellorWrapper staleness when override is active", async function () {
@@ -220,7 +222,9 @@ async function runTestsForCurrency(currency: string, { deployer, guardian }: { d
         // Override should work even though TellorWrapper is stale
         const [price, isAlive] = await oracleAggregator.getPriceInfo(testAsset);
         expect(price).to.equal(overridePrice);
-        expect(isAlive).to.be.false;
+        expect(isAlive).to.be.true;
+        const assetPrice = await oracleAggregator.getAssetPrice(testAsset);
+        expect(assetPrice).to.equal(overridePrice);
       });
 
       it("should resume TellorWrapper lookup after unfreeze", async function () {
@@ -396,7 +400,7 @@ async function runTestsForCurrency(currency: string, { deployer, guardian }: { d
 
         [price, isAlive] = await oracleAggregator.getPriceInfo(testAsset);
         expect(price).to.equal(overridePrice);
-        expect(isAlive).to.be.false; // Overrides always return isAlive = false
+        expect(isAlive).to.be.true;
 
         // Step 4: Override expires (frozen asset without valid override reverts)
         await advanceTime(61n);
