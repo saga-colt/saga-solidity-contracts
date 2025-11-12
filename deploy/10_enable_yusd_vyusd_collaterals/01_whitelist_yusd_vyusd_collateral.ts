@@ -47,10 +47,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Pr
   const safeConfig =
     testMultisig && config.safeConfig
       ? {
-        safeAddress: governanceMultisig,
-        chainId: config.safeConfig.chainId,
-        txServiceUrl: config.safeConfig.txServiceUrl,
-      }
+          safeAddress: governanceMultisig,
+          chainId: config.safeConfig.chainId,
+          txServiceUrl: config.safeConfig.txServiceUrl,
+        }
       : config.safeConfig;
 
   // Initialize Saga governance executor with potentially overridden Safe config
@@ -184,4 +184,3 @@ func.dependencies = [D_COLLATERAL_VAULT_CONTRACT_ID, USD_ORACLE_AGGREGATOR_ID];
 func.id = "d-whitelist-yusd-vyusd-collateral";
 
 export default func;
-
