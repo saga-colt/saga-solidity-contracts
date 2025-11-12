@@ -40,5 +40,6 @@
   "D_SmoHelperV4": 1758617214,
   "setup-sfrxusd-usdn-usd-tellor-oracle-feeds": 1761135696,
   "point-sfrxusd-usdn-feeds-to-oracle-aggregator": 1761135697,
-  "d-whitelist-sfrxusd-usdn-collateral": 1761135997
+  "d-whitelist-sfrxusd-usdn-collateral": 1761135997,
+  "d-whitelist-yusd-vyusd-collateral": 1762932656
 }
