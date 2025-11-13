@@ -12,9 +12,9 @@ const WRONG_SFRXUSD_ADDRESS = "0x55F937DEF274C6CBd9444f0857639757C5A2a3E9";
 /**
  * Build a Safe transaction payload to remove an oracle
  *
- * @param oracleAggregatorAddress
- * @param assetAddress
- * @param oracleAggregatorInterface
+ * @param oracleAggregatorAddress - Address of the OracleAggregator contract
+ * @param assetAddress - Asset whose oracle entry should be removed
+ * @param oracleAggregatorInterface - Interface used to encode Safe transaction data
  */
 function createRemoveOracleTransaction(
   oracleAggregatorAddress: string,
@@ -31,10 +31,10 @@ function createRemoveOracleTransaction(
 /**
  * Build a Safe transaction payload to set an oracle
  *
- * @param oracleAggregatorAddress
- * @param assetAddress
- * @param oracleAddress
- * @param oracleAggregatorInterface
+ * @param oracleAggregatorAddress - Address of the OracleAggregator contract
+ * @param assetAddress - Asset whose oracle entry should be set
+ * @param oracleAddress - Address of the new oracle feed
+ * @param oracleAggregatorInterface - Interface used to encode Safe transaction data
  */
 function createSetOracleTransaction(
   oracleAggregatorAddress: string,

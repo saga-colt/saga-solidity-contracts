@@ -18,15 +18,21 @@ export type OracleProvider = "TELLOR"; // Using Tellor for local testing
 // Export the feeds array
 // Using Tellor-compatible feeds for local testing
 export const tellorFeeds: OracleFeedConfig[] = [
-  // USD price feeds
+  // Legacy feeds (kept for localhost/backwards compatibility)
   { name: "WSAGA_USD", symbol: "WSAGA", price: "0.30" },
   { name: "frxUSD_USD", symbol: "frxUSD", price: "1" },
-  { name: "USDC_USD", symbol: "USDC", price: "1" },
   { name: "USDS_USD", symbol: "USDS", price: "1" },
-
-  // Vault feeds
   { name: "sfrxUSD_frxUSD", symbol: "sfrxUSD", price: "1.1" },
   { name: "sUSDS_USDS", symbol: "sUSDS", price: "1.1" },
+
+  // Mainnet-aligned feeds
+  { name: "USDC_USD", symbol: "USDC", price: "1" },
+  { name: "USDT_USD", symbol: "USDT", price: "1" },
+  { name: "USDN_USD", symbol: "USDN", price: "1" },
+  { name: "SAGA_USD", symbol: "SAGA", price: "0.30" },
+  { name: "yUSD_USD", symbol: "yUSD", price: "1.02" },
+  { name: "vyUSD_USD", symbol: "vyUSD", price: "1.02" },
+  { name: "sfrxUSD_USD", symbol: "sfrxUSD", price: "1.1" },
 ];
 
 // Tellor oracle feeds for local testing
@@ -59,7 +65,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
     // Convert price to int256 format expected by Tellor (18 decimals)
     const priceInWei = hre.ethers.parseUnits(feed.price, 18); // Tellor uses 18 decimals
-    await mockOracleContract.setMock(priceInWei);
+    console.log(`Setting mock price for ${feed.name} to ${priceInWei.toString()}`);
+    await (await mockOracleContract.setMock(priceInWei, { gasLimit: 200_000 })).wait(); // wait so downstream sanity checks see the price
 
     // Store the deployment for config
     mockOracleNameToAddress[feed.name] = mockOracle.address;

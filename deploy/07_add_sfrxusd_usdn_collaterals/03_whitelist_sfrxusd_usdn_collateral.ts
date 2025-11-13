@@ -10,9 +10,9 @@ import { SafeTransactionData } from "../../typescript/hardhat/saga-safe-manager"
 /**
  * Build a Safe transaction payload to allow collateral in CollateralVault
  *
- * @param collateralVaultAddress
- * @param collateralAddress
- * @param collateralVaultInterface
+ * @param collateralVaultAddress - Address of the CollateralVault to call
+ * @param collateralAddress - Collateral token address to whitelist
+ * @param collateralVaultInterface - Interface used to encode the Safe transaction data
  */
 function createAllowCollateralTransaction(
   collateralVaultAddress: string,
@@ -95,7 +95,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       } else {
         console.log(`    ✅ Oracle price for ${token.name}: ${price.toString()}`);
       }
-    } catch (error) {
+    } catch {
       console.log(`    ⚠️  Oracle not configured for ${token.name} (previous Safe txs not executed yet)`);
       allOraclesConfigured = false;
     }

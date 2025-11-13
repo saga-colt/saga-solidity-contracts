@@ -1,0 +1,19 @@
+{
+  "address": "0x0000000000000000000000000000000000000000",
+  "abi": [],
+  "numDeployments": 1,
+  "linkedData": {
+    "WSAGA_USD": "TELLOR",
+    "frxUSD_USD": "TELLOR",
+    "USDS_USD": "TELLOR",
+    "sfrxUSD_frxUSD": "TELLOR",
+    "sUSDS_USDS": "TELLOR",
+    "USDC_USD": "TELLOR",
+    "USDT_USD": "TELLOR",
+    "USDN_USD": "TELLOR",
+    "SAGA_USD": "TELLOR",
+    "yUSD_USD": "TELLOR",
+    "vyUSD_USD": "TELLOR",
+    "sfrxUSD_USD": "TELLOR"
+  }
+}

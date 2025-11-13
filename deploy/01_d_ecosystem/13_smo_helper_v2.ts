@@ -3,7 +3,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
 
 import { getConfig } from "../../config/config";
-import { D_ISSUER_CONTRACT_ID, D_REDEEMER_CONTRACT_ID, D_SMO_HELPER_ID, D_TOKEN_ID } from "../../typescript/deploy-ids";
+import { D_REDEEMER_CONTRACT_ID, D_SMO_HELPER_ID, D_TOKEN_ID } from "../../typescript/deploy-ids";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployer } = await hre.getNamedAccounts();
@@ -33,7 +33,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Get required contract addresses
   const dToken = await get(D_TOKEN_ID);
   const dRedeemer = await get(D_REDEEMER_CONTRACT_ID);
-  const dIssuer = await get(D_ISSUER_CONTRACT_ID);
 
   // Get the old SMOHelper contract to revoke operator access
   const oldSmoHelper = await get(D_SMO_HELPER_ID);
@@ -65,7 +64,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     args: [
       dToken.address, // dstable
       dRedeemer.address, // redeemer
-      dIssuer.address, // issuer
       config.uniswapRouter, // uniswapRouter
       config.walletAddresses.governanceMultisig, // operator
     ],
@@ -220,6 +218,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 func.id = "D_SmoHelperV2";
 func.tags = ["d", "smo-helper-v2", "migration"];
-func.dependencies = [D_TOKEN_ID, D_REDEEMER_CONTRACT_ID, D_ISSUER_CONTRACT_ID, D_SMO_HELPER_ID];
+func.dependencies = [D_TOKEN_ID, D_REDEEMER_CONTRACT_ID, D_SMO_HELPER_ID];
 
 export default func;

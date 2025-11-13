@@ -12,9 +12,9 @@ const WRONG_SFRXUSD_ADDRESS = "0x55F937DEF274C6CBd9444f0857639757C5A2a3E9";
 /**
  * Build a Safe transaction payload to disallow collateral
  *
- * @param collateralVaultAddress
- * @param collateralAddress
- * @param collateralVaultInterface
+ * @param collateralVaultAddress - Address of the CollateralVault contract
+ * @param collateralAddress - Collateral token to remove
+ * @param collateralVaultInterface - Interface used to encode Safe transaction data
  */
 function createDisallowCollateralTransaction(
   collateralVaultAddress: string,
@@ -31,9 +31,9 @@ function createDisallowCollateralTransaction(
 /**
  * Build a Safe transaction payload to allow collateral
  *
- * @param collateralVaultAddress
- * @param collateralAddress
- * @param collateralVaultInterface
+ * @param collateralVaultAddress - Address of the CollateralVault contract
+ * @param collateralAddress - Collateral token to allow
+ * @param collateralVaultInterface - Interface used to encode Safe transaction data
  */
 function createAllowCollateralTransaction(
   collateralVaultAddress: string,
@@ -126,7 +126,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     } else {
       console.log(`  ✅ Oracle price for correct sfrxUSD: ${price.toString()}`);
     }
-  } catch (error) {
+  } catch {
     console.log(`  ⚠️  Oracle not configured for correct sfrxUSD (previous Safe txs not executed yet)`);
   }
 

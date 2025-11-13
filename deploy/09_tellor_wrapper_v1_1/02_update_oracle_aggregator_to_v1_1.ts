@@ -14,10 +14,10 @@ import { SafeTransactionData } from "../../typescript/hardhat/saga-safe-manager"
 /**
  * Build a Safe transaction payload to set an oracle in the OracleAggregator
  *
- * @param oracleAggregatorAddress
- * @param assetAddress
- * @param oracleAddress
- * @param oracleAggregatorInterface
+ * @param oracleAggregatorAddress - Address of the OracleAggregator contract
+ * @param assetAddress - Asset whose oracle will be updated
+ * @param oracleAddress - Address of the target oracle feed
+ * @param oracleAggregatorInterface - Interface used to encode Safe transaction data
  */
 function createSetOracleTransaction(
   oracleAggregatorAddress: string,
