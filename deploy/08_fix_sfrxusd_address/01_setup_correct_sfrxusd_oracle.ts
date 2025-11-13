@@ -10,10 +10,10 @@ import { SafeTransactionData } from "../../typescript/hardhat/saga-safe-manager"
 /**
  * Build a Safe transaction payload to set a Tellor feed
  *
- * @param tellorWrapperAddress
- * @param assetAddress
- * @param feedAddress
- * @param tellorWrapperInterface
+ * @param tellorWrapperAddress - Address of the Tellor wrapper receiving the call
+ * @param assetAddress - Asset to associate with the feed
+ * @param feedAddress - Address of the Tellor feed to set
+ * @param tellorWrapperInterface - Interface used to encode Safe call data
  */
 function createSetFeedTransaction(
   tellorWrapperAddress: string,

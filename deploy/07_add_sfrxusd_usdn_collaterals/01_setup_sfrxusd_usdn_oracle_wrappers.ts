@@ -10,10 +10,10 @@ import { SafeTransactionData } from "../../typescript/hardhat/saga-safe-manager"
 /**
  * Build a Safe transaction payload to set a Tellor feed
  *
- * @param tellorWrapperAddress
- * @param assetAddress
- * @param feedAddress
- * @param tellorWrapperInterface
+ * @param tellorWrapperAddress - Address of the Tellor wrapper contract receiving the call
+ * @param assetAddress - Asset that will be mapped to the Tellor feed
+ * @param feedAddress - Address of the Tellor feed to set
+ * @param tellorWrapperInterface - Interface used to encode the Safe transaction data
  */
 function createSetFeedTransaction(
   tellorWrapperAddress: string,
@@ -31,11 +31,11 @@ function createSetFeedTransaction(
 /**
  * Build a Safe transaction payload to set threshold configuration
  *
- * @param tellorWrapperAddress
- * @param assetAddress
- * @param lowerThreshold
- * @param fixedPrice
- * @param tellorWrapperInterface
+ * @param tellorWrapperAddress - Address of the Tellor wrapper contract receiving the call
+ * @param assetAddress - Asset that will be configured with thresholds
+ * @param lowerThreshold - Threshold below which the wrapper should revert
+ * @param fixedPrice - Fixed price to use when the threshold hits
+ * @param tellorWrapperInterface - Interface used to encode the Safe transaction data
  */
 function createSetThresholdConfigTransaction(
   tellorWrapperAddress: string,

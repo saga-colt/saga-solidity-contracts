@@ -46,8 +46,8 @@ export class SagaGovernanceExecutor {
    * Returns whether the requirement is considered complete (true) or pending
    * governance/manual action (false).
    *
-   * @param directCall
-   * @param safeTxBuilder
+   * @param directCall - Async fn that attempts to perform the action directly on-chain
+   * @param safeTxBuilder - Optional builder that returns a Safe transaction when queuing is needed
    */
   async tryOrQueue<T>(directCall: () => Promise<T>, safeTxBuilder?: () => SafeTransactionData): Promise<boolean> {
     try {
@@ -69,7 +69,7 @@ export class SagaGovernanceExecutor {
    * Flush queued transactions into a Safe batch (if any and in Safe mode).
    * Returns true if either not in Safe mode, or batch prepared successfully.
    *
-   * @param description
+   * @param description - Human-readable summary for the Safe batch
    */
   async flush(description: string): Promise<boolean> {
     if (!this.useSafe || !this.safeManager || this.transactions.length === 0) {

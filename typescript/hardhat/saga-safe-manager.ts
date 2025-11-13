@@ -74,7 +74,7 @@ export class SagaSafeManager {
   /**
    * Create a batch transaction using MultiSendCallOnly and propose it to the Safe
    *
-   * @param batch
+   * @param batch - Transactions to encode (and metadata) before proposing to Safe
    */
   async createBatchTransaction(batch: SafeTransactionBatch): Promise<SafeOperationResult> {
     if (!this.apiKit || !this.signerAddress) {
@@ -118,7 +118,7 @@ export class SagaSafeManager {
           }
         }
       } catch (error) {
-        console.log(`   - Could not fetch pending transactions, using current nonce ${nonce}`);
+        console.log(`   - Could not fetch pending transactions, using current nonce ${nonce}`, error);
       }
 
       // Filter out duplicate and already-pending transactions
@@ -228,7 +228,7 @@ export class SagaSafeManager {
   /**
    * Encode multiple transactions into MultiSend format
    *
-   * @param transactions
+   * @param transactions - Individual Safe transactions to encode for MultiSend
    */
   private encodeMultiSendData(transactions: SafeTransactionData[]): string {
     // MultiSend encodes transactions as: [operation(1)][to(20)][value(32)][dataLength(32)][data(dataLength)]
@@ -253,12 +253,9 @@ export class SagaSafeManager {
   /**
    * Calculate the Safe transaction hash
    *
-   * @param safeTx
+   * @param safeTx - Safe transaction payload to hash
    */
   private async calculateSafeTxHash(safeTx: any): Promise<string> {
-    // Get Safe contract info
-    const safeInfo = await this.apiKit!.getSafeInfo(this.config.safeAddress);
-
     // EIP-712 domain for Safe
     const domain = {
       chainId: this.config.chainId,
@@ -304,7 +301,7 @@ export class SagaSafeManager {
   /**
    * Build a deterministic identity string for a Safe transaction payload
    *
-   * @param tx
+   * @param tx - Transaction fields used to compute a deduplication identity
    */
   private buildTransactionIdentity(tx: Pick<SafeTransactionData, "to" | "value" | "data" | "operation">): string {
     const to = ethers.getAddress(tx.to);
@@ -318,7 +315,7 @@ export class SagaSafeManager {
   /**
    * Sign a Safe transaction hash
    *
-   * @param safeTxHash
+   * @param safeTxHash - Hash of the Safe transaction that should be signed
    */
   private async signSafeTransaction(safeTxHash: string): Promise<string> {
     // Sign the Safe transaction hash
@@ -334,7 +331,7 @@ export class SagaSafeManager {
   /**
    * Pause execution for the specified number of milliseconds.
    *
-   * @param ms
+   * @param ms - Milliseconds to sleep
    */
   private async sleep(ms: number): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, ms));

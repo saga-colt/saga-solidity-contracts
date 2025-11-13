@@ -10,9 +10,9 @@ import { SafeTransactionData } from "../../typescript/hardhat/saga-safe-manager"
 /**
  * Build a Safe transaction payload to disallow collateral
  *
- * @param collateralVaultAddress
- * @param collateralAddress
- * @param collateralVaultInterface
+ * @param collateralVaultAddress - Address of the CollateralVault contract
+ * @param collateralAddress - Collateral token to disable
+ * @param collateralVaultInterface - Interface used to encode Safe transaction data
  */
 function createDisallowCollateralTransaction(
   collateralVaultAddress: string,

@@ -112,7 +112,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Pr
       } else {
         console.log(`    ✅ Oracle price for ${token.name}: ${price.toString()}`);
       }
-    } catch (error) {
+    } catch {
       console.log(`    ⚠️  Oracle not configured for ${token.name} (previous Safe txs not executed yet)`);
       allOraclesConfigured = false;
     }
