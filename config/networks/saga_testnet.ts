@@ -159,56 +159,56 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
           plainTellorOracleWrappers: {
             ...(yUSDDeployment?.address && mockOracleNameToAddress["yUSD_USD"]
               ? {
-                [yUSDDeployment.address]: mockOracleNameToAddress["yUSD_USD"],
-              }
+                  [yUSDDeployment.address]: mockOracleNameToAddress["yUSD_USD"],
+                }
               : {}),
             ...(vyUSDDeployment?.address && mockOracleNameToAddress["vyUSD_USD"]
               ? {
-                [vyUSDDeployment.address]: mockOracleNameToAddress["vyUSD_USD"],
-              }
+                  [vyUSDDeployment.address]: mockOracleNameToAddress["vyUSD_USD"],
+                }
               : {}),
             ...(sfrxUSDDeployment?.address && mockOracleNameToAddress["sfrxUSD_USD"]
               ? {
-                [sfrxUSDDeployment.address]: mockOracleNameToAddress["sfrxUSD_USD"],
-              }
+                  [sfrxUSDDeployment.address]: mockOracleNameToAddress["sfrxUSD_USD"],
+                }
               : {}),
           },
           tellorOracleWrappersWithThresholding: {
             ...(USDCDeployment?.address && mockOracleNameToAddress["USDC_USD"]
               ? {
-                [USDCDeployment.address]: {
-                  feed: mockOracleNameToAddress["USDC_USD"],
-                  lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-                  fixedPrice: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-                },
-              }
+                  [USDCDeployment.address]: {
+                    feed: mockOracleNameToAddress["USDC_USD"],
+                    lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
+                    fixedPrice: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
+                  },
+                }
               : {}),
             ...(USDTDeployment?.address && mockOracleNameToAddress["USDT_USD"]
               ? {
-                [USDTDeployment.address]: {
-                  feed: mockOracleNameToAddress["USDT_USD"],
-                  lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-                  fixedPrice: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-                },
-              }
+                  [USDTDeployment.address]: {
+                    feed: mockOracleNameToAddress["USDT_USD"],
+                    lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
+                    fixedPrice: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
+                  },
+                }
               : {}),
             ...(SAGADeployment?.address && mockOracleNameToAddress["SAGA_USD"]
               ? {
-                [SAGADeployment.address]: {
-                  feed: mockOracleNameToAddress["SAGA_USD"],
-                  lowerThreshold: 0n,
-                  fixedPrice: 0n,
-                },
-              }
+                  [SAGADeployment.address]: {
+                    feed: mockOracleNameToAddress["SAGA_USD"],
+                    lowerThreshold: 0n,
+                    fixedPrice: 0n,
+                  },
+                }
               : {}),
             ...(USDNDeployment?.address && mockOracleNameToAddress["USDN_USD"]
               ? {
-                [USDNDeployment.address]: {
-                  feed: mockOracleNameToAddress["USDN_USD"],
-                  lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-                  fixedPrice: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
-                },
-              }
+                  [USDNDeployment.address]: {
+                    feed: mockOracleNameToAddress["USDN_USD"],
+                    lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
+                    fixedPrice: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
+                  },
+                }
               : {}),
           },
         },
