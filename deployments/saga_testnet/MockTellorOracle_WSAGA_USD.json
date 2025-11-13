@@ -1,0 +1,269 @@
+{
+  "address": "0x09c02f72a01024F03ECF607a442f408F4DdF1E42",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "_decimals",
+          "type": "uint8"
+        },
+        {
+          "internalType": "string",
+          "name": "_description",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "decimals",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "description",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint80",
+          "name": "_roundId",
+          "type": "uint80"
+        }
+      ],
+      "name": "getRoundData",
+      "outputs": [
+        {
+          "internalType": "uint80",
+          "name": "roundId",
+          "type": "uint80"
+        },
+        {
+          "internalType": "int256",
+          "name": "answer",
+          "type": "int256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "startedAt",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "updatedAt",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint80",
+          "name": "answeredInRound",
+          "type": "uint80"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "latestRoundData",
+      "outputs": [
+        {
+          "internalType": "uint80",
+          "name": "roundId",
+          "type": "uint80"
+        },
+        {
+          "internalType": "int256",
+          "name": "answer",
+          "type": "int256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "startedAt",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "updatedAt",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint80",
+          "name": "answeredInRound",
+          "type": "uint80"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "int256",
+          "name": "_price",
+          "type": "int256"
+        }
+      ],
+      "name": "setMock",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "int256",
+          "name": "_price",
+          "type": "int256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_timestamp",
+          "type": "uint256"
+        }
+      ],
+      "name": "setMockWithTimestamp",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "version",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x456d0b392e0f55ebce78b225d032837039421daf1f918fc59f923b10897e957b",
+  "receipt": {
+    "to": null,
+    "from": "0xd2f775Ff2cD41bfe43C7A8c016eD10393553fe44",
+    "contractAddress": "0x09c02f72a01024F03ECF607a442f408F4DdF1E42",
+    "transactionIndex": 11,
+    "gasUsed": "347527",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x81f99528f3a45653a275ef3cdab7a58626538c9d9940c7ce2fce4bd7627b0bc4",
+    "transactionHash": "0x456d0b392e0f55ebce78b225d032837039421daf1f918fc59f923b10897e957b",
+    "logs": [],
+    "blockNumber": 5481839,
+    "cumulativeGasUsed": "7025627",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    18,
+    "WSAGA_USD Mock Oracle"
+  ],
+  "numDeployments": 1,
+  "solcInputHash": "2527ebfec9c9a604caa210608c9d74c8",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.22+commit.4fc1097e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"_decimals\",\"type\":\"uint8\"},{\"internalType\":\"string\",\"name\":\"_description\",\"type\":\"string\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"description\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint80\",\"name\":\"_roundId\",\"type\":\"uint80\"}],\"name\":\"getRoundData\",\"outputs\":[{\"internalType\":\"uint80\",\"name\":\"roundId\",\"type\":\"uint80\"},{\"internalType\":\"int256\",\"name\":\"answer\",\"type\":\"int256\"},{\"internalType\":\"uint256\",\"name\":\"startedAt\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"updatedAt\",\"type\":\"uint256\"},{\"internalType\":\"uint80\",\"name\":\"answeredInRound\",\"type\":\"uint80\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"latestRoundData\",\"outputs\":[{\"internalType\":\"uint80\",\"name\":\"roundId\",\"type\":\"uint80\"},{\"internalType\":\"int256\",\"name\":\"answer\",\"type\":\"int256\"},{\"internalType\":\"uint256\",\"name\":\"startedAt\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"updatedAt\",\"type\":\"uint256\"},{\"internalType\":\"uint80\",\"name\":\"answeredInRound\",\"type\":\"uint80\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"int256\",\"name\":\"_price\",\"type\":\"int256\"}],\"name\":\"setMock\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"int256\",\"name\":\"_price\",\"type\":\"int256\"},{\"internalType\":\"uint256\",\"name\":\"_timestamp\",\"type\":\"uint256\"}],\"name\":\"setMockWithTimestamp\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"version\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/testing/oracle/MockChainlinkAggregatorV3.sol\":\"MockChainlinkAggregatorV3\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/oracle_aggregator/interface/chainlink/IAggregatorV3Interface.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n/* \\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014 *\\n *    _____     ______   ______     __     __   __     __     ______   __  __       *\\n *   /\\\\  __-.  /\\\\__  _\\\\ /\\\\  == \\\\   /\\\\ \\\\   /\\\\ \\\"-.\\\\ \\\\   /\\\\ \\\\   /\\\\__  _\\\\ /\\\\ \\\\_\\\\ \\\\      *\\n *   \\\\ \\\\ \\\\/\\\\ \\\\ \\\\/_/\\\\ \\\\/ \\\\ \\\\  __<   \\\\ \\\\ \\\\  \\\\ \\\\ \\\\-.  \\\\  \\\\ \\\\ \\\\  \\\\/_/\\\\ \\\\/ \\\\ \\\\____ \\\\     *\\n *    \\\\ \\\\____-    \\\\ \\\\_\\\\  \\\\ \\\\_\\\\ \\\\_\\\\  \\\\ \\\\_\\\\  \\\\ \\\\_\\\\\\\\\\\"\\\\_\\\\  \\\\ \\\\_\\\\    \\\\ \\\\_\\\\  \\\\/\\\\_____\\\\    *\\n *     \\\\/____/     \\\\/_/   \\\\/_/ /_/   \\\\/_/   \\\\/_/ \\\\/_/   \\\\/_/     \\\\/_/   \\\\/_____/    *\\n *                                                                                  *\\n * \\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014 dtrinity.org \\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014 *\\n *                                                                                  *\\n *                                         \\u25b2                                        *\\n *                                        \\u25b2 \\u25b2                                       *\\n *                                                                                  *\\n * \\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014 *\\n * dTRINITY Protocol: https://github.com/dtrinity                                   *\\n * \\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014 */\\n\\npragma solidity ^0.8.20;\\n\\ninterface AggregatorV3Interface {\\n    function decimals() external view returns (uint8);\\n\\n    function description() external view returns (string memory);\\n\\n    function version() external view returns (uint256);\\n\\n    // getRoundData and latestRoundData should both raise \\\"No data present\\\"\\n    // if they do not have data to report, instead of returning unset values\\n    // which could be misinterpreted as actual reported values.\\n    function getRoundData(\\n        uint80 _roundId\\n    )\\n        external\\n        view\\n        returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);\\n\\n    function latestRoundData()\\n        external\\n        view\\n        returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);\\n}\\n\",\"keccak256\":\"0x39aa5907d90c346f01d376900eb407cda5f41f89915514d98fcee73d0beee3e8\",\"license\":\"MIT\"},\"contracts/testing/oracle/MockChainlinkAggregatorV3.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n/* \\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014 *\\n *    _____     ______   ______     __     __   __     __     ______   __  __       *\\n *   /\\\\  __-.  /\\\\__  _\\\\ /\\\\  == \\\\   /\\\\ \\\\   /\\\\ \\\"-.\\\\ \\\\   /\\\\ \\\\   /\\\\__  _\\\\ /\\\\ \\\\_\\\\ \\\\      *\\n *   \\\\ \\\\ \\\\/\\\\ \\\\ \\\\/_/\\\\ \\\\/ \\\\ \\\\  __<   \\\\ \\\\ \\\\  \\\\ \\\\ \\\\-.  \\\\  \\\\ \\\\ \\\\  \\\\/_/\\\\ \\\\/ \\\\ \\\\____ \\\\     *\\n *    \\\\ \\\\____-    \\\\ \\\\_\\\\  \\\\ \\\\_\\\\ \\\\_\\\\  \\\\ \\\\_\\\\  \\\\ \\\\_\\\\\\\\\\\"\\\\_\\\\  \\\\ \\\\_\\\\    \\\\ \\\\_\\\\  \\\\/\\\\_____\\\\    *\\n *     \\\\/____/     \\\\/_/   \\\\/_/ /_/   \\\\/_/   \\\\/_/ \\\\/_/   \\\\/_/     \\\\/_/   \\\\/_____/    *\\n *                                                                                  *\\n * \\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014 dtrinity.org \\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014 *\\n *                                                                                  *\\n *                                         \\u25b2                                        *\\n *                                        \\u25b2 \\u25b2                                       *\\n *                                                                                  *\\n * \\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014 *\\n * dTRINITY Protocol: https://github.com/dtrinity                                   *\\n * \\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014\\u2014 */\\n\\npragma solidity ^0.8.20;\\n\\nimport \\\"../../oracle_aggregator/interface/chainlink/IAggregatorV3Interface.sol\\\";\\n\\ncontract MockChainlinkAggregatorV3 is AggregatorV3Interface {\\n    int256 private mockPrice;\\n    uint80 private mockRoundId;\\n    uint8 private mockDecimals;\\n    string private mockDescription;\\n    uint256 private mockUpdatedAt;\\n\\n    constructor(uint8 _decimals, string memory _description) {\\n        mockRoundId = 1;\\n        mockDecimals = _decimals;\\n        mockDescription = _description;\\n        mockUpdatedAt = block.timestamp;\\n    }\\n\\n    function decimals() external view override returns (uint8) {\\n        return mockDecimals;\\n    }\\n\\n    function description() external view override returns (string memory) {\\n        return mockDescription;\\n    }\\n\\n    function version() external pure override returns (uint256) {\\n        return 1;\\n    }\\n\\n    function setMock(int256 _price) external {\\n        mockPrice = _price;\\n        mockRoundId++;\\n        mockUpdatedAt = block.timestamp;\\n    }\\n\\n    function setMockWithTimestamp(int256 _price, uint256 _timestamp) external {\\n        mockPrice = _price;\\n        mockRoundId++;\\n        mockUpdatedAt = _timestamp;\\n    }\\n\\n    function getRoundData(\\n        uint80 _roundId\\n    )\\n        external\\n        view\\n        override\\n        returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)\\n    {\\n        return (_roundId, mockPrice, mockUpdatedAt, mockUpdatedAt, _roundId);\\n    }\\n\\n    function latestRoundData()\\n        external\\n        view\\n        override\\n        returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)\\n    {\\n        return (mockRoundId, mockPrice, mockUpdatedAt, mockUpdatedAt, mockRoundId);\\n    }\\n}\\n\",\"keccak256\":\"0x9b28282ead13bc15b272599402bb8382ac8a2a5fab83ed335b04c8e172cc3b9c\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b506040516106a53803806106a583398101604081905261002f91610081565b600180546001600160581b0319166a010000000000000000000060ff8516021781179055600261005f82826101ef565b505042600355506102ae565b634e487b7160e01b600052604160045260246000fd5b6000806040838503121561009457600080fd5b825160ff811681146100a557600080fd5b602084810151919350906001600160401b03808211156100c457600080fd5b818601915086601f8301126100d857600080fd5b8151818111156100ea576100ea61006b565b604051601f8201601f19908116603f011681019083821181831017156101125761011261006b565b81604052828152898684870101111561012a57600080fd5b600093505b8284101561014c578484018601518185018701529285019261012f565b60008684830101528096505050505050509250929050565b600181811c9082168061017857607f821691505b60208210810361019857634e487b7160e01b600052602260045260246000fd5b50919050565b601f8211156101ea576000816000526020600020601f850160051c810160208610156101c75750805b601f850160051c820191505b818110156101e6578281556001016101d3565b5050505b505050565b81516001600160401b038111156102085761020861006b565b61021c816102168454610164565b8461019e565b602080601f83116001811461025157600084156102395750858301515b600019600386901b1c1916600185901b1785556101e6565b600085815260208120601f198616915b8281101561028057888601518255948401946001909101908401610261565b508582101561029e5787850151600019600388901b60f8161c191681555b5050505050600190811b01905550565b6103e8806102bd6000396000f3fe608060405234801561001057600080fd5b506004361061007d5760003560e01c806354fd4d501161005b57806354fd4d50146100ce5780637284e416146100dd5780639a6fc8f5146100f2578063feaf968c1461014557600080fd5b8063313ce5671461008257806333f3998b146100a6578063444320ca146100bb575b600080fd5b600154600160501b900460ff1660405160ff90911681526020015b60405180910390f35b6100b96100b436600461028a565b610161565b005b6100b96100c93660046102a3565b6101ac565b6040516001815260200161009d565b6100e56101f8565b60405161009d91906102c5565b610111610100366004610314565b600054600354919290919081908490565b604080516001600160501b03968716815260208101959095528401929092526060830152909116608082015260a00161009d565b6001546000546003546001600160501b03909216918083610111565b6000818155600180546001600160501b03169161017d83610344565b91906101000a8154816001600160501b0302191690836001600160501b03160217905550504260038190555050565b6000828155600180546001600160501b0316916101c883610344565b91906101000a8154816001600160501b0302191690836001600160501b0316021790555050806003819055505050565b60606002805461020790610378565b80601f016020809104026020016040519081016040528092919081815260200182805461023390610378565b80156102805780601f1061025557610100808354040283529160200191610280565b820191906000526020600020905b81548152906001019060200180831161026357829003601f168201915b5050505050905090565b60006020828403121561029c57600080fd5b5035919050565b600080604083850312156102b657600080fd5b50508035926020909101359150565b60006020808352835180602085015260005b818110156102f3578581018301518582016040015282016102d7565b506000604082860101526040601f19601f8301168501019250505092915050565b60006020828403121561032657600080fd5b81356001600160501b038116811461033d57600080fd5b9392505050565b60006001600160501b0380831681810361036e57634e487b7160e01b600052601160045260246000fd5b6001019392505050565b600181811c9082168061038c57607f821691505b6020821081036103ac57634e487b7160e01b600052602260045260246000fd5b5091905056fea2646970667358221220aa3fa65cfda0e3c008ec324dedf8b3f63d96c29a52d6c1e155a8ba547e9cbaa664736f6c63430008160033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b506004361061007d5760003560e01c806354fd4d501161005b57806354fd4d50146100ce5780637284e416146100dd5780639a6fc8f5146100f2578063feaf968c1461014557600080fd5b8063313ce5671461008257806333f3998b146100a6578063444320ca146100bb575b600080fd5b600154600160501b900460ff1660405160ff90911681526020015b60405180910390f35b6100b96100b436600461028a565b610161565b005b6100b96100c93660046102a3565b6101ac565b6040516001815260200161009d565b6100e56101f8565b60405161009d91906102c5565b610111610100366004610314565b600054600354919290919081908490565b604080516001600160501b03968716815260208101959095528401929092526060830152909116608082015260a00161009d565b6001546000546003546001600160501b03909216918083610111565b6000818155600180546001600160501b03169161017d83610344565b91906101000a8154816001600160501b0302191690836001600160501b03160217905550504260038190555050565b6000828155600180546001600160501b0316916101c883610344565b91906101000a8154816001600160501b0302191690836001600160501b0316021790555050806003819055505050565b60606002805461020790610378565b80601f016020809104026020016040519081016040528092919081815260200182805461023390610378565b80156102805780601f1061025557610100808354040283529160200191610280565b820191906000526020600020905b81548152906001019060200180831161026357829003601f168201915b5050505050905090565b60006020828403121561029c57600080fd5b5035919050565b600080604083850312156102b657600080fd5b50508035926020909101359150565b60006020808352835180602085015260005b818110156102f3578581018301518582016040015282016102d7565b506000604082860101526040601f19601f8301168501019250505092915050565b60006020828403121561032657600080fd5b81356001600160501b038116811461033d57600080fd5b9392505050565b60006001600160501b0380831681810361036e57634e487b7160e01b600052601160045260246000fd5b6001019392505050565b600181811c9082168061038c57607f821691505b6020821081036103ac57634e487b7160e01b600052602260045260246000fd5b5091905056fea2646970667358221220aa3fa65cfda0e3c008ec324dedf8b3f63d96c29a52d6c1e155a8ba547e9cbaa664736f6c63430008160033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 65677,
+        "contract": "contracts/testing/oracle/MockChainlinkAggregatorV3.sol:MockChainlinkAggregatorV3",
+        "label": "mockPrice",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_int256"
+      },
+      {
+        "astId": 65679,
+        "contract": "contracts/testing/oracle/MockChainlinkAggregatorV3.sol:MockChainlinkAggregatorV3",
+        "label": "mockRoundId",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_uint80"
+      },
+      {
+        "astId": 65681,
+        "contract": "contracts/testing/oracle/MockChainlinkAggregatorV3.sol:MockChainlinkAggregatorV3",
+        "label": "mockDecimals",
+        "offset": 10,
+        "slot": "1",
+        "type": "t_uint8"
+      },
+      {
+        "astId": 65683,
+        "contract": "contracts/testing/oracle/MockChainlinkAggregatorV3.sol:MockChainlinkAggregatorV3",
+        "label": "mockDescription",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_string_storage"
+      },
+      {
+        "astId": 65685,
+        "contract": "contracts/testing/oracle/MockChainlinkAggregatorV3.sol:MockChainlinkAggregatorV3",
+        "label": "mockUpdatedAt",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_uint256"
+      }
+    ],
+    "types": {
+      "t_int256": {
+        "encoding": "inplace",
+        "label": "int256",
+        "numberOfBytes": "32"
+      },
+      "t_string_storage": {
+        "encoding": "bytes",
+        "label": "string",
+        "numberOfBytes": "32"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      },
+      "t_uint8": {
+        "encoding": "inplace",
+        "label": "uint8",
+        "numberOfBytes": "1"
+      },
+      "t_uint80": {
+        "encoding": "inplace",
+        "label": "uint80",
+        "numberOfBytes": "10"
+      }
+    }
+  }
+}

@@ -65,7 +65,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
     // Convert price to int256 format expected by Tellor (18 decimals)
     const priceInWei = hre.ethers.parseUnits(feed.price, 18); // Tellor uses 18 decimals
-    await mockOracleContract.setMock(priceInWei);
+    console.log(`Setting mock price for ${feed.name} to ${priceInWei.toString()}`);
+    await (await mockOracleContract.setMock(priceInWei, { gasLimit: 200_000 })).wait(); // wait so downstream sanity checks see the price
 
     // Store the deployment for config
     mockOracleNameToAddress[feed.name] = mockOracle.address;
