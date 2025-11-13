@@ -27,7 +27,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Deploy pool configurator implementation
   console.log("[dLend] Deploying PoolConfigurator implementation...");
-  const poolConfiguratorArtifact = await hre.deployments.getExtendedArtifact("PoolConfigurator");
+  const poolConfiguratorArtifact = await hre.deployments.getExtendedArtifact(POOL_CONFIGURATOR_ID);
   const poolConfiguratorFactory = await hre.ethers.getContractFactory("PoolConfigurator", {
     libraries: {
       ConfiguratorLogic: configuratorLogicDeployment.address,
