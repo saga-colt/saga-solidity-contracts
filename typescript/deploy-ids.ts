@@ -16,6 +16,7 @@ export const D_REDEEMER_CONTRACT_ID = "D_Redeemer";
 export const D_COLLATERAL_VAULT_CONTRACT_ID = "D_CollateralHolderVault";
 export const D_AMO_MANAGER_ID = "D_AmoManager";
 export const D_HARD_PEG_ORACLE_WRAPPER_ID = "D_HardPegOracleWrapper";
+export const MUST_HARD_PEG_ORACLE_WRAPPER_ID = "MUST_HardPegOracleWrapper";
 
 // dLEND
 export const TREASURY_PROXY_ID = "TreasuryProxy";

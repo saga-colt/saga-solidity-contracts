@@ -29,6 +29,7 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
   const usdnAddress = "0xE9A5C89eCff4323344cFaA4c659EFa42C80FE6cc";
   const yUSDAddress = "0x839e7e610108Cf3DCc9b40329db33b6E6bc9baCE";
   const vyUSDAddress = "0x704a58f888f18506C9Fc199e53AE220B5fdCaEd8";
+  const mustAddress = "0xA8b56ce258a7f55327BdE886B0e947EE059ca434";
 
   const governanceSafeMultisig = "0xf19cf8881237CA819Fd50C9C22cb258e9DB8644e"; // Safe on Saga
 
@@ -63,6 +64,7 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
       USDN: usdnAddress,
       yUSD: yUSDAddress,
       vyUSD: vyUSDAddress,
+      MUST: mustAddress,
     },
     uniswapRouter: "0x346239972d1fa486FC4a521031BC81bFB7D6e8a4", // Uniswap V3 SwapRouter
     walletAddresses: {
@@ -76,7 +78,7 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
     },
     dStables: {
       D: {
-        collaterals: [usdcAddress, usdtAddress, usdnAddress, yUSDAddress, vyUSDAddress],
+        collaterals: [usdcAddress, usdtAddress, usdnAddress, yUSDAddress, vyUSDAddress, mustAddress],
         initialFeeReceiver: governanceSafeMultisig, // governanceMultisig
         initialRedemptionFeeBps: 0.4 * ONE_PERCENT_BPS, // Default for stablecoins
         collateralRedemptionFees: {
