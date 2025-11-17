@@ -42,5 +42,9 @@
   "point-sfrxusd-usdn-feeds-to-oracle-aggregator": 1761135697,
   "d-whitelist-sfrxusd-usdn-collateral": 1761135997,
   "d-whitelist-yusd-vyusd-collateral": 1762932656,
-  "MUST_HardPegOracleWrapper": 1763100994
+  "MUST_HardPegOracleWrapper": 1763100994,
+  "deploy-tellor-wrapper-v1.1": 1763389650,
+  "update-oracle-aggregator-to-tellor-wrapper-v1.1": 1763389650,
+  "disallow-sfrxusd-collateral-v1.1": 1763392179,
+  "transfer_tellor_wrapper_v1_1_roles_to_multisig": 1763392179
 }
