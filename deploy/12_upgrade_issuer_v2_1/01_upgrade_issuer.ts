@@ -114,7 +114,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Pr
   };
 
   if (!(await dstable.hasRole(MINTER_ROLE, newIssuerAddress))) {
-    const buildGrantMinterTx = () => buildRoleTx(dstableAddress, dstable.interface.encodeFunctionData("grantRole", [MINTER_ROLE, newIssuerAddress]));
+    const buildGrantMinterTx = (): SafeTransactionData =>
+      buildRoleTx(dstableAddress, dstable.interface.encodeFunctionData("grantRole", [MINTER_ROLE, newIssuerAddress]));
 
     if (executor.useSafe && !canDirectlyManageDStableRoles) {
       enqueueGovernance("Grant MINTER_ROLE to IssuerV2_1", buildGrantMinterTx);
@@ -139,7 +140,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Pr
   }
 
   if (previousIssuerAddress && (await dstable.hasRole(MINTER_ROLE, previousIssuerAddress))) {
-    const buildRevokeMinterTx = () =>
+    const buildRevokeMinterTx = (): SafeTransactionData =>
       buildRoleTx(dstableAddress, dstable.interface.encodeFunctionData("revokeRole", [MINTER_ROLE, previousIssuerAddress]));
 
     if (executor.useSafe && !canDirectlyManageDStableRoles) {

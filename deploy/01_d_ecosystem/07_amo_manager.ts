@@ -70,9 +70,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   let pendingGovernanceActions = false;
   let requiresGovernanceBeforeContinue = false;
 
-  const markPending = (opComplete: boolean, requiresImmediateFlush = false) => {
+  const markPending = (opComplete: boolean, requiresImmediateFlush = false): void => {
     if (!opComplete) {
       pendingGovernanceActions = true;
+
       if (requiresImmediateFlush) {
         requiresGovernanceBeforeContinue = true;
       }
@@ -82,7 +83,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const currentOracle = await oracle.assetOracles(debtTokenDeployment.address);
 
   if (!currentOracle || currentOracle.toLowerCase() !== hardPegWrapperAddress.toLowerCase()) {
-    const buildOracleTx = () =>
+    const buildOracleTx = (): SafeTransactionData =>
       buildSafeTransaction(oracleAggregatorAddress, oracle.interface, "setOracle", [debtTokenDeployment.address, hardPegWrapperAddress]);
 
     if (executor.useSafe && !canDirectlyUpdateOracle) {
@@ -145,7 +146,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const canDirectlyGrantMinterRole = !executor.useSafe && deployerIsDstAdmin;
 
   if (!(await dstable.hasRole(MINTER_ROLE, amoManagerDeployment.address))) {
-    const buildMinterTx = () => buildSafeTransaction(dstableAddress, dstable.interface, "grantRole", [MINTER_ROLE, amoManagerDeployment.address]);
+    const buildMinterTx = (): SafeTransactionData =>
+      buildSafeTransaction(dstableAddress, dstable.interface, "grantRole", [MINTER_ROLE, amoManagerDeployment.address]);
 
     if (executor.useSafe && !canDirectlyGrantMinterRole) {
       console.log(`   ↳ Queuing MINTER_ROLE grant for AmoManagerV2 via Saga Safe`);
@@ -178,7 +180,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const canDirectlyGrantWithdrawerRole = !executor.useSafe && deployerIsCollateralAdmin;
 
   if (!(await collateralVault.hasRole(COLLATERAL_WITHDRAWER_ROLE, amoManagerDeployment.address))) {
-    const buildWithdrawerTx = () =>
+    const buildWithdrawerTx = (): SafeTransactionData =>
       buildSafeTransaction(collateralVaultAddress, collateralVault.interface, "grantRole", [
         COLLATERAL_WITHDRAWER_ROLE,
         amoManagerDeployment.address,
@@ -228,7 +230,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const canDirectlyAllowCollateral = !executor.useSafe && deployerIsCollateralManager;
 
   if (!(await collateralVault.isCollateralSupported(debtTokenDeployment.address))) {
-    const buildAllowCollateralTx = () =>
+    const buildAllowCollateralTx = (): SafeTransactionData =>
       buildSafeTransaction(collateralVaultAddress, collateralVault.interface, "allowCollateral", [debtTokenDeployment.address]);
 
     if (executor.useSafe && !canDirectlyAllowCollateral) {
