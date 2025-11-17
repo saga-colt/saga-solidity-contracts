@@ -9,9 +9,9 @@ import {
   D_TOKEN_ID,
   USD_ORACLE_AGGREGATOR_ID,
 } from "../../typescript/deploy-ids";
+import { isMainnet } from "../../typescript/hardhat/deploy";
 import { SagaGovernanceExecutor } from "../../typescript/hardhat/saga-governance";
 import { SafeTransactionData } from "../../typescript/hardhat/saga-safe-manager";
-import { isMainnet } from "../../typescript/hardhat/deploy";
 
 /**
  * Build a Safe transaction payload for a simple function call.
