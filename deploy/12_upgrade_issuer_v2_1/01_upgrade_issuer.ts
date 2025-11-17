@@ -11,6 +11,7 @@ import {
 } from "../../typescript/deploy-ids";
 import { SagaGovernanceExecutor } from "../../typescript/hardhat/saga-governance";
 import { SafeTransactionData } from "../../typescript/hardhat/saga-safe-manager";
+import { isMainnet } from "../../typescript/hardhat/deploy";
 
 /**
  * Build a Safe transaction payload for a simple function call.
@@ -27,6 +28,11 @@ function buildRoleTx(contractAddress: string, data: string): SafeTransactionData
 }
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Promise<boolean> {
+  if (!isMainnet(hre.network.name)) {
+    console.log(`\n≻ 12_upgrade_issuer_v2_1/01_upgrade_issuer.ts: ⏭️  Skipping upgrade on ${hre.network.name}`);
+    return true;
+  }
+
   const { deployer } = await hre.getNamedAccounts();
   const deployerSigner = await hre.ethers.getSigner(deployer);
   const config = await getConfig(hre);
