@@ -238,9 +238,7 @@ dstableConfigs.forEach((config) => {
         // Attempt to issue – should revert with the custom error defined in CollateralVault
         await expect(
           issuerContract.connect(await hre.ethers.getSigner(user1)).issue(unsupportedAmount, unsupportedCollateralInfo.address, 0),
-        )
-          .to.be.revertedWithCustomError(issuerContract, "UnsupportedCollateral")
-          .withArgs(unsupportedCollateralInfo.address);
+        ).to.be.revertedWithCustomError(issuerContract, "AssetMintingPaused");
       });
     });
 

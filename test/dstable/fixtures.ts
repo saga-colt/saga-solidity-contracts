@@ -29,33 +29,39 @@ export const createDStableFixture = (config: DStableFixtureConfig) => {
   return deployments.createFixture(async ({ deployments }) => {
     await deployments.fixture(); // Start from a fresh deployment
     await deployments.fixture(["local-setup", config.deploymentTag]); // Include local-setup to use the mock Oracle
-
-    // Hardhat tests need IssuerV2_1 available even though the upgrade script is mainnet-only
-    const issuerV2_1 = await deployments.getOrNull(config.issuerContractId);
-
-    if (!issuerV2_1) {
-      const { deployer } = await hre.getNamedAccounts();
-      const cfg = await getConfig(hre);
-
-      const { address: collateralVaultAddress } = await deployments.get(config.collateralVaultContractId);
-      const { address: oracleAggregatorAddress } = await deployments.get(config.oracleAggregatorId);
-      const dstableAddress = cfg.tokenAddresses[config.symbol];
-
-      const deployment = await deployments.deploy(config.issuerContractId, {
-        from: deployer,
-        args: [collateralVaultAddress, dstableAddress, oracleAggregatorAddress],
-        contract: "IssuerV2_1",
-        autoMine: true,
-        log: false,
-      });
-
-      const signer = await hre.ethers.getSigner(deployer);
-      const dstable = await hre.ethers.getContractAt("ERC20StablecoinUpgradeable", dstableAddress, signer);
-      const MINTER_ROLE = await dstable.MINTER_ROLE();
-      await dstable.grantRole(MINTER_ROLE, deployment.address);
-    }
+    await ensureIssuerV2_1Deployment(config);
   });
 };
+
+export async function ensureIssuerV2_1Deployment(config: DStableFixtureConfig): Promise<void> {
+  const issuerV2_1 = await deployments.getOrNull(config.issuerContractId);
+
+  if (issuerV2_1) {
+    return;
+  }
+
+  const { deployer } = await hre.getNamedAccounts();
+  const cfg = await getConfig(hre);
+
+  const { address: collateralVaultAddress } = await deployments.get(config.collateralVaultContractId);
+  const { address: oracleAggregatorAddress } = await deployments.get(config.oracleAggregatorId);
+  const dstableAddress = cfg.tokenAddresses[config.symbol];
+
+  const deployment = await deployments.deploy(config.issuerContractId, {
+    from: deployer,
+    args: [collateralVaultAddress, dstableAddress, oracleAggregatorAddress],
+    contract: "IssuerV2_1",
+    autoMine: true,
+    log: false,
+  });
+
+  const signer = await hre.ethers.getSigner(deployer);
+  const dstable = await hre.ethers.getContractAt("ERC20StablecoinUpgradeable", dstableAddress, signer);
+  const MINTER_ROLE = await dstable.MINTER_ROLE();
+  if (!(await dstable.hasRole(MINTER_ROLE, deployment.address))) {
+    await dstable.grantRole(MINTER_ROLE, deployment.address);
+  }
+}
 
 // Create an AMO fixture factory for any dstable based on its configuration
 export const createDStableAmoFixture = (config: DStableFixtureConfig) => {

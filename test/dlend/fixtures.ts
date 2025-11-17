@@ -24,6 +24,7 @@ import {
 } from "../../typescript/deploy-ids";
 import { ORACLE_AGGREGATOR_PRICE_DECIMALS } from "../../typescript/oracle_aggregator/constants";
 import { getTokenContractForSymbol } from "../../typescript/token/utils";
+import { ensureIssuerV2_1Deployment, D_CONFIG } from "../dstable/fixtures";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 
 /**
@@ -135,6 +136,8 @@ async function setupDLendFixture(): Promise<DLendFixtureResult> {
   if (!reservesList.includes(dAddress)) {
     throw new Error(`D (${dAddress}) not found in reserves: ${reservesList}`);
   }
+
+  await ensureIssuerV2_1Deployment(D_CONFIG);
 
   // Mint D
   const dIssuerAddress = (await hre.deployments.get(D_ISSUER_V2_1_CONTRACT_ID)).address;

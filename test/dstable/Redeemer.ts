@@ -5,7 +5,7 @@ import { ZeroAddress } from "ethers";
 
 import { RedeemerV2, TestMintableERC20, CollateralVault, OracleAggregator, IssuerV2_1, TestERC20 } from "../../typechain-types";
 import { getTokenContractForSymbol, TokenInfo } from "../../typescript/token/utils";
-import { createDStableFixture, D_CONFIG, DStableFixtureConfig } from "./fixtures"; // Assuming fixtures.ts is in the same directory
+import { createDStableFixture, D_CONFIG, DStableFixtureConfig, ensureIssuerV2_1Deployment } from "./fixtures"; // Assuming fixtures.ts is in the same directory
 import { D_REDEEMER_CONTRACT_ID } from "../../typescript/deploy-ids";
 import { getConfig } from "../../config/config"; // To access deployment config for verification
 import { ONE_HUNDRED_PERCENT_BPS } from "../../typescript/common/bps_constants";
@@ -20,6 +20,7 @@ export const createDStableWithRedeemerV2Fixture = (config: DStableFixtureConfig)
     // Then, deploy the RedeemerV2 contracts
     // The deployment script uses the tag 'dusd'
     await deployments.fixture(["dusd"]);
+    await ensureIssuerV2_1Deployment(config);
   });
 };
 
