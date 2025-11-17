@@ -9,8 +9,8 @@ import {
   D_REDEEMER_CONTRACT_ID,
   D_COLLATERAL_VAULT_CONTRACT_ID,
   D_AMO_MANAGER_ID,
+  D_AMO_DEBT_TOKEN_ID,
 } from "../../typescript/deploy-ids";
-import { getTokenContractForSymbol } from "../../typescript/token/utils";
 
 export interface DStableFixtureConfig {
   symbol: "D";
@@ -18,7 +18,8 @@ export interface DStableFixtureConfig {
   issuerContractId: string;
   redeemerContractId: string;
   collateralVaultContractId: string;
-  amoManagerId: string;
+  amoManagerId?: string;
+  amoDebtTokenId?: string;
   oracleAggregatorId: string;
   peggedCollaterals: string[];
   yieldBearingCollaterals: string[];
@@ -64,25 +65,16 @@ export async function ensureIssuerV2_1Deployment(config: DStableFixtureConfig): 
 }
 
 // Create an AMO fixture factory for any dstable based on its configuration
-export const createDStableAmoFixture = (config: DStableFixtureConfig) => {
+export const createDStableAmoV2Fixture = (config: DStableFixtureConfig) => {
   return deployments.createFixture(async ({ deployments }) => {
-    const standaloneMinimalFixture = createDStableFixture(config);
-    await standaloneMinimalFixture(deployments);
+    const baseFixture = createDStableFixture(config);
+    await baseFixture(deployments);
 
-    const { deployer } = await hre.getNamedAccounts();
-    const { address: amoManagerAddress } = await deployments.get(config.amoManagerId);
+    if (!config.amoManagerId || !config.amoDebtTokenId) {
+      throw new Error(`AMO configuration missing for ${config.symbol}`);
+    }
 
-    const { tokenInfo: dstableInfo } = await getTokenContractForSymbol(hre, deployer, config.symbol);
-
-    const { address: oracleAggregatorAddress } = await deployments.get(config.oracleAggregatorId);
-
-    // Deploy MockAmoVault using standard deployment
-    await hre.deployments.deploy("MockAmoVault", {
-      from: deployer,
-      args: [dstableInfo.address, amoManagerAddress, deployer, deployer, deployer, oracleAggregatorAddress],
-      autoMine: true,
-      log: false,
-    });
+    await deployments.fixture(["amo-v2"]);
   });
 };
 
@@ -94,6 +86,7 @@ export const D_CONFIG: DStableFixtureConfig = {
   redeemerContractId: D_REDEEMER_CONTRACT_ID,
   collateralVaultContractId: D_COLLATERAL_VAULT_CONTRACT_ID,
   amoManagerId: D_AMO_MANAGER_ID,
+  amoDebtTokenId: D_AMO_DEBT_TOKEN_ID,
   oracleAggregatorId: USD_ORACLE_AGGREGATOR_ID,
   peggedCollaterals: ["frxUSD", "USDC", "USDS"], // USDC is interesting due to 6 decimals
   yieldBearingCollaterals: ["sfrxUSD", "sUSDS"],

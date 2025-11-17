@@ -98,6 +98,11 @@ The system carefully tracks "AMO supply" separately from circulating supply:
 2. When collateral is withdrawn from AMO vaults, the equivalent dStable becomes circulating
 3. This ensures AMO operations are capital-neutral from a backing perspective
 
+To reflect AMO-held collateral in the accounting vault, AmoManagerV2 mints an `AmoDebtToken`
+into the `CollateralHolderVault` whenever collateral leaves the vault and burns it on repayment.
+The debt token is priced at the hard peg through the oracle aggregator, so `IssuerV2_1`'s
+collateral checks remain valid even while collateral is deployed in external AMO venues.
+
 ### Stability Mechanisms
 
 1. **Overcollateralization**: Users must deposit collateral worth more than the dStable they mint
