@@ -80,6 +80,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Pr
   const DEFAULT_ADMIN_ROLE = await issuer.DEFAULT_ADMIN_ROLE();
   const INCENTIVES_MANAGER_ROLE = await issuer.INCENTIVES_MANAGER_ROLE();
   const PAUSER_ROLE = await issuer.PAUSER_ROLE();
+  const dstableDefaultAdminRole = await dstable.DEFAULT_ADMIN_ROLE();
+  const deployerIsDstAdmin = await dstable.hasRole(dstableDefaultAdminRole, deployer);
+  const canDirectlyManageDStableRoles = !executor.useSafe && deployerIsDstAdmin;
 
   const previousIssuerDeployment = await hre.deployments.getOrNull(D_ISSUER_CONTRACT_ID);
   const previousIssuerAddress = previousIssuerDeployment?.address;
@@ -104,26 +107,59 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Pr
     }
   }
 
+  const enqueueGovernance = (description: string, builder: () => SafeTransactionData): void => {
+    executor.queueTransaction(builder);
+    pendingGovernance = true;
+    console.log(`   ⏳ ${description} queued for governance`);
+  };
+
   if (!(await dstable.hasRole(MINTER_ROLE, newIssuerAddress))) {
-    await queueOrExecute(
-      "Grant MINTER_ROLE to IssuerV2_1",
-      async (): Promise<void> => {
-        await dstable.grantRole(MINTER_ROLE, newIssuerAddress);
-      },
-      buildRoleTx(dstableAddress, dstable.interface.encodeFunctionData("grantRole", [MINTER_ROLE, newIssuerAddress])),
-    );
+    const buildGrantMinterTx = () => buildRoleTx(dstableAddress, dstable.interface.encodeFunctionData("grantRole", [MINTER_ROLE, newIssuerAddress]));
+
+    if (executor.useSafe && !canDirectlyManageDStableRoles) {
+      enqueueGovernance("Grant MINTER_ROLE to IssuerV2_1", buildGrantMinterTx);
+    } else {
+      await queueOrExecute(
+        "Grant MINTER_ROLE to IssuerV2_1",
+        async (): Promise<void> => {
+          if (!canDirectlyManageDStableRoles) {
+            throw new Error(
+              deployerIsDstAdmin
+                ? "Safe execution required for granting MINTER_ROLE on Saga Dollar"
+                : "Deployer is missing DEFAULT_ADMIN_ROLE on Saga Dollar",
+            );
+          }
+          await dstable.grantRole(MINTER_ROLE, newIssuerAddress);
+        },
+        buildGrantMinterTx(),
+      );
+    }
   } else {
     console.log("   ✓ IssuerV2_1 already has MINTER_ROLE");
   }
 
   if (previousIssuerAddress && (await dstable.hasRole(MINTER_ROLE, previousIssuerAddress))) {
-    await queueOrExecute(
-      "Revoke MINTER_ROLE from legacy Issuer",
-      async (): Promise<void> => {
-        await dstable.revokeRole(MINTER_ROLE, previousIssuerAddress);
-      },
-      buildRoleTx(dstableAddress, dstable.interface.encodeFunctionData("revokeRole", [MINTER_ROLE, previousIssuerAddress])),
-    );
+    const buildRevokeMinterTx = () =>
+      buildRoleTx(dstableAddress, dstable.interface.encodeFunctionData("revokeRole", [MINTER_ROLE, previousIssuerAddress]));
+
+    if (executor.useSafe && !canDirectlyManageDStableRoles) {
+      enqueueGovernance("Revoke MINTER_ROLE from legacy Issuer", buildRevokeMinterTx);
+    } else {
+      await queueOrExecute(
+        "Revoke MINTER_ROLE from legacy Issuer",
+        async (): Promise<void> => {
+          if (!canDirectlyManageDStableRoles) {
+            throw new Error(
+              deployerIsDstAdmin
+                ? "Safe execution required for revoking MINTER_ROLE on Saga Dollar"
+                : "Deployer is missing DEFAULT_ADMIN_ROLE on Saga Dollar",
+            );
+          }
+          await dstable.revokeRole(MINTER_ROLE, previousIssuerAddress);
+        },
+        buildRevokeMinterTx(),
+      );
+    }
   }
 
   if (!(await issuer.hasRole(DEFAULT_ADMIN_ROLE, governanceMultisig))) {

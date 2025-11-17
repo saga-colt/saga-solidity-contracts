@@ -46,5 +46,8 @@
   "deploy-tellor-wrapper-v1.1": 1763389650,
   "update-oracle-aggregator-to-tellor-wrapper-v1.1": 1763389650,
   "disallow-sfrxusd-collateral-v1.1": 1763392179,
-  "transfer_tellor_wrapper_v1_1_roles_to_multisig": 1763392179
+  "transfer_tellor_wrapper_v1_1_roles_to_multisig": 1763392179,
+  "upgrade-d-issuer-v2_1": 1763393793,
+  "d-configure-must-oracle": 1763393815,
+  "d-whitelist-must-collateral": 1763393816
 }

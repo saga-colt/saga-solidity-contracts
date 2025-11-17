@@ -42,6 +42,19 @@ export class SagaGovernanceExecutor {
   }
 
   /**
+   * Queue a Safe transaction without attempting a direct call.
+   *
+   * @param safeTxBuilder - Builder returning the Safe transaction to enqueue
+   */
+  queueTransaction(safeTxBuilder: () => SafeTransactionData): void {
+    if (!this.useSafe) {
+      throw new Error("Safe mode disabled; cannot queue governance transaction");
+    }
+    const tx = safeTxBuilder();
+    this.transactions.push(tx);
+  }
+
+  /**
    * Attempt an on-chain call; on failure, queue a Safe transaction if enabled.
    * Returns whether the requirement is considered complete (true) or pending
    * governance/manual action (false).

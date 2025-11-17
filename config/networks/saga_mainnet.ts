@@ -115,11 +115,12 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
               lowerThreshold: 0n,
               fixedPrice: 0n,
             },
-            // [sfrxUSDAddress]: {
-            //   feed: "0x40EA5EE6f4acB6DccDC940E2835a50C8E57574e2", // sfrxUSD/USD Tellor price feed
-            //   lowerThreshold: 0n,
-            //   fixedPrice: 0n,
-            // }, // Currently delisted, still keeping in config since we will re-add it later
+            [sfrxUSDAddress]: {
+              // Note this feed is not currently in use
+              feed: "0x40EA5EE6f4acB6DccDC940E2835a50C8E57574e2", // sfrxUSD/USD Tellor price feed
+              lowerThreshold: 0n,
+              fixedPrice: 0n,
+            },
             [usdnAddress]: {
               feed: "0xF1518c56916EAFc80FDe8CB142eA785B7850e580", // USDN/USD Tellor price feed
               lowerThreshold: ORACLE_AGGREGATOR_BASE_CURRENCY_UNIT,
