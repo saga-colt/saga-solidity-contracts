@@ -183,7 +183,9 @@ dstableConfigs.forEach((config) => {
      */
     async function checkInvariants() {
       // 1. Total value in the system (dStable circulating + AmoVault value) >= collateral value
-      const circulatingDstable = await issuerContract.circulatingDstable();
+      const totalDstableSupply = await dstableContract.totalSupply();
+      const amoAllocated = await amoManagerContract.totalAmoSupply();
+      const circulatingDstable = totalDstableSupply > amoAllocated ? totalDstableSupply - amoAllocated : 0n;
       const circulatingDstableValue = await amoManagerContract.dstableAmountToBaseValue(circulatingDstable);
 
       const totalCollateralValue = await collateralHolderVaultContract.totalValue();
