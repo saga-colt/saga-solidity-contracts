@@ -192,18 +192,11 @@ dstableConfigs.forEach((config) => {
       const amoVaultTotalValue = await mockAmoVaultContract.totalValue();
 
       const totalSystemValueWithAmo = circulatingDstableValue + amoVaultTotalValue;
-
-      // Allow for a small rounding error due to fixed-point math
-      const valueDifference =
-        totalSystemValueWithAmo > totalCollateralValue
-          ? totalSystemValueWithAmo - totalCollateralValue
-          : totalCollateralValue - totalSystemValueWithAmo;
-
       const acceptableValueError = (totalCollateralValue * 1n) / 100n; // 1% error margin
 
       assert.isTrue(
-        totalSystemValueWithAmo >= totalCollateralValue || valueDifference <= acceptableValueError,
-        `System value (${totalSystemValueWithAmo}) should be >= collateral value (${totalCollateralValue}) or within acceptable error (${acceptableValueError})`,
+        totalSystemValueWithAmo <= totalCollateralValue + acceptableValueError,
+        `dStable value (${totalSystemValueWithAmo}) should not exceed collateral value (${totalCollateralValue}) beyond ${acceptableValueError}`,
       );
 
       // 2. Amo Manager's accounting is consistent
