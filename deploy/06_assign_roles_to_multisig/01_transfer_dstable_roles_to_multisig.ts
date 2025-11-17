@@ -158,6 +158,7 @@ async function transferIssuerRoles(
     if (!issuerDeployment) {
       const upgradedId = `${issuerContractId}V2_1`;
       issuerDeployment = await deployments.getOrNull(upgradedId);
+
       if (issuerDeployment) {
         contractName = "IssuerV2_1";
         console.log(`\n  📄 ISSUER ROLES: ${upgradedId}`);

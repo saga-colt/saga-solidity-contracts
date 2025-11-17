@@ -2,7 +2,15 @@ import { assert, expect } from "chai";
 import hre, { getNamedAccounts } from "hardhat";
 import { Address } from "hardhat-deploy/types";
 
-import { AmoManager, IssuerV2_1, TestMintableERC20, TestERC20, OracleAggregator, CollateralVault, MockAmoVault } from "../../typechain-types";
+import {
+  AmoManager,
+  IssuerV2_1,
+  TestMintableERC20,
+  TestERC20,
+  OracleAggregator,
+  CollateralVault,
+  MockAmoVault,
+} from "../../typechain-types";
 import { TokenInfo, getTokenContractForAddress, getTokenContractForSymbol } from "../../typescript/token/utils";
 import { createDStableAmoFixture, D_CONFIG, DStableFixtureConfig } from "./fixtures";
 import { getConfig } from "../../config/config";

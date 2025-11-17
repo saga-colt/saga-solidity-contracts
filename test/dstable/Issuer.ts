@@ -291,7 +291,11 @@ dstableConfigs.forEach((config) => {
 
         assert.equal(finalTotalSupply - initialTotalSupply, amountToMint, "Total dStable supply was not increased correctly");
         assert.equal(finalReceiverBalance - initialReceiverBalance, amountToMint, "Receiver balance was not increased correctly");
-        assert.equal(finalCollateralCover, initialCollateralCover, "Collateral cover should remain constant when minting excess collateral");
+        assert.equal(
+          finalCollateralCover,
+          initialCollateralCover,
+          "Collateral cover should remain constant when minting excess collateral",
+        );
       });
 
       it("reverts issueUsingExcessCollateral when minting beyond backing", async function () {
@@ -317,7 +321,7 @@ dstableConfigs.forEach((config) => {
         const excessiveMint = collateralValueInDstable + 1n;
         await expect(issuerContract.issueUsingExcessCollateral(user2, excessiveMint))
           .to.be.revertedWithCustomError(issuerContract, "IssuanceSurpassesCollateral")
-          .withArgs(await issuerContract.collateralInDstable(), await dstableContract.totalSupply() + excessiveMint);
+          .withArgs(await issuerContract.collateralInDstable(), (await dstableContract.totalSupply()) + excessiveMint);
       });
 
       it("pauses and unpauses asset-level issuance", async function () {
