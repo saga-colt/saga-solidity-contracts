@@ -152,56 +152,52 @@ async function transferIssuerRoles(
   const { deployments, ethers } = hre;
 
   try {
-    let issuerDeployment = await deployments.getOrNull(issuerContractId);
-    let contractName = "IssuerV2";
-
-    if (!issuerDeployment) {
-      const upgradedId = `${issuerContractId}V2_1`;
-      issuerDeployment = await deployments.getOrNull(upgradedId);
-
-      if (issuerDeployment) {
-        contractName = "IssuerV2_1";
-        console.log(`\n  📄 ISSUER ROLES: ${upgradedId}`);
-      }
-    } else {
-      console.log(`\n  📄 ISSUER ROLES: ${issuerContractId}`);
-    }
+    const issuerDeployment = await deployments.getOrNull(issuerContractId);
 
     if (issuerDeployment) {
-      const issuerContract = await ethers.getContractAt(contractName, issuerDeployment.address, deployerSigner);
+      console.log(`\n  📄 ISSUER ROLES: ${issuerContractId}`);
 
+      const issuerContract = await ethers.getContractAt("IssuerV2", issuerDeployment.address, deployerSigner);
+
+      // Get roles
       const DEFAULT_ADMIN_ROLE = ZERO_BYTES_32;
-      const rolesToSync: { name: string; id: string }[] = [{ name: "DEFAULT_ADMIN_ROLE", id: DEFAULT_ADMIN_ROLE }];
-
-      if (contractName === "IssuerV2") {
-        const AMO_MANAGER_ROLE = await issuerContract.AMO_MANAGER_ROLE();
-        rolesToSync.push({ name: "AMO_MANAGER_ROLE", id: AMO_MANAGER_ROLE });
-      }
-
+      const AMO_MANAGER_ROLE = await issuerContract.AMO_MANAGER_ROLE();
       const INCENTIVES_MANAGER_ROLE = await issuerContract.INCENTIVES_MANAGER_ROLE();
-      rolesToSync.push({ name: "INCENTIVES_MANAGER_ROLE", id: INCENTIVES_MANAGER_ROLE });
 
-      if (typeof issuerContract.PAUSER_ROLE === "function") {
-        const PAUSER_ROLE = await issuerContract.PAUSER_ROLE();
-        rolesToSync.push({ name: "PAUSER_ROLE", id: PAUSER_ROLE });
+      // Grant roles to multisig
+      if (!(await issuerContract.hasRole(DEFAULT_ADMIN_ROLE, governanceMultisig))) {
+        await issuerContract.grantRole(DEFAULT_ADMIN_ROLE, governanceMultisig);
+        console.log(`    ➕ Granted DEFAULT_ADMIN_ROLE to ${governanceMultisig}`);
+      } else {
+        console.log(`    ✓ DEFAULT_ADMIN_ROLE already granted to ${governanceMultisig}`);
       }
 
-      for (const role of rolesToSync) {
-        if (!(await issuerContract.hasRole(role.id, governanceMultisig))) {
-          await issuerContract.grantRole(role.id, governanceMultisig);
-          console.log(`    ➕ Granted ${role.name} to ${governanceMultisig}`);
-        } else {
-          console.log(`    ✓ ${role.name} already granted to ${governanceMultisig}`);
-        }
+      if (!(await issuerContract.hasRole(AMO_MANAGER_ROLE, governanceMultisig))) {
+        await issuerContract.grantRole(AMO_MANAGER_ROLE, governanceMultisig);
+        console.log(`    ➕ Granted AMO_MANAGER_ROLE to ${governanceMultisig}`);
+      } else {
+        console.log(`    ✓ AMO_MANAGER_ROLE already granted to ${governanceMultisig}`);
       }
 
-      for (const role of rolesToSync.filter((r) => r.name !== "DEFAULT_ADMIN_ROLE")) {
-        if (await issuerContract.hasRole(role.id, deployer)) {
-          await issuerContract.revokeRole(role.id, deployer);
-          console.log(`    ➖ Revoked ${role.name} from deployer`);
-        }
+      if (!(await issuerContract.hasRole(INCENTIVES_MANAGER_ROLE, governanceMultisig))) {
+        await issuerContract.grantRole(INCENTIVES_MANAGER_ROLE, governanceMultisig);
+        console.log(`    ➕ Granted INCENTIVES_MANAGER_ROLE to ${governanceMultisig}`);
+      } else {
+        console.log(`    ✓ INCENTIVES_MANAGER_ROLE already granted to ${governanceMultisig}`);
       }
 
+      // Revoke non-admin roles from deployer first
+      if (await issuerContract.hasRole(AMO_MANAGER_ROLE, deployer)) {
+        await issuerContract.revokeRole(AMO_MANAGER_ROLE, deployer);
+        console.log(`    ➖ Revoked AMO_MANAGER_ROLE from deployer`);
+      }
+
+      if (await issuerContract.hasRole(INCENTIVES_MANAGER_ROLE, deployer)) {
+        await issuerContract.revokeRole(INCENTIVES_MANAGER_ROLE, deployer);
+        console.log(`    ➖ Revoked INCENTIVES_MANAGER_ROLE from deployer`);
+      }
+
+      // Revoke DEFAULT_ADMIN_ROLE last
       if (await issuerContract.hasRole(DEFAULT_ADMIN_ROLE, deployer)) {
         await issuerContract.revokeRole(DEFAULT_ADMIN_ROLE, deployer);
         console.log(`    ➖ Revoked DEFAULT_ADMIN_ROLE from deployer`);
