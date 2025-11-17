@@ -5,7 +5,7 @@ import { Address } from "hardhat-deploy/types";
 import {
   AmoManager,
   CollateralHolderVault,
-  IssuerV2,
+  IssuerV2_1,
   TestERC20,
   MockAmoVault,
   TestMintableERC20,
@@ -22,7 +22,7 @@ const dstableConfigs: DStableFixtureConfig[] = [D_CONFIG];
 dstableConfigs.forEach((config) => {
   describe(`${config.symbol} Ecosystem Lifecycle`, () => {
     let amoManagerContract: AmoManager;
-    let issuerContract: IssuerV2;
+    let issuerContract: IssuerV2_1;
     let redeemerContract: any;
     let collateralHolderVaultContract: CollateralHolderVault;
     let oracleAggregatorContract: OracleAggregator;
@@ -49,20 +49,20 @@ dstableConfigs.forEach((config) => {
 
       // Set up main contracts
       const issuerAddress = (await hre.deployments.get(config.issuerContractId)).address;
-      issuerContract = await hre.ethers.getContractAt("IssuerV2", issuerAddress, await hre.ethers.getSigner(deployer));
+      issuerContract = await hre.ethers.getContractAt("IssuerV2_1", issuerAddress, await hre.ethers.getSigner(deployer));
 
       const redeemerAddress = (await hre.deployments.get(config.redeemerContractId)).address;
       // Use RedeemerV2 for new flow
       redeemerContract = await hre.ethers.getContractAt("RedeemerV2", redeemerAddress, await hre.ethers.getSigner(deployer));
 
-      const collateralVaultAddress = await issuerContract.collateralVault();
+      const { address: collateralVaultAddress } = await hre.deployments.get(config.collateralVaultContractId);
       collateralHolderVaultContract = await hre.ethers.getContractAt(
         "CollateralHolderVault",
         collateralVaultAddress,
         await hre.ethers.getSigner(deployer),
       );
 
-      const amoManagerAddress = await issuerContract.amoManager();
+      const { address: amoManagerAddress } = await hre.deployments.get(config.amoManagerId);
       amoManagerContract = await hre.ethers.getContractAt("AmoManager", amoManagerAddress, await hre.ethers.getSigner(deployer));
 
       // Get the oracle aggregator based on the dStable configuration
@@ -253,7 +253,10 @@ dstableConfigs.forEach((config) => {
 
         // Allocate some dStable to AMO vault
         const dstableToAllocate = hre.ethers.parseUnits("100", dstableInfo.decimals);
-        await issuerContract.increaseAmoSupply(dstableToAllocate);
+        const seedCollateralAmount = hre.ethers.parseUnits("500", collateralInfo.decimals);
+        await collateralContract.approve(await collateralHolderVaultContract.getAddress(), seedCollateralAmount);
+        await collateralHolderVaultContract.deposit(seedCollateralAmount, collateralInfo.address);
+        await issuerContract.issueUsingExcessCollateral(await amoManagerContract.getAddress(), dstableToAllocate);
         await amoManagerContract.allocateAmo(await mockAmoVaultContract.getAddress(), dstableToAllocate);
 
         await checkInvariants();
@@ -340,7 +343,10 @@ dstableConfigs.forEach((config) => {
 
         // 4. Allocate dStable to the AMO vault
         const dstableToAllocate = hre.ethers.parseUnits("200", dstableInfo.decimals);
-        await issuerContract.increaseAmoSupply(dstableToAllocate);
+        const amoCollateralSeed = hre.ethers.parseUnits("800", primaryCollateralInfo.decimals);
+        await primaryCollateralContract.approve(await collateralHolderVaultContract.getAddress(), amoCollateralSeed);
+        await collateralHolderVaultContract.deposit(amoCollateralSeed, primaryCollateralInfo.address);
+        await issuerContract.issueUsingExcessCollateral(await amoManagerContract.getAddress(), dstableToAllocate);
         await amoManagerContract.allocateAmo(await mockAmoVaultContract.getAddress(), dstableToAllocate);
 
         await checkInvariants();

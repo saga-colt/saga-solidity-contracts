@@ -19,7 +19,7 @@ import {
   POOL_PROXY_ID,
   POOL_DATA_PROVIDER_ID,
   D_TOKEN_ID,
-  D_ISSUER_CONTRACT_ID,
+  D_ISSUER_V2_1_CONTRACT_ID,
   USD_ORACLE_AGGREGATOR_ID,
 } from "../../typescript/deploy-ids";
 import { ORACLE_AGGREGATOR_PRICE_DECIMALS } from "../../typescript/oracle_aggregator/constants";
@@ -137,8 +137,8 @@ async function setupDLendFixture(): Promise<DLendFixtureResult> {
   }
 
   // Mint D
-  const dIssuerAddress = (await hre.deployments.get(D_ISSUER_CONTRACT_ID)).address;
-  const dIssuer = await hre.ethers.getContractAt("IssuerV2", dIssuerAddress);
+  const dIssuerAddress = (await hre.deployments.get(D_ISSUER_V2_1_CONTRACT_ID)).address;
+  const dIssuer = await hre.ethers.getContractAt("IssuerV2_1", dIssuerAddress);
   const usdOracleAddress = (await hre.deployments.get(USD_ORACLE_AGGREGATOR_ID)).address;
   const usdOracle = await hre.ethers.getContractAt("OracleAggregator", usdOracleAddress);
 

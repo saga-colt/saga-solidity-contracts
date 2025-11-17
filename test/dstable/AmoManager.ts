@@ -2,7 +2,7 @@ import { assert, expect } from "chai";
 import hre, { getNamedAccounts } from "hardhat";
 import { Address } from "hardhat-deploy/types";
 
-import { AmoManager, IssuerV2, TestMintableERC20, TestERC20, OracleAggregator, CollateralVault, MockAmoVault } from "../../typechain-types";
+import { AmoManager, IssuerV2_1, TestMintableERC20, TestERC20, OracleAggregator, CollateralVault, MockAmoVault } from "../../typechain-types";
 import { TokenInfo, getTokenContractForAddress, getTokenContractForSymbol } from "../../typescript/token/utils";
 import { createDStableAmoFixture, D_CONFIG, DStableFixtureConfig } from "./fixtures";
 import { getConfig } from "../../config/config";
@@ -31,7 +31,7 @@ async function runTestsForDStable(
 ) {
   describe(`AmoManager for ${config.symbol}`, () => {
     let amoManagerContract: AmoManager;
-    let issuerContract: IssuerV2;
+    let issuerContract: IssuerV2_1;
     let dstableContract: TestMintableERC20;
     let dstableInfo: TokenInfo;
     let oracleAggregatorContract: OracleAggregator;
@@ -55,7 +55,7 @@ async function runTestsForDStable(
       amoManagerContract = await hre.ethers.getContractAt("AmoManager", amoManagerAddress, await hre.ethers.getSigner(deployer));
 
       const issuerAddress = (await hre.deployments.get(config.issuerContractId)).address;
-      issuerContract = await hre.ethers.getContractAt("IssuerV2", issuerAddress, await hre.ethers.getSigner(deployer));
+      issuerContract = await hre.ethers.getContractAt("IssuerV2_1", issuerAddress, await hre.ethers.getSigner(deployer));
 
       // Get dStable contract using symbol - we know this is always TestMintableERC20
       ({ contract: dstableContract, tokenInfo: dstableInfo } = await getTokenContractForSymbol(hre, deployer, config.symbol));
@@ -106,9 +106,18 @@ async function runTestsForDStable(
       mockCollateralTokens.set(tokenInfo.symbol, contract);
       mockCollateralInfos.set(tokenInfo.symbol, tokenInfo);
 
-      // Mint some dStable to the AmoManager for testing
+      // Ensure the collateral is enabled and deposit enough to cover AMO minting
+      if (!(await collateralVaultContract.isCollateralSupported(tokenInfo.address))) {
+        await collateralVaultContract.allowCollateral(tokenInfo.address);
+      }
+
+      const collateralSeedAmount = hre.ethers.parseUnits("20000", tokenInfo.decimals);
+      await contract.approve(await collateralVaultContract.getAddress(), collateralSeedAmount);
+      await collateralVaultContract.deposit(collateralSeedAmount, tokenInfo.address);
+
+      // Mint some dStable to the AmoManager for testing via excess collateral
       const initialAmoSupply = hre.ethers.parseUnits("10000", dstableInfo.decimals);
-      await issuerContract.increaseAmoSupply(initialAmoSupply);
+      await issuerContract.issueUsingExcessCollateral(await amoManagerContract.getAddress(), initialAmoSupply);
 
       // Ensure the MockAmoVault has the necessary roles
       const collateralWithdrawerRole = await mockAmoVault.COLLATERAL_WITHDRAWER_ROLE();

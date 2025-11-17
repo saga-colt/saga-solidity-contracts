@@ -5,7 +5,7 @@ import { Address } from "hardhat-deploy/types";
 import {
   AmoManager,
   CollateralHolderVault,
-  IssuerV2,
+  IssuerV2_1,
   MockAmoVault,
   TestERC20,
   TestMintableERC20,
@@ -21,7 +21,7 @@ const dstableConfigs: DStableFixtureConfig[] = [D_CONFIG];
 dstableConfigs.forEach((config) => {
   describe(`AmoManager Ecosystem Tests for ${config.symbol}`, () => {
     let amoManagerContract: AmoManager;
-    let issuerContract: IssuerV2;
+    let issuerContract: IssuerV2_1;
     let collateralVaultContract: CollateralHolderVault;
     let mockAmoVaultContract: MockAmoVault;
     let oracleAggregatorContract: OracleAggregator;
@@ -46,16 +46,16 @@ dstableConfigs.forEach((config) => {
       ({ deployer, user1, user2 } = await getNamedAccounts());
 
       const issuerAddress = (await hre.deployments.get(config.issuerContractId)).address;
-      issuerContract = await hre.ethers.getContractAt("IssuerV2", issuerAddress, await hre.ethers.getSigner(deployer));
+      issuerContract = await hre.ethers.getContractAt("IssuerV2_1", issuerAddress, await hre.ethers.getSigner(deployer));
 
-      const collateralVaultAddress = await issuerContract.collateralVault();
+      const { address: collateralVaultAddress } = await hre.deployments.get(config.collateralVaultContractId);
       collateralVaultContract = await hre.ethers.getContractAt(
         "CollateralHolderVault",
         collateralVaultAddress,
         await hre.ethers.getSigner(deployer),
       );
 
-      const amoManagerAddress = await issuerContract.amoManager();
+      const { address: amoManagerAddress } = await hre.deployments.get(config.amoManagerId);
       amoManagerContract = await hre.ethers.getContractAt("AmoManager", amoManagerAddress, await hre.ethers.getSigner(deployer));
 
       // Get the oracle aggregator
@@ -101,9 +101,21 @@ dstableConfigs.forEach((config) => {
         await amoManagerContract.getAddress(),
       );
 
-      // Mint some dStable to the AmoManager for testing
+      // Seed the collateral vault to enable issuing excess collateral to the AMO manager
+      const collateralSymbol = config.peggedCollaterals[0];
+      const collateralContract = collateralContracts.get(collateralSymbol) as TestERC20;
+      const collateralInfo = collateralInfos.get(collateralSymbol) as TokenInfo;
+
+      if (!(await collateralVaultContract.isCollateralSupported(collateralInfo.address))) {
+        await collateralVaultContract.allowCollateral(collateralInfo.address);
+      }
+
+      const collateralSeedAmount = hre.ethers.parseUnits("20000", collateralInfo.decimals);
+      await collateralContract.approve(await collateralVaultContract.getAddress(), collateralSeedAmount);
+      await collateralVaultContract.deposit(collateralSeedAmount, collateralInfo.address);
+
       const initialAmoSupply = hre.ethers.parseUnits("10000", dstableInfo.decimals);
-      await issuerContract.increaseAmoSupply(initialAmoSupply);
+      await issuerContract.issueUsingExcessCollateral(await amoManagerContract.getAddress(), initialAmoSupply);
     });
 
     /**

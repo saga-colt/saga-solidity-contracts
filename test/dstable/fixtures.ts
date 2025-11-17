@@ -3,6 +3,7 @@ import hre, { deployments } from "hardhat";
 import {
   USD_ORACLE_AGGREGATOR_ID,
   D_ISSUER_CONTRACT_ID,
+  D_ISSUER_V2_1_CONTRACT_ID,
   D_REDEEMER_CONTRACT_ID,
   D_COLLATERAL_VAULT_CONTRACT_ID,
   D_AMO_MANAGER_ID,
@@ -56,7 +57,7 @@ export const createDStableAmoFixture = (config: DStableFixtureConfig) => {
 export const D_CONFIG: DStableFixtureConfig = {
   symbol: "D",
   deploymentTag: "dusd",
-  issuerContractId: D_ISSUER_CONTRACT_ID,
+  issuerContractId: D_ISSUER_V2_1_CONTRACT_ID,
   redeemerContractId: D_REDEEMER_CONTRACT_ID,
   collateralVaultContractId: D_COLLATERAL_VAULT_CONTRACT_ID,
   amoManagerId: D_AMO_MANAGER_ID,
