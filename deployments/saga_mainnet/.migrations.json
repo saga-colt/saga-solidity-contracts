@@ -49,5 +49,9 @@
   "transfer_tellor_wrapper_v1_1_roles_to_multisig": 1763392179,
   "upgrade-d-issuer-v2_1": 1763393793,
   "d-configure-must-oracle": 1763393815,
-  "d-whitelist-must-collateral": 1763393816
+  "d-whitelist-must-collateral": 1763393816,
+  "D_AmoManagerV2": 1763394084,
+  "fix-sfrxusd-setup-oracle": 1763394086,
+  "fix-sfrxusd-update-aggregator": 1763394087,
+  "fix-sfrxusd-update-collateral": 1763394088
 }
