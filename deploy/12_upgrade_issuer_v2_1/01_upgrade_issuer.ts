@@ -76,6 +76,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Pr
 
   const dstable = await hre.ethers.getContractAt("ERC20StablecoinUpgradeable", dstableAddress, deployerSigner);
   const issuer = await hre.ethers.getContractAt("IssuerV2_1", newIssuerAddress, deployerSigner);
+  const deployerIsGovernance = deployer.toLowerCase() === governanceMultisig.toLowerCase();
   const MINTER_ROLE = await dstable.MINTER_ROLE();
   const DEFAULT_ADMIN_ROLE = await issuer.DEFAULT_ADMIN_ROLE();
   const INCENTIVES_MANAGER_ROLE = await issuer.INCENTIVES_MANAGER_ROLE();
@@ -199,7 +200,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Pr
     console.log("   ✓ Governance already has PAUSER_ROLE");
   }
 
-  if (await issuer.hasRole(INCENTIVES_MANAGER_ROLE, deployer)) {
+  const shouldRevokeDeployerRoles = !deployerIsGovernance;
+
+  if (shouldRevokeDeployerRoles && (await issuer.hasRole(INCENTIVES_MANAGER_ROLE, deployer))) {
     await queueOrExecute(
       "Revoke deployer INCENTIVES_MANAGER_ROLE",
       async (): Promise<void> => {
@@ -209,7 +212,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Pr
     );
   }
 
-  if (await issuer.hasRole(PAUSER_ROLE, deployer)) {
+  if (shouldRevokeDeployerRoles && (await issuer.hasRole(PAUSER_ROLE, deployer))) {
     await queueOrExecute(
       "Revoke deployer PAUSER_ROLE",
       async (): Promise<void> => {
@@ -219,7 +222,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Pr
     );
   }
 
-  if (await issuer.hasRole(DEFAULT_ADMIN_ROLE, deployer)) {
+  if (shouldRevokeDeployerRoles && (await issuer.hasRole(DEFAULT_ADMIN_ROLE, deployer))) {
     await queueOrExecute(
       "Revoke deployer DEFAULT_ADMIN_ROLE",
       async (): Promise<void> => {
