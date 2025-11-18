@@ -9,7 +9,7 @@ import {
   D_TOKEN_ID,
   USD_ORACLE_AGGREGATOR_ID,
 } from "../../typescript/deploy-ids";
-import { isMainnet } from "../../typescript/hardhat/deploy";
+import { isMainnet, isSagaTestnet } from "../../typescript/hardhat/deploy";
 import { SagaGovernanceExecutor } from "../../typescript/hardhat/saga-governance";
 import { SafeTransactionData } from "../../typescript/hardhat/saga-safe-manager";
 
@@ -28,7 +28,7 @@ function buildRoleTx(contractAddress: string, data: string): SafeTransactionData
 }
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Promise<boolean> {
-  if (!isMainnet(hre.network.name)) {
+  if (!isMainnet(hre.network.name) && !isSagaTestnet(hre.network.name)) {
     console.log(`\n≻ 13_upgrade_issuer_v2_2/01_upgrade_issuer.ts: ⏭️  Skipping upgrade on ${hre.network.name}`);
     return true;
   }
