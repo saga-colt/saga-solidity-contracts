@@ -49,5 +49,11 @@
   "fix-sfrxusd-update-aggregator": 1763023091,
   "fix-sfrxusd-update-collateral": 1763023091,
   "transfer_tellor_wrapper_v1_1_roles_to_multisig": 1763023091,
-  "d-whitelist-yusd-vyusd-collateral": 1763023092
+  "d-whitelist-yusd-vyusd-collateral": 1763023092,
+  "D_AmoManagerV2": 1763449326,
+  "upgrade-d-issuer-v2_1": 1763449326,
+  "upgrade-d-issuer-v2_2": 1763449326,
+  "MUST_HardPegOracleWrapper": 1763449326,
+  "d-configure-must-oracle": 1763449326,
+  "d-whitelist-must-collateral": 1763449326
 }
