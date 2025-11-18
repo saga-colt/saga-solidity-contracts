@@ -12,9 +12,12 @@ export const USD_REDSTONE_COMPOSITE_WRAPPER_WITH_THRESHOLDING_ID = "USD_Redstone
 // D
 export const D_TOKEN_ID = "D";
 export const D_ISSUER_CONTRACT_ID = "D_Issuer";
+export const D_ISSUER_V2_1_CONTRACT_ID = "D_IssuerV2_1";
+export const D_ISSUER_V2_2_CONTRACT_ID = "D_IssuerV2_2";
 export const D_REDEEMER_CONTRACT_ID = "D_Redeemer";
 export const D_COLLATERAL_VAULT_CONTRACT_ID = "D_CollateralHolderVault";
-export const D_AMO_MANAGER_ID = "D_AmoManager";
+export const D_AMO_DEBT_TOKEN_ID = "D_AmoDebtToken";
+export const D_AMO_MANAGER_ID = "D_AmoManagerV2";
 export const D_HARD_PEG_ORACLE_WRAPPER_ID = "D_HardPegOracleWrapper";
 export const MUST_HARD_PEG_ORACLE_WRAPPER_ID = "MUST_HardPegOracleWrapper";
 

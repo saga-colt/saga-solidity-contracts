@@ -19,11 +19,12 @@ import {
   POOL_PROXY_ID,
   POOL_DATA_PROVIDER_ID,
   D_TOKEN_ID,
-  D_ISSUER_CONTRACT_ID,
+  D_ISSUER_V2_2_CONTRACT_ID,
   USD_ORACLE_AGGREGATOR_ID,
 } from "../../typescript/deploy-ids";
 import { ORACLE_AGGREGATOR_PRICE_DECIMALS } from "../../typescript/oracle_aggregator/constants";
 import { getTokenContractForSymbol } from "../../typescript/token/utils";
+import { ensureIssuerV2Deployment, D_CONFIG } from "../dstable/fixtures";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 
 /**
@@ -136,9 +137,11 @@ async function setupDLendFixture(): Promise<DLendFixtureResult> {
     throw new Error(`D (${dAddress}) not found in reserves: ${reservesList}`);
   }
 
+  await ensureIssuerV2Deployment(D_CONFIG);
+
   // Mint D
-  const dIssuerAddress = (await hre.deployments.get(D_ISSUER_CONTRACT_ID)).address;
-  const dIssuer = await hre.ethers.getContractAt("IssuerV2", dIssuerAddress);
+  const dIssuerAddress = (await hre.deployments.get(D_ISSUER_V2_2_CONTRACT_ID)).address;
+  const dIssuer = await hre.ethers.getContractAt("IssuerV2_2", dIssuerAddress);
   const usdOracleAddress = (await hre.deployments.get(USD_ORACLE_AGGREGATOR_ID)).address;
   const usdOracle = await hre.ethers.getContractAt("OracleAggregator", usdOracleAddress);
 

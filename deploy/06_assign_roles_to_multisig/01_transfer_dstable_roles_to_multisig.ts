@@ -38,7 +38,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const issuerContractId = `${dStableName}_Issuer`;
     const redeemerContractId = `${dStableName}_Redeemer`;
     const collateralVaultContractId = `${dStableName}_CollateralHolderVault`;
-    const amoManagerId = `${dStableName}_AmoManager`;
+    const amoManagerId = `${dStableName}_AmoManagerV2`;
 
     // Transfer token roles
     await transferTokenRoles(hre, tokenId, deployerSigner, governanceMultisig, deployer);
@@ -308,12 +308,12 @@ async function transferAmoManagerRoles(
     if (amoManagerDeployment) {
       console.log(`\n  📄 AMO MANAGER ROLES: ${amoManagerId}`);
 
-      const amoManagerContract = await ethers.getContractAt("AmoManager", amoManagerDeployment.address, deployerSigner);
+      const amoManagerContract = await ethers.getContractAt("AmoManagerV2", amoManagerDeployment.address, deployerSigner);
 
       // Get roles
       const DEFAULT_ADMIN_ROLE = ZERO_BYTES_32;
-      const AMO_ALLOCATOR_ROLE = await amoManagerContract.AMO_ALLOCATOR_ROLE();
-      const FEE_COLLECTOR_ROLE = await amoManagerContract.FEE_COLLECTOR_ROLE();
+      const AMO_INCREASE_ROLE = await amoManagerContract.AMO_INCREASE_ROLE();
+      const AMO_DECREASE_ROLE = await amoManagerContract.AMO_DECREASE_ROLE();
 
       // Grant roles to multisig
       if (!(await amoManagerContract.hasRole(DEFAULT_ADMIN_ROLE, governanceMultisig))) {
@@ -323,29 +323,29 @@ async function transferAmoManagerRoles(
         console.log(`    ✓ DEFAULT_ADMIN_ROLE already granted to ${governanceMultisig}`);
       }
 
-      if (!(await amoManagerContract.hasRole(AMO_ALLOCATOR_ROLE, governanceMultisig))) {
-        await amoManagerContract.grantRole(AMO_ALLOCATOR_ROLE, governanceMultisig);
-        console.log(`    ➕ Granted AMO_ALLOCATOR_ROLE to ${governanceMultisig}`);
+      if (!(await amoManagerContract.hasRole(AMO_INCREASE_ROLE, governanceMultisig))) {
+        await amoManagerContract.grantRole(AMO_INCREASE_ROLE, governanceMultisig);
+        console.log(`    ➕ Granted AMO_INCREASE_ROLE to ${governanceMultisig}`);
       } else {
-        console.log(`    ✓ AMO_ALLOCATOR_ROLE already granted to ${governanceMultisig}`);
+        console.log(`    ✓ AMO_INCREASE_ROLE already granted to ${governanceMultisig}`);
       }
 
-      if (!(await amoManagerContract.hasRole(FEE_COLLECTOR_ROLE, governanceMultisig))) {
-        await amoManagerContract.grantRole(FEE_COLLECTOR_ROLE, governanceMultisig);
-        console.log(`    ➕ Granted FEE_COLLECTOR_ROLE to ${governanceMultisig}`);
+      if (!(await amoManagerContract.hasRole(AMO_DECREASE_ROLE, governanceMultisig))) {
+        await amoManagerContract.grantRole(AMO_DECREASE_ROLE, governanceMultisig);
+        console.log(`    ➕ Granted AMO_DECREASE_ROLE to ${governanceMultisig}`);
       } else {
-        console.log(`    ✓ FEE_COLLECTOR_ROLE already granted to ${governanceMultisig}`);
+        console.log(`    ✓ AMO_DECREASE_ROLE already granted to ${governanceMultisig}`);
       }
 
       // Revoke non-admin roles from deployer first
-      if (await amoManagerContract.hasRole(AMO_ALLOCATOR_ROLE, deployer)) {
-        await amoManagerContract.revokeRole(AMO_ALLOCATOR_ROLE, deployer);
-        console.log(`    ➖ Revoked AMO_ALLOCATOR_ROLE from deployer`);
+      if (await amoManagerContract.hasRole(AMO_INCREASE_ROLE, deployer)) {
+        await amoManagerContract.revokeRole(AMO_INCREASE_ROLE, deployer);
+        console.log(`    ➖ Revoked AMO_INCREASE_ROLE from deployer`);
       }
 
-      if (await amoManagerContract.hasRole(FEE_COLLECTOR_ROLE, deployer)) {
-        await amoManagerContract.revokeRole(FEE_COLLECTOR_ROLE, deployer);
-        console.log(`    ➖ Revoked FEE_COLLECTOR_ROLE from deployer`);
+      if (await amoManagerContract.hasRole(AMO_DECREASE_ROLE, deployer)) {
+        await amoManagerContract.revokeRole(AMO_DECREASE_ROLE, deployer);
+        console.log(`    ➖ Revoked AMO_DECREASE_ROLE from deployer`);
       }
 
       // Revoke DEFAULT_ADMIN_ROLE last

@@ -20,7 +20,7 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "contracts/common/IMintableERC20.sol";
-import "./AmoManager.sol";
+import "./AmoManagerV2.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "contracts/dstable/CollateralVault.sol";
@@ -37,13 +37,14 @@ interface IRecoverable {
  */
 abstract contract AmoVault is CollateralVault, IRecoverable, ReentrancyGuard {
     using SafeERC20 for IERC20;
+    using SafeERC20 for IMintableERC20;
     using Address for address payable;
 
     /* Core state */
 
     IMintableERC20 public immutable dstable;
     uint8 public immutable dstableDecimals;
-    AmoManager public amoManager;
+    AmoManagerV2 public amoManager;
 
     /* Roles */
 
@@ -64,12 +65,12 @@ abstract contract AmoVault is CollateralVault, IRecoverable, ReentrancyGuard {
     ) CollateralVault(_oracle) {
         dstable = IMintableERC20(_dstable);
         dstableDecimals = IERC20Metadata(_dstable).decimals();
-        amoManager = AmoManager(_amoManager);
+        amoManager = AmoManagerV2(_amoManager);
         _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         grantRole(COLLATERAL_WITHDRAWER_ROLE, _collateralWithdrawer);
         grantRole(RECOVERER_ROLE, _recoverer);
         // Use standard approve for trusted protocol token (dStable) and trusted protocol contract (AmoManager)
-        dstable.approve(address(amoManager), type(uint256).max);
+        dstable.forceApprove(address(amoManager), type(uint256).max);
     }
 
     /**
@@ -78,7 +79,7 @@ abstract contract AmoVault is CollateralVault, IRecoverable, ReentrancyGuard {
      */
     function approveAmoManager() public onlyRole(DEFAULT_ADMIN_ROLE) {
         // Use standard approve for trusted protocol token (dStable) and trusted protocol contract (AmoManager)
-        dstable.approve(address(amoManager), type(uint256).max);
+        dstable.forceApprove(address(amoManager), type(uint256).max);
     }
 
     /**
@@ -107,7 +108,7 @@ abstract contract AmoVault is CollateralVault, IRecoverable, ReentrancyGuard {
         dstable.approve(address(amoManager), 0);
 
         // Set new AMO manager
-        amoManager = AmoManager(_newAmoManager);
+        amoManager = AmoManagerV2(_newAmoManager);
 
         // Approve new AMO manager
         approveAmoManager();
