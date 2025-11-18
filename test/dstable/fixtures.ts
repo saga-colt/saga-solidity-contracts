@@ -4,8 +4,7 @@ import { getConfig } from "../../config/config";
 
 import {
   USD_ORACLE_AGGREGATOR_ID,
-  D_ISSUER_CONTRACT_ID,
-  D_ISSUER_V2_1_CONTRACT_ID,
+  D_ISSUER_V2_2_CONTRACT_ID,
   D_REDEEMER_CONTRACT_ID,
   D_COLLATERAL_VAULT_CONTRACT_ID,
   D_AMO_MANAGER_ID,
@@ -30,14 +29,14 @@ export const createDStableFixture = (config: DStableFixtureConfig) => {
   return deployments.createFixture(async ({ deployments }) => {
     await deployments.fixture(); // Start from a fresh deployment
     await deployments.fixture(["local-setup", config.deploymentTag]); // Include local-setup to use the mock Oracle
-    await ensureIssuerV2_1Deployment(config);
+    await ensureIssuerV2Deployment(config);
   });
 };
 
-export async function ensureIssuerV2_1Deployment(config: DStableFixtureConfig): Promise<void> {
-  const issuerV2_1 = await deployments.getOrNull(config.issuerContractId);
+export async function ensureIssuerV2Deployment(config: DStableFixtureConfig): Promise<void> {
+  const issuerV2_2 = await deployments.getOrNull(config.issuerContractId);
 
-  if (issuerV2_1) {
+  if (issuerV2_2) {
     return;
   }
 
@@ -51,7 +50,7 @@ export async function ensureIssuerV2_1Deployment(config: DStableFixtureConfig): 
   const deployment = await deployments.deploy(config.issuerContractId, {
     from: deployer,
     args: [collateralVaultAddress, dstableAddress, oracleAggregatorAddress],
-    contract: "IssuerV2_1",
+    contract: "IssuerV2_2",
     autoMine: true,
     log: false,
   });
@@ -82,7 +81,7 @@ export const createDStableAmoV2Fixture = (config: DStableFixtureConfig) => {
 export const D_CONFIG: DStableFixtureConfig = {
   symbol: "D",
   deploymentTag: "dusd",
-  issuerContractId: D_ISSUER_V2_1_CONTRACT_ID,
+  issuerContractId: D_ISSUER_V2_2_CONTRACT_ID,
   redeemerContractId: D_REDEEMER_CONTRACT_ID,
   collateralVaultContractId: D_COLLATERAL_VAULT_CONTRACT_ID,
   amoManagerId: D_AMO_MANAGER_ID,

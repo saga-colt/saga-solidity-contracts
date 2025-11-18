@@ -3,9 +3,9 @@ import hre, { deployments, getNamedAccounts } from "hardhat";
 import { Address } from "hardhat-deploy/types";
 import { ZeroAddress } from "ethers";
 
-import { RedeemerV2, TestMintableERC20, CollateralVault, OracleAggregator, IssuerV2_1, TestERC20 } from "../../typechain-types";
+import { RedeemerV2, TestMintableERC20, CollateralVault, OracleAggregator, IssuerV2_2, TestERC20 } from "../../typechain-types";
 import { getTokenContractForSymbol, TokenInfo } from "../../typescript/token/utils";
-import { createDStableFixture, D_CONFIG, DStableFixtureConfig, ensureIssuerV2_1Deployment } from "./fixtures"; // Assuming fixtures.ts is in the same directory
+import { createDStableFixture, D_CONFIG, DStableFixtureConfig, ensureIssuerV2Deployment } from "./fixtures"; // Assuming fixtures.ts is in the same directory
 import { D_REDEEMER_CONTRACT_ID } from "../../typescript/deploy-ids";
 import { getConfig } from "../../config/config"; // To access deployment config for verification
 import { ONE_HUNDRED_PERCENT_BPS } from "../../typescript/common/bps_constants";
@@ -20,7 +20,7 @@ export const createDStableWithRedeemerV2Fixture = (config: DStableFixtureConfig)
     // Then, deploy the RedeemerV2 contracts
     // The deployment script uses the tag 'dusd'
     await deployments.fixture(["dusd"]);
-    await ensureIssuerV2_1Deployment(config);
+    await ensureIssuerV2Deployment(config);
   });
 };
 
@@ -37,7 +37,7 @@ dstableConfigs.forEach((config) => {
     let deployer: Address;
     let user1: Address;
     let feeReceiverSigner: any; // To hold the signer for the configured fee receiver
-    let issuerContract: IssuerV2_1;
+    let issuerContract: IssuerV2_2;
     let collateralContracts: Map<string, TestERC20>;
     let collateralInfos: Map<string, TokenInfo>;
 
@@ -96,7 +96,7 @@ dstableConfigs.forEach((config) => {
 
       // Prepare issuer and issue dStable tokens to user1
       const issuerAddress = (await hre.deployments.get(config.issuerContractId)).address;
-      issuerContract = await hre.ethers.getContractAt("IssuerV2_1", issuerAddress, await hre.ethers.getSigner(deployer));
+      issuerContract = await hre.ethers.getContractAt("IssuerV2_2", issuerAddress, await hre.ethers.getSigner(deployer));
       collateralContracts = new Map();
       collateralInfos = new Map();
       for (const collateralSymbol of config.peggedCollaterals) {

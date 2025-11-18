@@ -2,7 +2,7 @@ import { assert, expect } from "chai";
 import hre, { getNamedAccounts } from "hardhat";
 import { Address } from "hardhat-deploy/types";
 
-import { CollateralHolderVault, IssuerV2_1, TestERC20, TestMintableERC20, OracleAggregator } from "../../typechain-types";
+import { CollateralHolderVault, IssuerV2_2, TestERC20, TestMintableERC20, OracleAggregator } from "../../typechain-types";
 import { ORACLE_AGGREGATOR_PRICE_DECIMALS } from "../../typescript/oracle_aggregator/constants";
 import { getTokenContractForSymbol, TokenInfo } from "../../typescript/token/utils";
 import { createDStableFixture, D_CONFIG, DStableFixtureConfig } from "./fixtures";
@@ -61,8 +61,8 @@ async function calculateExpectedDstableFromBase(
 const dstableConfigs: DStableFixtureConfig[] = [D_CONFIG];
 
 dstableConfigs.forEach((config) => {
-  describe(`IssuerV2_1 for ${config.symbol}`, () => {
-    let issuerContract: IssuerV2_1;
+  describe(`IssuerV2_2 for ${config.symbol}`, () => {
+    let issuerContract: IssuerV2_2;
     let collateralVaultContract: CollateralHolderVault;
     let oracleAggregatorContract: OracleAggregator;
     let collateralContracts: Map<string, TestERC20> = new Map();
@@ -82,7 +82,7 @@ dstableConfigs.forEach((config) => {
       ({ deployer, user1, user2 } = await getNamedAccounts());
 
       const issuerAddress = (await hre.deployments.get(config.issuerContractId)).address;
-      issuerContract = await hre.ethers.getContractAt("IssuerV2_1", issuerAddress, await hre.ethers.getSigner(deployer));
+      issuerContract = await hre.ethers.getContractAt("IssuerV2_2", issuerAddress, await hre.ethers.getSigner(deployer));
 
       const collateralVaultAddress = (await hre.deployments.get(config.collateralVaultContractId)).address;
       collateralVaultContract = await hre.ethers.getContractAt(
@@ -342,6 +342,69 @@ dstableConfigs.forEach((config) => {
         const minDStable = await issuerContract.baseValueToDstableAmount(baseValue);
 
         await issuerContract.connect(await hre.ethers.getSigner(user1)).issue(collateralAmount, collateralInfo.address, minDStable);
+      });
+    });
+
+    describe("Asset deposit caps", () => {
+      it("allows DEFAULT_ADMIN_ROLE to set per-asset deposit caps", async function () {
+        const collateralSymbol = config.peggedCollaterals[0];
+        const collateralInfo = collateralInfos.get(collateralSymbol) as TokenInfo;
+        const cap = hre.ethers.parseUnits("1000", collateralInfo.decimals);
+
+        await expect(issuerContract.setAssetDepositCap(collateralInfo.address, cap))
+          .to.emit(issuerContract, "AssetDepositCapUpdated")
+          .withArgs(collateralInfo.address, cap);
+
+        expect(await issuerContract.assetDepositCap(collateralInfo.address)).to.equal(cap);
+
+        await expect(issuerContract.setAssetDepositCap(collateralInfo.address, 0n))
+          .to.emit(issuerContract, "AssetDepositCapUpdated")
+          .withArgs(collateralInfo.address, 0n);
+      });
+
+      it("reverts issuance if deposit cap would be exceeded", async function () {
+        const collateralSymbol = config.peggedCollaterals[0];
+        const collateralInfo = collateralInfos.get(collateralSymbol) as TokenInfo;
+        const collateralContract = collateralContracts.get(collateralSymbol) as TestERC20;
+        const collateralSigner = await hre.ethers.getSigner(user1);
+
+        const cap = hre.ethers.parseUnits("1000", collateralInfo.decimals);
+        const existingBalance = cap / 2n;
+
+        await collateralContract.connect(collateralSigner).approve(await collateralVaultContract.getAddress(), existingBalance);
+        await collateralVaultContract.connect(collateralSigner).deposit(existingBalance, collateralInfo.address);
+
+        await issuerContract.setAssetDepositCap(collateralInfo.address, cap);
+
+        const attemptAmount = existingBalance + 1n;
+        const projectedBalance = existingBalance + attemptAmount;
+
+        await collateralContract.connect(collateralSigner).approve(await issuerContract.getAddress(), attemptAmount);
+
+        await expect(issuerContract.connect(collateralSigner).issue(attemptAmount, collateralInfo.address, 1n))
+          .to.be.revertedWithCustomError(issuerContract, "AssetDepositCapExceeded")
+          .withArgs(collateralInfo.address, cap, projectedBalance);
+      });
+
+      it("allows issuance up to the deposit cap", async function () {
+        const collateralSymbol = config.peggedCollaterals[0];
+        const collateralInfo = collateralInfos.get(collateralSymbol) as TokenInfo;
+        const collateralContract = collateralContracts.get(collateralSymbol) as TestERC20;
+        const collateralSigner = await hre.ethers.getSigner(user2);
+
+        const cap = hre.ethers.parseUnits("500", collateralInfo.decimals);
+        await issuerContract.setAssetDepositCap(collateralInfo.address, cap);
+
+        const collateralAmount = cap;
+
+        await collateralContract.connect(collateralSigner).approve(await issuerContract.getAddress(), collateralAmount);
+
+        const baseValue = await collateralVaultContract.assetValueFromAmount(collateralAmount, collateralInfo.address);
+        const minDStable = await issuerContract.baseValueToDstableAmount(baseValue);
+
+        await issuerContract.connect(collateralSigner).issue(collateralAmount, collateralInfo.address, minDStable);
+
+        expect(await collateralContract.balanceOf(await collateralVaultContract.getAddress())).to.equal(cap);
       });
     });
   });
