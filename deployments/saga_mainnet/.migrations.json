@@ -53,5 +53,6 @@
   "D_AmoManagerV2": 1763394084,
   "fix-sfrxusd-setup-oracle": 1763394086,
   "fix-sfrxusd-update-aggregator": 1763394087,
-  "fix-sfrxusd-update-collateral": 1763394088
+  "fix-sfrxusd-update-collateral": 1763394088,
+  "upgrade-d-issuer-v2_2": 1763444024
 }
