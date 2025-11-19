@@ -24,7 +24,9 @@
     "threshold": 2,
     "chainId": 5464,
     "rpcUrl": "https://sagaevm.jsonrpc.sagarpc.io/",
-    "description": "Saga mainnet governance Safe"
+    "description": "Saga mainnet governance Safe",
+    "multiSendAddress": "0x9641d764fc13c8B624c04430C7356C1C7C8102e2",
+    "multiSendCallOnlyAddress": "0x9641d764fc13c8B624c04430C7356C1C7C8102e2"
   },
   "output": {
     "json": "reports/roles/saga-mainnet-latest.json"

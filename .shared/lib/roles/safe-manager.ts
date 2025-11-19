@@ -61,6 +61,17 @@ export class SafeManager {
         signerAddress = this.config.owners?.[0] || this.config.safeAddress;
       }
 
+      const contractNetworks: Record<string, any> = {};
+      if (this.config.multiSendAddress || this.config.multiSendCallOnlyAddress) {
+        contractNetworks[String(this.config.chainId)] = {};
+        if (this.config.multiSendAddress) {
+          contractNetworks[String(this.config.chainId)].multiSendAddress = this.config.multiSendAddress;
+        }
+        if (this.config.multiSendCallOnlyAddress) {
+          contractNetworks[String(this.config.chainId)].multiSendCallOnlyAddress = this.config.multiSendCallOnlyAddress;
+        }
+      }
+
       this.protocolKit = await Safe.init({
         // Safe Protocol Kit v4 expects an EIP-1193 provider (e.g., window.ethereum or Hardhat's provider)
         provider: this.hre.network.provider,
@@ -68,6 +79,7 @@ export class SafeManager {
         // Use an explicitly typed async IIFE to satisfy the linter's explicit return type rule
         signer: signerAddress,
         safeAddress: this.config.safeAddress,
+        contractNetworks,
       });
 
       // Verify Safe configuration
