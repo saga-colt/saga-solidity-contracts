@@ -20,6 +20,7 @@ export const D_AMO_DEBT_TOKEN_ID = "D_AmoDebtToken";
 export const D_AMO_MANAGER_ID = "D_AmoManagerV2";
 export const D_HARD_PEG_ORACLE_WRAPPER_ID = "D_HardPegOracleWrapper";
 export const MUST_HARD_PEG_ORACLE_WRAPPER_ID = "MUST_HardPegOracleWrapper";
+export const MUST_GOVERNANCE_ORACLE_WRAPPER_ID = "MUST_GovernanceOracleWrapper";
 
 // dLEND
 export const TREASURY_PROXY_ID = "TreasuryProxy";
