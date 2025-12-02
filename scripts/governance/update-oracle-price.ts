@@ -1,4 +1,5 @@
 import { ethers } from "hardhat";
+import hre from "hardhat";
 import { getConfig } from "../../config/config";
 import Safe, { EthersAdapter } from "@safe-global/protocol-kit";
 import { SafeApiKit } from "@safe-global/api-kit";
