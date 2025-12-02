@@ -59,9 +59,8 @@ describe("GovernanceOracleWrapper", () => {
       expect(timestamp).to.be.gt(0);
     });
 
-    it("should set default maxStaleness to 90 days", async () => {
-      const expectedStaleness = 90n * 24n * 60n * 60n; // 90 days in seconds
-      expect(await wrapper.maxStaleness()).to.equal(expectedStaleness);
+    it("should default maxStaleness to 0 (never stale)", async () => {
+      expect(await wrapper.maxStaleness()).to.equal(0);
     });
 
     it("should set default bpsTolerance to 5", async () => {
@@ -100,8 +99,8 @@ describe("GovernanceOracleWrapper", () => {
     });
 
     it("should return isAlive = false when stale", async () => {
-      const maxStaleness = await wrapper.maxStaleness();
-      await time.increase(maxStaleness + 1n);
+      await wrapper.connect(oracleManager).setMaxStaleness(1n);
+      await time.increase(2n);
       const [, isAlive] = await wrapper.getPriceInfo(ethers.ZeroAddress);
       expect(isAlive).to.be.false;
     });
@@ -265,8 +264,8 @@ describe("GovernanceOracleWrapper", () => {
     });
 
     it("should return isAlive=false when exceeds maxStaleness", async () => {
-      const maxStaleness = await wrapper.maxStaleness();
-      await time.increase(maxStaleness + 1n);
+      await wrapper.connect(oracleManager).setMaxStaleness(1n);
+      await time.increase(2n);
       const [, isAlive] = await wrapper.getPriceInfo(ethers.ZeroAddress);
       expect(isAlive).to.be.false;
     });
@@ -279,9 +278,9 @@ describe("GovernanceOracleWrapper", () => {
     });
 
     it("should refresh timestamp on price update", async () => {
-      const maxStaleness = await wrapper.maxStaleness();
-      // Move time close to staleness
-      await time.increase(maxStaleness - 100n);
+      // Set a finite staleness window and move near it
+      await wrapper.connect(oracleManager).setMaxStaleness(200n);
+      await time.increase(150n);
 
       // Price update should refresh timestamp
       const oldPrice = await wrapper.price();
@@ -398,13 +397,13 @@ describe("GovernanceOracleWrapper", () => {
     });
 
     it("should return correct staleness in OracleAggregator", async () => {
+      await wrapper.connect(oracleManager).setMaxStaleness(100n);
       // Fresh price
       let [, isAlive] = await oracleAggregator.getPriceInfo(testAsset);
       expect(isAlive).to.be.true;
 
       // Make stale
-      const maxStaleness = await wrapper.maxStaleness();
-      await time.increase(maxStaleness + 1n);
+      await time.increase(200n);
 
       [, isAlive] = await oracleAggregator.getPriceInfo(testAsset);
       expect(isAlive).to.be.false;

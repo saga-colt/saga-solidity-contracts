@@ -30,7 +30,7 @@ contract GovernanceOracleWrapper is IOracleWrapper, AccessControl {
 
     uint256 public price;
     uint256 public lastUpdateTimestamp;
-    uint256 public maxStaleness = 90 days;
+    uint256 public maxStaleness = 0; // 0 = never stale
     uint256 public bpsTolerance = 5; // Initial: 5 bps (0.05%)
 
     address public immutable BASE_CURRENCY;

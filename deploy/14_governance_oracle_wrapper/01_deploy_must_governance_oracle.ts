@@ -54,14 +54,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Pr
   // Verify deployment
   const wrapper = await hre.ethers.getContractAt("GovernanceOracleWrapper", deployment.address);
 
-  // Set max staleness to 0 (never stale) for parity with hard-pegged oracle
-  const desiredMaxStaleness = 0n;
-  const currentMaxStaleness = await wrapper.maxStaleness();
-  if (currentMaxStaleness !== desiredMaxStaleness) {
-    console.log(`\n⏱️  Setting max staleness to 0 (never stale)...`);
-    await wrapper.setMaxStaleness(desiredMaxStaleness);
-  }
-
   const deployedPrice = await wrapper.price();
   const bpsTolerance = await wrapper.bpsTolerance();
   const maxStaleness = await wrapper.maxStaleness();
