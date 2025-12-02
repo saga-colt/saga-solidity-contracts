@@ -271,6 +271,13 @@ describe("GovernanceOracleWrapper", () => {
       expect(isAlive).to.be.false;
     });
 
+    it("should treat maxStaleness = 0 as never stale", async () => {
+      await wrapper.connect(oracleManager).setMaxStaleness(0);
+      await time.increase(365n * 24n * 60n * 60n); // 1 year
+      const [, isAlive] = await wrapper.getPriceInfo(ethers.ZeroAddress);
+      expect(isAlive).to.be.true;
+    });
+
     it("should refresh timestamp on price update", async () => {
       const maxStaleness = await wrapper.maxStaleness();
       // Move time close to staleness

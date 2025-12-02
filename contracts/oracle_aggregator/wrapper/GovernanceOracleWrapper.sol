@@ -163,7 +163,7 @@ contract GovernanceOracleWrapper is IOracleWrapper, AccessControl {
     function getPriceInfo(
         address // asset
     ) external view returns (uint256, bool isAlive) {
-        bool alive = block.timestamp <= lastUpdateTimestamp + maxStaleness;
+        bool alive = maxStaleness == 0 ? true : block.timestamp <= lastUpdateTimestamp + maxStaleness;
         return (price, alive);
     }
 
