@@ -89,8 +89,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment): Pr
       return true;
     } else if (currentOracle && currentOracle !== "0x0000000000000000000000000000000000000000") {
       console.log(`\n⚠️  Oracle for MUST token is already set to a different address: ${currentOracle}`);
-      console.log(`   Expected: ${governanceOracleWrapperAddress}`);
-      throw new Error(`Oracle already configured with different address: ${currentOracle}`);
+      console.log(`   Migrating to governance oracle: ${governanceOracleWrapperAddress}`);
     }
   } catch (error: any) {
     // If assetOracles reverts or returns zero address, it's not configured yet
