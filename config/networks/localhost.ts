@@ -27,6 +27,7 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
   const sUSDSDeployment = await _hre.deployments.getOrNull("sUSDS");
   const frxUSDDeployment = await _hre.deployments.getOrNull("frxUSD");
   const sfrxUSDDeployment = await _hre.deployments.getOrNull("sfrxUSD");
+  const MUSTDeployment = await _hre.deployments.getOrNull("MUST");
   const WSAGADeployment = await _hre.deployments.getOrNull("WSAGA");
 
   // Fetch deployed dLend StaticATokenLM wrappers
@@ -92,6 +93,12 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
           decimals: 18,
           initialSupply: 1e6,
         },
+        MUST: {
+          name: "Must",
+          address: MUSTDeployment?.address,
+          decimals: 18,
+          initialSupply: 1e6,
+        },
       },
     },
     tokenAddresses: {
@@ -101,6 +108,7 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
       USDC: emptyStringIfUndefined(USDCDeployment?.address),
       USDS: emptyStringIfUndefined(USDSDeployment?.address),
       frxUSD: emptyStringIfUndefined(frxUSDDeployment?.address),
+      MUST: emptyStringIfUndefined(MUSTDeployment?.address),
     },
     walletAddresses: {
       governanceMultisig: deployer,

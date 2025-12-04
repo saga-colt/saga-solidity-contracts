@@ -4,6 +4,7 @@ import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { GovernanceOracleWrapper, OracleAggregator } from "../../typechain-types";
 import { time } from "@nomicfoundation/hardhat-network-helpers";
 import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
+import { getGovernanceOracleWrapperFixture } from "./governance-oracle.fixture";
 
 describe("GovernanceOracleWrapper", () => {
   let wrapper: GovernanceOracleWrapper;
@@ -15,12 +16,12 @@ describe("GovernanceOracleWrapper", () => {
   const INITIAL_PRICE = ethers.parseUnits("0.995", 18);
   const BASE_CURRENCY = ethers.ZeroAddress;
   const BASE_CURRENCY_UNIT = ethers.parseUnits("1", 18);
+  const loadFixture = getGovernanceOracleWrapperFixture();
 
   beforeEach(async () => {
-    [deployer, oracleManager, guardian, unauthorized] = await ethers.getSigners();
-
-    const Factory = await ethers.getContractFactory("GovernanceOracleWrapper");
-    wrapper = await Factory.deploy(BASE_CURRENCY, BASE_CURRENCY_UNIT, INITIAL_PRICE);
+    const fixture = await loadFixture();
+    wrapper = fixture.wrapper;
+    [deployer, oracleManager, guardian, unauthorized] = fixture.signers;
 
     await wrapper.grantRole(await wrapper.ORACLE_MANAGER_ROLE(), oracleManager.address);
     await wrapper.grantRole(await wrapper.GUARDIAN_ROLE(), guardian.address);
@@ -68,11 +69,13 @@ describe("GovernanceOracleWrapper", () => {
     });
 
     it("should emit PriceUpdated event on deployment", async () => {
-      const Factory = await ethers.getContractFactory("GovernanceOracleWrapper");
-      const newWrapper = await Factory.deploy(BASE_CURRENCY, BASE_CURRENCY_UNIT, INITIAL_PRICE);
-      await expect(newWrapper.deploymentTransaction())
-        .to.emit(newWrapper, "PriceUpdated")
-        .withArgs(0, INITIAL_PRICE, deployer.address, 0, anyValue);
+      const events = await wrapper.queryFilter(wrapper.filters.PriceUpdated());
+      expect(events.length).to.be.greaterThan(0);
+
+      const last = events[events.length - 1];
+      expect(last.args?.oldPrice).to.equal(0n);
+      expect(last.args?.newPrice).to.equal(INITIAL_PRICE);
+      expect(last.args?.updater).to.equal(deployer.address);
     });
 
     it("should revert on zero initial price", async () => {

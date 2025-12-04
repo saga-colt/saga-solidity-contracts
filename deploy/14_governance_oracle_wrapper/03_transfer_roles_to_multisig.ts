@@ -4,7 +4,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 import { getConfig } from "../../config/config";
 import { MUST_GOVERNANCE_ORACLE_WRAPPER_ID } from "../../typescript/deploy-ids";
 import { ZERO_BYTES_32 } from "../../typescript/dlend/constants";
-import { isMainnet } from "../../typescript/hardhat/deploy";
+import { isLocalNetwork, isMainnet, isSagaTestnet } from "../../typescript/hardhat/deploy";
 
 /**
  * Transfer GovernanceOracleWrapper roles to governance and guardian multisigs
@@ -12,8 +12,10 @@ import { isMainnet } from "../../typescript/hardhat/deploy";
  * @param hre
  */
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  if (!isMainnet(hre.network.name)) {
-    console.log(`\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping non-mainnet network`);
+  const networkName = hre.network.name;
+
+  if (!isMainnet(networkName) && !isSagaTestnet(networkName) && !isLocalNetwork(networkName)) {
+    console.log(`\n🔑 ${__filename.split("/").slice(-2).join("/")}: Skipping unsupported network (${networkName})`);
     return true;
   }
 
@@ -96,8 +98,8 @@ async function transferRole(
     throw new Error(`❌ Multisig ${targetMultisig} does not have the role ${roleName}. Aborting revocation from deployer.`);
   }
 
-  // Revoke role from deployer
-  if (await contract.hasRole(role, deployer)) {
+  // Revoke role from deployer unless deployer and target are the same (e.g., local testing)
+  if (targetMultisig.toLowerCase() !== deployer.toLowerCase() && (await contract.hasRole(role, deployer))) {
     await contract.revokeRole(role, deployer);
     console.log(`    ➖ Revoked ${roleName} from deployer`);
   }
