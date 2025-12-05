@@ -25,6 +25,7 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
   const USDCDeployment = await _hre.deployments.getOrNull("USDC");
   const USDTDeployment = await _hre.deployments.getOrNull("USDT");
   const SAGADeployment = await _hre.deployments.getOrNull("SAGA");
+  const MUSTDeployment = await _hre.deployments.getOrNull("MUST");
   const sfrxUSDDeployment = await _hre.deployments.getOrNull("sfrxUSD");
   const USDNDeployment = await _hre.deployments.getOrNull("USDN");
   const yUSDDeployment = await _hre.deployments.getOrNull("yUSD");
@@ -67,6 +68,7 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
   const usdcAddress = USDCDeployment?.address || ZeroAddress;
   const usdtAddress = USDTDeployment?.address || ZeroAddress;
   const sagaAddress = SAGADeployment?.address || ZeroAddress;
+  const mustAddress = emptyStringIfUndefined(MUSTDeployment?.address);
   const sfrxUSDAddress = sfrxUSDDeployment?.address || ZeroAddress;
   const usdnAddress = USDNDeployment?.address || ZeroAddress;
   const yUSDAddress = yUSDDeployment?.address || ZeroAddress;
@@ -124,6 +126,7 @@ export async function getConfig(_hre: HardhatRuntimeEnvironment): Promise<Config
       USDC: emptyStringIfUndefined(usdcAddress),
       USDT: emptyStringIfUndefined(usdtAddress),
       SAGA: emptyStringIfUndefined(sagaAddress),
+      MUST: mustAddress,
       sfrxUSD: emptyStringIfUndefined(sfrxUSDAddress),
       USDN: emptyStringIfUndefined(usdnAddress),
       yUSD: emptyStringIfUndefined(yUSDAddress),
