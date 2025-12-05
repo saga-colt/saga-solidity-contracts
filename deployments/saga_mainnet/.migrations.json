@@ -56,5 +56,6 @@
   "fix-sfrxusd-update-collateral": 1763394088,
   "upgrade-d-issuer-v2_2": 1763444024,
   "MUST_GovernanceOracleWrapper": 1764824241,
-  "transfer_governance_oracle_wrapper_roles_to_multisig": 1764828279
+  "transfer_governance_oracle_wrapper_roles_to_multisig": 1764828279,
+  "d-configure-must-governance-oracle": 1764906328
 }
