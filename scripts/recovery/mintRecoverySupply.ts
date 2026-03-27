@@ -10,14 +10,18 @@ interface PreparedRecoveryBundle {
     reconciliationMintAmount: string;
     reconciliationMintAmountFormatted: string;
     reconciliationMintSink: string;
+    burnSinkBalanceBeforeMint: string;
   };
 }
 
 async function main(): Promise<void> {
-  const [bundlePathArg, outPathArg] = process.argv.slice(2);
+  const args = process.argv.slice(2);
+  const force = args.includes("--force");
+  const positionalArgs = args.filter((arg) => arg !== "--force");
+  const [bundlePathArg, outPathArg] = positionalArgs;
   if (!bundlePathArg) {
     throw new Error(
-      "Usage: npx hardhat run --network <network> scripts/recovery/mintRecoverySupply.ts <prepared-bundle.json> [mint-out.json]",
+      "Usage: npx hardhat run --network <network> scripts/recovery/mintRecoverySupply.ts <prepared-bundle.json> [mint-out.json] [--force]",
     );
   }
 
@@ -37,10 +41,29 @@ async function main(): Promise<void> {
   const minterRole = await dstable.MINTER_ROLE();
   const hasMinterRole = await dstable.hasRole(minterRole, deployer);
   const mintAmount = BigInt(bundle.dstable.reconciliationMintAmount);
+  const expectedSinkBalanceBeforeMint = BigInt(bundle.dstable.burnSinkBalanceBeforeMint);
+  const currentSinkBalance = BigInt((await dstable.balanceOf(sink)).toString());
   const mintCalldata = dstable.interface.encodeFunctionData("mint", [sink, mintAmount]);
 
+  let alreadyMinted = false;
+  if (currentSinkBalance === expectedSinkBalanceBeforeMint + mintAmount) {
+    alreadyMinted = true;
+    console.log(`Burn sink ${sink} already holds the expected post-mint balance. Skipping duplicate mint.`);
+  } else if (currentSinkBalance !== expectedSinkBalanceBeforeMint && !force) {
+    throw new Error(
+      `Burn sink balance changed since preparation. Expected ${expectedSinkBalanceBeforeMint.toString()} before mint, found ${currentSinkBalance.toString()}. ` +
+        "Refusing to mint again. Re-run preparation or pass --force after manual review.",
+    );
+  } else if (currentSinkBalance !== expectedSinkBalanceBeforeMint) {
+    console.log(
+      `WARNING: burn sink balance differs from prepared snapshot (${currentSinkBalance.toString()} vs ${expectedSinkBalanceBeforeMint.toString()}); proceeding due to --force.`,
+    );
+  }
+
   let txHash: string | null = null;
-  if (hasMinterRole) {
+  if (alreadyMinted) {
+    txHash = null;
+  } else if (hasMinterRole) {
     console.log(`Minting ${bundle.dstable.reconciliationMintAmountFormatted} D to burn sink ${sink} for supply reconciliation...`);
     const tx = await dstable.mint(sink, mintAmount);
     const receipt = await tx.wait();
@@ -57,6 +80,9 @@ async function main(): Promise<void> {
     reconciliationMintSink: sink,
     minterRole,
     hasMinterRole,
+    expectedBurnSinkBalanceBeforeMint: expectedSinkBalanceBeforeMint.toString(),
+    currentBurnSinkBalance: currentSinkBalance.toString(),
+    alreadyMinted,
     txHash,
     mintCalldata,
   };

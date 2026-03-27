@@ -52,9 +52,7 @@ interface ZeroPayoutRecoveryAsset {
 async function main(): Promise<void> {
   const [configPathArg, outPathArg] = process.argv.slice(2);
   if (!configPathArg || !outPathArg) {
-    throw new Error(
-      "Usage: npx ts-node --files scripts/recovery/prepareBasketRecovery.ts <config.json> <out.json>",
-    );
+    throw new Error("Usage: npx ts-node --files scripts/recovery/prepareBasketRecovery.ts <config.json> <out.json>");
   }
 
   const configPath = path.resolve(configPathArg);
@@ -79,6 +77,7 @@ async function main(): Promise<void> {
 
   const vault = await hre.ethers.getContractAt("CollateralVault", collateralVaultAddress);
   const configuredAssetAddresses = await resolveRecoveryAssetAddresses(vault, rawConfig.assets ?? []);
+  const usingExplicitAssets = (rawConfig.assets?.length ?? 0) > 0;
 
   const assets: PreparedRecoveryAsset[] = [];
   const skippedZeroBalanceAssets: SkippedRecoveryAsset[] = [];
@@ -89,7 +88,7 @@ async function main(): Promise<void> {
     const erc20 = await hre.ethers.getContractAt(["function balanceOf(address) view returns (uint256)"], assetAddress);
     const vaultBalance = BigInt((await erc20.balanceOf(collateralVaultAddress)).toString());
 
-    if (vaultBalance === 0n && !includeZeroBalanceAssets) {
+    if (vaultBalance === 0n && !includeZeroBalanceAssets && !usingExplicitAssets) {
       skippedZeroBalanceAssets.push({
         address: assetAddress,
         symbol: tokenInfo.symbol,
@@ -134,6 +133,14 @@ async function main(): Promise<void> {
     );
   }
 
+  if (!usingExplicitAssets && skippedZeroBalanceAssets.length > 0) {
+    const skippedList = skippedZeroBalanceAssets.map((asset) => `${asset.symbol} (${asset.address})`).join(", ");
+    throw new Error(
+      `vault.listCollateral() contains zero-balance supported assets that would be omitted from the frozen basket: ${skippedList}. ` +
+        "Either provide an explicit assets list to make that omission intentional, or set includeZeroBalanceAssets=true to freeze the full supported list.",
+    );
+  }
+
   const totalSupplyReader = await hre.ethers.getContractAt(["function totalSupply() view returns (uint256)"], dstableAddress);
   const balanceReader = await hre.ethers.getContractAt(["function balanceOf(address) view returns (uint256)"], dstableAddress);
   const currentTotalSupply = BigInt((await totalSupplyReader.totalSupply()).toString());
@@ -150,6 +157,9 @@ async function main(): Promise<void> {
       "reconciliationMintAmount is NOT included in claimBaseD and must be minted to a non-redeemable burn sink before opening redemption.",
       "Minting to address(0) is impossible with ERC20StablecoinUpgradeable because OZ _mint(address(0), ...) reverts.",
       "The BasketRecoveryRedeemer should be the only active redemption path; keep legacy RedeemerV2 paused.",
+      usingExplicitAssets
+        ? "Recovery asset list was provided explicitly by the operator."
+        : "Recovery asset list came from vault.listCollateral(); any zero-balance omissions must be made explicit by the operator.",
     ],
     dstable: {
       address: dstableInfo.address,
@@ -193,13 +203,6 @@ async function main(): Promise<void> {
     console.log(
       `  - ${asset.symbol} @ ${asset.address}: vault=${asset.vaultBalanceFormatted}, payoutPerD=${asset.payoutPerDFormatted}, dust=${asset.unallocatableDustFormatted}`,
     );
-  }
-  if (skippedZeroBalanceAssets.length > 0) {
-    console.log("Skipped supported collateral entries with zero vault balance:");
-    for (const asset of skippedZeroBalanceAssets) {
-      console.log(`  - ${asset.symbol} @ ${asset.address}: ${asset.reason}`);
-    }
-    console.log("Review these entries before treating the prepared basket as final.");
   }
   if (zeroPayoutAssets.length > 0) {
     console.log("Warning: some selected recovery assets have non-zero vault balance but payoutPerD=0.");

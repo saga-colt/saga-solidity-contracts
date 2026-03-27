@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-import { formatUnits } from "ethers";
+import { formatUnits, getAddress } from "ethers";
 import hre from "hardhat";
 
 import { D_BASKET_RECOVERY_REDEEMER_ID } from "../../typescript/deploy-ids";
@@ -23,6 +23,13 @@ interface PreparedRecoveryBundle {
   };
   collateralVault: string;
   recoveryAssets: PreparedRecoveryAsset[];
+  constructorArgs: {
+    dstable: string;
+    collateralVault: string;
+    claimBaseD: string;
+    recoveryAssets: string[];
+    payoutPerD: string[];
+  };
 }
 
 async function main(): Promise<void> {
@@ -67,6 +74,36 @@ async function main(): Promise<void> {
   const dstablePaused = await dstable.paused();
   const totalRedeemedD = await redeemer.totalRedeemedD();
   const failures: string[] = [];
+  const deployedDstable = await redeemer.dstable();
+  const deployedVault = await redeemer.collateralVault();
+  const deployedClaimBaseD = await redeemer.claimBaseD();
+  const deployedAssets = (await redeemer.recoveryAssets()).map((asset) => getAddress(asset));
+  const expectedAssets = bundle.constructorArgs.recoveryAssets.map((asset) => getAddress(asset));
+
+  if (getAddress(deployedDstable) !== getAddress(bundle.constructorArgs.dstable)) {
+    failures.push("BasketRecoveryRedeemer dstable address does not match the prepared bundle");
+  }
+  if (getAddress(deployedVault) !== getAddress(bundle.constructorArgs.collateralVault)) {
+    failures.push("BasketRecoveryRedeemer collateral vault address does not match the prepared bundle");
+  }
+  if (deployedClaimBaseD !== BigInt(bundle.constructorArgs.claimBaseD)) {
+    failures.push("BasketRecoveryRedeemer claimBaseD does not match the prepared bundle");
+  }
+  if (deployedAssets.length !== expectedAssets.length) {
+    failures.push("BasketRecoveryRedeemer recovery asset count does not match the prepared bundle");
+  } else {
+    for (let i = 0; i < expectedAssets.length; i++) {
+      if (deployedAssets[i] !== expectedAssets[i]) {
+        failures.push(`BasketRecoveryRedeemer recovery asset at index ${i} does not match the prepared bundle`);
+        continue;
+      }
+
+      const deployedPayout = await redeemer.payoutPerD(deployedAssets[i]);
+      if (deployedPayout !== BigInt(bundle.constructorArgs.payoutPerD[i])) {
+        failures.push(`BasketRecoveryRedeemer payoutPerD for ${deployedAssets[i]} does not match the prepared bundle`);
+      }
+    }
+  }
 
   if (!isPaused) {
     failures.push("BasketRecoveryRedeemer is not paused");
@@ -78,6 +115,8 @@ async function main(): Promise<void> {
   console.log(`BasketRecoveryRedeemer: ${redeemerAddress}`);
   console.log(`  paused: ${isPaused}`);
   console.log(`  totalRedeemedD: ${formatUnits(totalRedeemedD, bundle.dstable.decimals)} ${bundle.dstable.symbol}`);
+  console.log(`  dstable: ${deployedDstable}`);
+  console.log(`  claimBaseD: ${formatUnits(deployedClaimBaseD, bundle.dstable.decimals)} ${bundle.dstable.symbol}`);
   console.log(`Collateral vault: ${bundle.collateralVault}`);
   console.log(`  has COLLATERAL_WITHDRAWER_ROLE: ${hasVaultRole}`);
   console.log(`D token paused: ${dstablePaused}`);
