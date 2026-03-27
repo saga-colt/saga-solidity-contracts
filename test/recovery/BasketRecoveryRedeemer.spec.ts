@@ -2,13 +2,7 @@ import { expect } from "chai";
 import { ZeroAddress } from "ethers";
 import hre from "hardhat";
 
-import {
-  BasketRecoveryRedeemer,
-  CollateralHolderVault,
-  MockOracleAggregator,
-  TestERC20,
-  TestMintableERC20,
-} from "../../typechain-types";
+import { BasketRecoveryRedeemer, CollateralHolderVault, MockOracleAggregator, TestERC20, TestMintableERC20 } from "../../typechain-types";
 
 describe("BasketRecoveryRedeemer", () => {
   async function deployBaseFixture() {
@@ -58,11 +52,7 @@ describe("BasketRecoveryRedeemer", () => {
     }
 
     const unit = hre.ethers.parseUnits("1", 18);
-    const payoutPerD = [
-      (mustBudget * unit) / claimBaseD,
-      (yusdBudget * unit) / claimBaseD,
-      (vyusdBudget * unit) / claimBaseD,
-    ];
+    const payoutPerD = [(mustBudget * unit) / claimBaseD, (yusdBudget * unit) / claimBaseD, (vyusdBudget * unit) / claimBaseD];
 
     const redeemerFactory = await hre.ethers.getContractFactory("BasketRecoveryRedeemer", deployer);
     const redeemer = (await redeemerFactory.deploy(

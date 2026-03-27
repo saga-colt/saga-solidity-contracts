@@ -3,6 +3,7 @@
 This recovery path is intentionally handled by dedicated scripts under `scripts/recovery/` instead of a normal `deploy/` tag flow.
 
 Reason:
+
 - the contract arguments depend on a reviewed live vault snapshot,
 - `claimBaseD` is incident-specific policy input,
 - accidental inclusion in normal fixture/tag deploys would be unsafe.
@@ -36,6 +37,7 @@ npx ts-node --files scripts/recovery/prepareBasketRecovery.ts \
 ```
 
 6. Review:
+
 - `claimBaseD`
 - `reconciliationMintAmount`
 - `recoveryAssets`
@@ -55,6 +57,7 @@ npx hardhat run --network saga_mainnet scripts/recovery/mintRecoverySupply.ts \
 ```
 
 Notes:
+
 - the script refuses to mint again if the burn sink balance no longer matches the prepared snapshot,
 - if the expected mint already happened, it exits without minting again,
 - use `--force` only after manual review if the sink balance changed unexpectedly.
@@ -70,6 +73,7 @@ npx hardhat run --network saga_mainnet scripts/recovery/deployBasketRecoveryRede
 ```
 
 The script:
+
 - deploys `D_BasketRecoveryRedeemer`,
 - grants `COLLATERAL_WITHDRAWER_ROLE` if possible,
 - grants `DEFAULT_ADMIN_ROLE` and `PAUSER_ROLE` on the new redeemer to governance,
@@ -87,6 +91,7 @@ npx hardhat run --network saga_mainnet scripts/recovery/checkBasketRecoveryReadi
 ```
 
 The script fails if:
+
 - the deployed redeemer does not match the prepared bundle,
 - the redeemer is already unpaused,
 - the redeemer lacks `COLLATERAL_WITHDRAWER_ROLE`,

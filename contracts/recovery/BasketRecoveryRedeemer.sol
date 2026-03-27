@@ -220,7 +220,11 @@ contract BasketRecoveryRedeemer is AccessControl, Pausable, ReentrancyGuard {
 
     function getAssetState(
         address asset
-    ) external view returns (uint256 payoutPerD_, uint256 cumulativePaid_, uint256 requiredBudget, uint256 remainingBudget) {
+    )
+        external
+        view
+        returns (uint256 payoutPerD_, uint256 cumulativePaid_, uint256 requiredBudget, uint256 remainingBudget)
+    {
         RecoveryAssetState storage assetState = _assetStates[asset];
         if (!assetState.configured) {
             revert UnknownRecoveryAsset(asset);
