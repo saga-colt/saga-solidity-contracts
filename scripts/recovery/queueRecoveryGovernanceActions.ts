@@ -4,12 +4,7 @@ import path from "path";
 import hre from "hardhat";
 
 import { getConfig } from "../../config/config";
-import {
-  D_COLLATERAL_VAULT_CONTRACT_ID,
-  D_ISSUER_V2_2_CONTRACT_ID,
-  D_REDEEMER_CONTRACT_ID,
-  D_TOKEN_ID,
-} from "../../typescript/deploy-ids";
+import { D_COLLATERAL_VAULT_CONTRACT_ID, D_ISSUER_V2_2_CONTRACT_ID, D_REDEEMER_CONTRACT_ID, D_TOKEN_ID } from "../../typescript/deploy-ids";
 import { SagaGovernanceExecutor } from "../../typescript/hardhat/saga-governance";
 import { SafeTransactionData } from "../../typescript/hardhat/saga-safe-manager";
 
@@ -33,9 +28,7 @@ function buildTx(to: string, data: string): SafeTransactionData {
 async function main(): Promise<void> {
   const [bundlePathArg] = process.argv.slice(2);
   if (!bundlePathArg) {
-    throw new Error(
-      "Usage: npx ts-node --files scripts/recovery/queueRecoveryGovernanceActions.ts <prepared-bundle.json>",
-    );
+    throw new Error("Usage: npx ts-node --files scripts/recovery/queueRecoveryGovernanceActions.ts <prepared-bundle.json>");
   }
 
   const bundlePath = path.resolve(bundlePathArg);
