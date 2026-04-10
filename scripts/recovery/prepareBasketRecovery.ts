@@ -148,10 +148,7 @@ async function main(): Promise<void> {
   const configuredReconciliationMintAmount =
     rawConfig.reconciliationMintAmount === undefined ? undefined : BigInt(rawConfig.reconciliationMintAmount);
   const expectedReconciliationMintAmount = claimBaseD > currentTotalSupply ? claimBaseD - currentTotalSupply : 0n;
-  if (
-    configuredReconciliationMintAmount !== undefined &&
-    configuredReconciliationMintAmount !== expectedReconciliationMintAmount
-  ) {
+  if (configuredReconciliationMintAmount !== undefined && configuredReconciliationMintAmount !== expectedReconciliationMintAmount) {
     throw new Error(
       `Configured reconciliationMintAmount ${configuredReconciliationMintAmount.toString()} does not match the required mint ` +
         `${expectedReconciliationMintAmount.toString()} derived from claimBaseD (${claimBaseD.toString()}) ` +
