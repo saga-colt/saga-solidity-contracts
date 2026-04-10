@@ -13,7 +13,7 @@ interface RecoveryConfigInput {
   dstable?: string;
   collateralVault?: string;
   claimBaseD: string;
-  reconciliationMintAmount: string;
+  reconciliationMintAmount?: string;
   reconciliationMintSink?: string;
   assets?: Array<string | { address: string; symbol?: string }>;
   includeZeroBalanceAssets?: boolean;
@@ -62,7 +62,6 @@ async function main(): Promise<void> {
   const dstableAddress = await resolveDstableAddress(rawConfig.dstable);
   const collateralVaultAddress = await resolveCollateralVaultAddress(rawConfig.collateralVault);
   const claimBaseD = BigInt(rawConfig.claimBaseD);
-  const reconciliationMintAmount = BigInt(rawConfig.reconciliationMintAmount);
   const reconciliationMintSink = getAddress(rawConfig.reconciliationMintSink ?? DEAD_BURN_SINK);
 
   if (claimBaseD <= 0n) {
@@ -146,20 +145,47 @@ async function main(): Promise<void> {
   const currentTotalSupply = BigInt((await totalSupplyReader.totalSupply()).toString());
   const burnSinkBalance = BigInt((await balanceReader.balanceOf(reconciliationMintSink)).toString());
 
+  const configuredReconciliationMintAmount =
+    rawConfig.reconciliationMintAmount === undefined ? undefined : BigInt(rawConfig.reconciliationMintAmount);
+  const expectedReconciliationMintAmount = claimBaseD > currentTotalSupply ? claimBaseD - currentTotalSupply : 0n;
+  if (
+    configuredReconciliationMintAmount !== undefined &&
+    configuredReconciliationMintAmount !== expectedReconciliationMintAmount
+  ) {
+    throw new Error(
+      `Configured reconciliationMintAmount ${configuredReconciliationMintAmount.toString()} does not match the required mint ` +
+        `${expectedReconciliationMintAmount.toString()} derived from claimBaseD (${claimBaseD.toString()}) ` +
+        `minus currentTotalSupply (${currentTotalSupply.toString()}).`,
+    );
+  }
+
+  const reconciliationMintAmount = expectedReconciliationMintAmount;
   const network = await hre.ethers.provider.getNetwork();
   const reconciledTotalSupplyAfterMint = currentTotalSupply + reconciliationMintAmount;
+  const accountingWarnings: string[] = [];
+  if (burnSinkBalance > currentTotalSupply) {
+    accountingWarnings.push(
+      "Burn sink balance already exceeds current D totalSupply(); live ERC20 accounting is inconsistent before the planned reconciliation mint.",
+    );
+  }
+  if (burnSinkBalance > reconciledTotalSupplyAfterMint) {
+    accountingWarnings.push(
+      "Burn sink balance also exceeds the projected totalSupply after the planned reconciliation mint; review the accounting hole assumptions before opening redemption.",
+    );
+  }
   const preparedOutput = {
     preparedAt: new Date().toISOString(),
     networkName: hre.network.name,
     chainId: network.chainId.toString(),
     notes: [
       "claimBaseD is the redeemable D denominator for basket ratios.",
-      "reconciliationMintAmount is NOT included in claimBaseD and must be minted to a non-redeemable burn sink before opening redemption.",
+      "reconciliationMintAmount is derived as max(claimBaseD - currentTotalSupply, 0) and must be minted to a non-redeemable burn sink before opening redemption.",
       "Minting to address(0) is impossible with ERC20StablecoinUpgradeable because OZ _mint(address(0), ...) reverts.",
       "The BasketRecoveryRedeemer should be the only active redemption path; keep legacy RedeemerV2 paused.",
       usingExplicitAssets
         ? "Recovery asset list was provided explicitly by the operator."
         : "Recovery asset list came from vault.listCollateral(); any zero-balance omissions must be made explicit by the operator.",
+      ...accountingWarnings,
     ],
     dstable: {
       address: dstableInfo.address,
@@ -210,6 +236,9 @@ async function main(): Promise<void> {
       console.log(`  - ${asset.symbol} @ ${asset.address}: vault=${asset.vaultBalanceFormatted}`);
     }
     console.log("These balances will remain as dust under the current claim base and token decimal mix.");
+  }
+  for (const warning of accountingWarnings) {
+    console.log(`Warning: ${warning}`);
   }
 }
 

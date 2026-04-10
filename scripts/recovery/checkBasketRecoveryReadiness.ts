@@ -20,6 +20,10 @@ interface PreparedRecoveryBundle {
     symbol: string;
     claimBaseD: string;
     claimBaseDFormatted: string;
+    currentTotalSupply: string;
+    currentTotalSupplyFormatted: string;
+    reconciledTotalSupplyAfterMint: string;
+    reconciledTotalSupplyAfterMintFormatted: string;
   };
   collateralVault: string;
   recoveryAssets: PreparedRecoveryAsset[];
@@ -66,12 +70,17 @@ async function main(): Promise<void> {
   const signer = await hre.ethers.getSigner((await hre.getNamedAccounts()).deployer);
   const redeemer = await hre.ethers.getContractAt("BasketRecoveryRedeemer", redeemerAddress, signer);
   const vault = await hre.ethers.getContractAt("CollateralVault", bundle.collateralVault, signer);
-  const dstable = await hre.ethers.getContractAt(["function paused() view returns (bool)"], bundle.dstable.address, signer);
+  const dstable = await hre.ethers.getContractAt(
+    ["function paused() view returns (bool)", "function totalSupply() view returns (uint256)"],
+    bundle.dstable.address,
+    signer,
+  );
 
   const withdrawerRole = await vault.COLLATERAL_WITHDRAWER_ROLE();
   const hasVaultRole = await vault.hasRole(withdrawerRole, redeemerAddress);
   const isPaused = await redeemer.paused();
   const dstablePaused = await dstable.paused();
+  const dstableTotalSupply = await dstable.totalSupply();
   const totalRedeemedD = await redeemer.totalRedeemedD();
   const failures: string[] = [];
   const deployedDstable = await redeemer.dstable();
@@ -111,12 +120,19 @@ async function main(): Promise<void> {
   if (!hasVaultRole) {
     failures.push("BasketRecoveryRedeemer does not have COLLATERAL_WITHDRAWER_ROLE on the collateral vault");
   }
+  if (dstableTotalSupply < BigInt(bundle.dstable.claimBaseD)) {
+    failures.push("D totalSupply is below claimBaseD; reconciliation mint is incomplete or claimBaseD is overstated");
+  }
 
   console.log(`BasketRecoveryRedeemer: ${redeemerAddress}`);
   console.log(`  paused: ${isPaused}`);
   console.log(`  totalRedeemedD: ${formatUnits(totalRedeemedD, bundle.dstable.decimals)} ${bundle.dstable.symbol}`);
   console.log(`  dstable: ${deployedDstable}`);
   console.log(`  claimBaseD: ${formatUnits(deployedClaimBaseD, bundle.dstable.decimals)} ${bundle.dstable.symbol}`);
+  console.log(`  live totalSupply: ${formatUnits(dstableTotalSupply, bundle.dstable.decimals)} ${bundle.dstable.symbol}`);
+  console.log(
+    `  prepared projected totalSupply after mint: ${bundle.dstable.reconciledTotalSupplyAfterMintFormatted} ${bundle.dstable.symbol}`,
+  );
   console.log(`Collateral vault: ${bundle.collateralVault}`);
   console.log(`  has COLLATERAL_WITHDRAWER_ROLE: ${hasVaultRole}`);
   console.log(`D token paused: ${dstablePaused}`);

@@ -1,6 +1,5 @@
 {
   "claimBaseD": "<FILL_ME_WITH_TOTAL_REDEEMABLE_D_IN_18_DECIMALS>",
-  "reconciliationMintAmount": "3471772844219621387360984",
   "reconciliationMintSink": "0x000000000000000000000000000000000000dEaD",
   "assets": [],
   "includeZeroBalanceAssets": false

@@ -1,0 +1,9 @@
+{
+  "claimBaseD": "<FILL_ME_WITH_FROZEN_NON_DEAD_D_BALANCE_IN_18_DECIMALS>",
+  "reconciliationMintSink": "0x000000000000000000000000000000000000dEaD",
+  "assets": [
+    "0x704a58f888f18506C9Fc199e53AE220B5fdCaEd8",
+    "0xA8b56ce258a7f55327BdE886B0e947EE059ca434"
+  ],
+  "includeZeroBalanceAssets": false
+}
