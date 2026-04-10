@@ -27,8 +27,9 @@ Reason:
 
 Current pre-recovery snapshot on Saga mainnet as of 2026-04-10:
 
-- `claimBaseD`: pending the frozen non-dead holder snapshot; do not reuse `D.totalSupply()` as a substitute
+- `claimBaseD`: `4564205157438530281468465` (`4564205.157438530281468465 D`)
 - observed `D.totalSupply()`: `1092432313218908894107481` (`1092432.313218908894107481 D`)
+- trusted `reconciliationMintAmount`: `3471772844219621387360984` (`3471772.844219621387360984 D`)
 - `reconciliationMintSink`: `0x000000000000000000000000000000000000dEaD`
 - current D balance at the burn sink before the planned reconciliation mint: `14059213281592607716076142` (`14059213.281592607716076142 D`)
 - live pause state observed on-chain:
@@ -48,10 +49,45 @@ Relevant observed transactions:
 - Attacker D sent to the burn sink: [`0xc6257c03f0610789e9c6c19fb2b453f7b0ad37a17bad1e4e960f4a5cf9565cfc`](https://sagaevm.sagaexplorer.io/tx/0xc6257c03f0610789e9c6c19fb2b453f7b0ad37a17bad1e4e960f4a5cf9565cfc)
 - MUST top-up into `D_CollateralHolderVault`: [`0xc2131f45d861c55a877d99ef8de9e796b909ec0cb885ea42a100a852d9572ec6`](https://sagaevm.sagaexplorer.io/tx/0xc2131f45d861c55a877d99ef8de9e796b909ec0cb885ea42a100a852d9572ec6)
 
+Current local recovery artifacts:
+
+- config: `recovery/basket-recovery.config.saga-mainnet.json`
+- prepared bundle: `recovery/basket-recovery.prepared.saga-mainnet.json`
+- deployment summary: `recovery/basket-recovery.deployed.saga-mainnet.json`
+
+Current deployed recovery redeemer state:
+
+- `D_BasketRecoveryRedeemer`: `0xfff14BF13EF30A7e962BA871F00f6D01Ed50a7aB`
+- deploy tx: [`0x822f92e6c5e0c9f7f96ae5c5af320e5196d5621c8cebf57211e7779502876c4c`](https://sagaevm.sagaexplorer.io/tx/0x822f92e6c5e0c9f7f96ae5c5af320e5196d5621c8cebf57211e7779502876c4c)
+- deployed paused by constructor
+- governance already granted `DEFAULT_ADMIN_ROLE` and `PAUSER_ROLE`
+- pending governance action still required: grant `COLLATERAL_WITHDRAWER_ROLE` on `D_CollateralHolderVault` to the new redeemer
+- explorer verification attempted on 2026-04-10 via both `verify-blockscout.ts` and `hardhat verify`, but Saga explorer returned server/JSON errors; retry later
+
+Current pending Safe queue as of 2026-04-10:
+
+- Safe: `0xf19cf8881237CA819Fd50C9C22cb258e9DB8644e`
+- live Safe threshold observed via Safe API: `3/5`
+- queue URL: <https://app.safe.global/transactions/queue?safe=saga:0xf19cf8881237CA819Fd50C9C22cb258e9DB8644e>
+- batch 1: grant vault withdrawer role to `D_BasketRecoveryRedeemer`
+- batch 2:
+  - grant `MINTER_ROLE` on `D` to governance
+  - mint `3471772844219621387360984` D to `0x...dEaD`
+  - revoke `MINTER_ROLE` on `D` from governance
+  - revoke `MINTER_ROLE` on `D` from `IssuerV2_2`
+  - revoke `COLLATERAL_WITHDRAWER_ROLE` on `D_CollateralHolderVault` from legacy `RedeemerV2`
+- separate pending pause actions were queued by operator outside these scripts:
+  - `IssuerV2_2.pauseMinting()`
+  - `RedeemerV2.pauseRedemption()`
+
 Important interpretation:
 
 - The existing D already at `0x...dEaD` is treated as irredeemable attacker balance and is excluded from `claimBaseD`.
-- `reconciliationMintAmount` must be derived as `max(claimBaseD - currentTotalSupply(), 0)`; it is an additional mint to the same sink, not a target final sink balance.
+- In the current working state, `claimBaseD` was set from the trusted historical reconciliation figure:
+  - `claimBaseD = observed currentTotalSupply + trusted reconciliationMintAmount`
+  - `claimBaseD = 1092432313218908894107481 + 3471772844219621387360984`
+  - `claimBaseD = 4564205157438530281468465`
+- For future re-preparation from scratch, the script logic still derives `reconciliationMintAmount` as `max(claimBaseD - currentTotalSupply(), 0)`; it is an additional mint to the same sink, not a target final sink balance.
 - Because the burn sink already has unrelated D, preparation and mint review must use the live pre-mint sink balance and reason about the mint as a delta.
 - The live ERC-20 accounting remains visibly inconsistent: `D.totalSupply()` is below the current `0x...dEaD` balance even before the reconciliation mint. Treat this as an unresolved accounting-state concern that must be consciously accepted before opening redemption.
 
@@ -132,6 +168,18 @@ The script fails if:
 - the redeemer is already unpaused,
 - the redeemer lacks `COLLATERAL_WITHDRAWER_ROLE`,
 - the vault is underfunded relative to the frozen basket.
+
+Recommended current gate sequence before opening:
+
+1. Confirm the operator-queued `pauseMinting()` and `pauseRedemption()` transactions have executed.
+2. Confirm Safe batch 1 executed, so the new redeemer has vault withdrawer role.
+3. Confirm Safe batch 2 executed, so reconciliation mint is complete and legacy privileges are revoked.
+4. Run the readiness script against the saved prepared and deployed JSON bundles.
+5. Manually confirm:
+   - `D.totalSupply() == claimBaseD`
+   - `IssuerV2_2` no longer has `MINTER_ROLE`
+   - legacy `RedeemerV2` no longer has vault withdrawer role
+   - `BasketRecoveryRedeemer` remains paused until explicitly opened
 
 ## Opening sequence
 
