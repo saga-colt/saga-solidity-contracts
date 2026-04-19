@@ -15,6 +15,7 @@ export const D_ISSUER_CONTRACT_ID = "D_Issuer";
 export const D_ISSUER_V2_1_CONTRACT_ID = "D_IssuerV2_1";
 export const D_ISSUER_V2_2_CONTRACT_ID = "D_IssuerV2_2";
 export const D_REDEEMER_CONTRACT_ID = "D_Redeemer";
+export const D_BASKET_RECOVERY_REDEEMER_ID = "D_BasketRecoveryRedeemer";
 export const D_COLLATERAL_VAULT_CONTRACT_ID = "D_CollateralHolderVault";
 export const D_AMO_DEBT_TOKEN_ID = "D_AmoDebtToken";
 export const D_AMO_MANAGER_ID = "D_AmoManagerV2";

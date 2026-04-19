@@ -1,0 +1,77 @@
+{
+  "preparedAt": "2026-04-10T16:29:35.472Z",
+  "networkName": "saga_mainnet",
+  "chainId": "5464",
+  "notes": [
+    "claimBaseD is the redeemable D denominator for basket ratios.",
+    "reconciliationMintAmount is derived as max(claimBaseD - currentTotalSupply, 0) and must be minted to a non-redeemable burn sink before opening redemption.",
+    "Minting to address(0) is impossible with ERC20StablecoinUpgradeable because OZ _mint(address(0), ...) reverts.",
+    "The BasketRecoveryRedeemer should be the only active redemption path; keep legacy RedeemerV2 paused.",
+    "Recovery asset list was provided explicitly by the operator.",
+    "Burn sink balance already exceeds current D totalSupply(); live ERC20 accounting is inconsistent before the planned reconciliation mint.",
+    "Burn sink balance also exceeds the projected totalSupply after the planned reconciliation mint; review the accounting hole assumptions before opening redemption."
+  ],
+  "dstable": {
+    "address": "0xB76144F87DF95816e8c55C240F874C554B4553C3",
+    "symbol": "D",
+    "name": "Saga Dollar",
+    "decimals": 18,
+    "currentTotalSupply": "1092432313218908894107481",
+    "currentTotalSupplyFormatted": "1092432.313218908894107481",
+    "claimBaseD": "4564205157438530281468465",
+    "claimBaseDFormatted": "4564205.157438530281468465",
+    "reconciliationMintAmount": "3471772844219621387360984",
+    "reconciliationMintAmountFormatted": "3471772.844219621387360984",
+    "reconciliationMintSink": "0x000000000000000000000000000000000000dEaD",
+    "burnSinkBalanceBeforeMint": "14059213281592607716076142",
+    "burnSinkBalanceBeforeMintFormatted": "14059213.281592607716076142",
+    "reconciledTotalSupplyAfterMint": "4564205157438530281468465",
+    "reconciledTotalSupplyAfterMintFormatted": "4564205.157438530281468465"
+  },
+  "collateralVault": "0x70924f77509dC1EB9384077B12Ca049AA2168d6f",
+  "recoveryAssets": [
+    {
+      "address": "0x704a58f888f18506C9Fc199e53AE220B5fdCaEd8",
+      "symbol": "vyUSD",
+      "name": "YieldFi vyUSD",
+      "decimals": 18,
+      "vaultBalance": "1190842450426070805633955",
+      "vaultBalanceFormatted": "1190842.450426070805633955",
+      "payoutPerD": "260909054117624600",
+      "payoutPerDFormatted": "0.2609090541176246",
+      "requiredBudget": "1190842450426070804849935",
+      "requiredBudgetFormatted": "1190842.450426070804849935",
+      "unallocatableDust": "784020",
+      "unallocatableDustFormatted": "0.00000000000078402"
+    },
+    {
+      "address": "0xA8b56ce258a7f55327BdE886B0e947EE059ca434",
+      "symbol": "MUST",
+      "name": "MUST Stablecoin",
+      "decimals": 18,
+      "vaultBalance": "3560133346713730385538439",
+      "vaultBalanceFormatted": "3560133.346713730385538439",
+      "payoutPerD": "780011683066347239",
+      "payoutPerDFormatted": "0.780011683066347239",
+      "requiredBudget": "3560133346713730384320287",
+      "requiredBudgetFormatted": "3560133.346713730384320287",
+      "unallocatableDust": "1218152",
+      "unallocatableDustFormatted": "0.000000000001218152"
+    }
+  ],
+  "skippedZeroBalanceAssets": [],
+  "zeroPayoutAssets": [],
+  "constructorArgs": {
+    "dstable": "0xB76144F87DF95816e8c55C240F874C554B4553C3",
+    "collateralVault": "0x70924f77509dC1EB9384077B12Ca049AA2168d6f",
+    "claimBaseD": "4564205157438530281468465",
+    "recoveryAssets": [
+      "0x704a58f888f18506C9Fc199e53AE220B5fdCaEd8",
+      "0xA8b56ce258a7f55327BdE886B0e947EE059ca434"
+    ],
+    "payoutPerD": [
+      "260909054117624600",
+      "780011683066347239"
+    ]
+  }
+}

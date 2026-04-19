@@ -1,0 +1,10 @@
+{
+  "claimBaseD": "4564205157438530281468465",
+  "reconciliationMintSink": "0x000000000000000000000000000000000000dEaD",
+  "assets": [
+    "0x704a58f888f18506C9Fc199e53AE220B5fdCaEd8",
+    "0xA8b56ce258a7f55327BdE886B0e947EE059ca434"
+  ],
+  "includeZeroBalanceAssets": false,
+  "reconciliationMintAmount": "3471772844219621387360984"
+}
